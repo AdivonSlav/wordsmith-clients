@@ -1,7 +1,9 @@
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:provider/provider.dart";
 import "package:window_manager/window_manager.dart";
 import "package:wordsmith_admin_panel/widgets/dashboard.dart";
+import "package:wordsmith_utils/logger.dart";
 import "package:wordsmith_utils/providers/user_login_provider.dart";
 import "package:wordsmith_utils/providers/user_provider.dart";
 
@@ -19,8 +21,16 @@ void main() async {
     await windowManager.focus();
   });
 
+  if (kReleaseMode) {
+    LogManager.init(LogLevel.INFO);
+  } else {
+    LogManager.init(LogLevel.WARNING);
+  }
+
+  final mainLogger = LogManager.getLogger("Main");
+
   FlutterError.onError = (FlutterErrorDetails details) {
-    print("Uncaught error: ${details.exception}");
+    mainLogger.severe(details.exception);
   };
 
   runApp(MultiProvider(

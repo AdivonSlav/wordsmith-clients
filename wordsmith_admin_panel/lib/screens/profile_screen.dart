@@ -1,11 +1,13 @@
 import "package:file_selector/file_selector.dart";
 import "package:flutter/material.dart";
+import "package:logging/logging.dart";
 import "package:provider/provider.dart";
 import "package:wordsmith_admin_panel/widgets/profile_image.dart";
 import "package:wordsmith_admin_panel/widgets/profile_info_field.dart";
 import "package:wordsmith_utils/dialogs.dart";
 import "package:wordsmith_utils/exceptions/base_exception.dart";
 import "package:wordsmith_utils/image_helper.dart";
+import "package:wordsmith_utils/logger.dart";
 import "package:wordsmith_utils/models/user_update.dart";
 import "package:wordsmith_utils/providers/user_login_provider.dart";
 import "package:wordsmith_utils/providers/user_provider.dart";
@@ -21,6 +23,7 @@ class ProfileScreenWidget extends StatefulWidget {
 }
 
 class _ProfileScreenWidgetState extends State<ProfileScreenWidget> {
+  final Logger _logger = LogManager.getLogger("ProfileScreen");
   late UserProvider _userProvider;
   late UserLoginProvider _userLoginProvider;
 
@@ -54,7 +57,7 @@ class _ProfileScreenWidgetState extends State<ProfileScreenWidget> {
             context, const Text("Error"), Text(error.toString()));
       }
 
-      print(error);
+      _logger.severe(error);
     }
   }
 
@@ -80,7 +83,7 @@ class _ProfileScreenWidgetState extends State<ProfileScreenWidget> {
 
     if (context.mounted) {
       await showErrorDialog(
-          context, const Text("Error"), Text("Not implemented yet"));
+          context, const Text("Error"), const Text("Not implemented yet"));
     }
 
     // TODO: Ensure that the image can be updated through an API call
@@ -108,8 +111,6 @@ class _ProfileScreenWidgetState extends State<ProfileScreenWidget> {
 
     _userProvider = context.read<UserProvider>();
     _userLoginProvider = context.read<UserLoginProvider>();
-
-    print(UserLoginProvider.loggedUser!.profileImage);
 
     return SingleChildScrollView(
       child: Padding(

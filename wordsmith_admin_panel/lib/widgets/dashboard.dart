@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:logging/logging.dart";
 import "package:provider/provider.dart";
 import "package:wordsmith_admin_panel/screens/login_screen.dart";
 import "package:wordsmith_admin_panel/screens/profile_screen.dart";
@@ -6,6 +7,7 @@ import "package:wordsmith_admin_panel/widgets/dashboard_error.dart";
 import "package:wordsmith_admin_panel/widgets/dashboard_loading.dart";
 import "package:wordsmith_admin_panel/widgets/dashboard_trailing.dart";
 import "package:wordsmith_utils/exceptions/base_exception.dart";
+import "package:wordsmith_utils/logger.dart";
 import "package:wordsmith_utils/providers/user_login_provider.dart";
 import "package:wordsmith_utils/providers/user_provider.dart";
 
@@ -19,6 +21,7 @@ class DashboardWidget extends StatefulWidget {
 }
 
 class _DashboardWidgetState extends State<DashboardWidget> {
+  final Logger _logger = LogManager.getLogger("Dashboard");
   int _selectedIndex = 0;
   late Widget _page;
   final bool _extended = false;
@@ -45,9 +48,9 @@ class _DashboardWidgetState extends State<DashboardWidget> {
 
       await _userLoginProvider.storeLogin(user: loggedUser);
     } on BaseException catch (error) {
-      print(error);
+      _logger.info(error);
     } on Exception catch (error) {
-      print(error);
+      _logger.severe(error);
       return Future.error(error.toString());
     }
   }

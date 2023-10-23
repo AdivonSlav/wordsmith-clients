@@ -1,10 +1,12 @@
 import "dart:convert";
 import "package:flutter/foundation.dart";
 import "package:wordsmith_utils/exceptions/base_exception.dart";
+import "package:wordsmith_utils/logger.dart";
 import "package:wordsmith_utils/models/query_result.dart";
 import "package:http/http.dart" as http;
 
 abstract class BaseProvider<T> with ChangeNotifier {
+  static final _logger = LogManager.getLogger("BaseProvider");
   String _endpoint = "";
   static String? _apiUrl;
 
@@ -29,8 +31,7 @@ abstract class BaseProvider<T> with ChangeNotifier {
     try {
       uri = Uri.parse(url);
     } catch (error) {
-      print("Invalid URL: $url");
-      print(error);
+      _logger.severe("Invalid URL: $url");
       throw Exception(error);
     }
 
@@ -66,8 +67,7 @@ abstract class BaseProvider<T> with ChangeNotifier {
     try {
       uri = Uri.parse(url);
     } catch (error) {
-      print("Invalid URL: $url");
-      print(error);
+      _logger.severe("Invalid URL: $url");
       throw Exception(error);
     }
 
@@ -99,7 +99,7 @@ abstract class BaseProvider<T> with ChangeNotifier {
     } else if (response.statusCode == 403) {
       throw BaseException("Forbidden: ${jsonDecode(response.body)["detail"]}");
     } else {
-      print(response.body);
+      _logger.severe(response.body);
       throw BaseException("Something bad happened");
     }
   }

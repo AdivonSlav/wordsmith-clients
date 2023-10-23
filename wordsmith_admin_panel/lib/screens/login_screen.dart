@@ -1,8 +1,10 @@
 import "package:flutter/material.dart";
+import "package:logging/logging.dart";
 import "package:provider/provider.dart";
 import "package:wordsmith_admin_panel/widgets/input_field.dart";
 import "package:wordsmith_utils/dialogs.dart";
 import "package:wordsmith_utils/exceptions/base_exception.dart";
+import "package:wordsmith_utils/logger.dart";
 import "package:wordsmith_utils/models/user_login.dart";
 import "package:wordsmith_utils/providers/user_login_provider.dart";
 import "package:wordsmith_utils/validators.dart";
@@ -15,6 +17,7 @@ class LoginScreenWidget extends StatefulWidget {
 }
 
 class _LoginScreenWidgetState extends State<LoginScreenWidget> {
+  final Logger _logger = LogManager.getLogger("LoginScreen");
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _usernameController =
       TextEditingController(text: "");
@@ -42,7 +45,7 @@ class _LoginScreenWidgetState extends State<LoginScreenWidget> {
     var username = _usernameController.text;
     var password = _passwordController.text;
 
-    print("Attempting login with $username:$password");
+    _logger.info("Attempting login with $username:$password");
 
     Map<String, String> request = {
       "username": username,
@@ -69,7 +72,7 @@ class _LoginScreenWidgetState extends State<LoginScreenWidget> {
         );
       }
 
-      print(error);
+      _logger.severe(error);
     }
 
     return null;
@@ -89,8 +92,6 @@ class _LoginScreenWidgetState extends State<LoginScreenWidget> {
           const Text("Something unexpected happened"),
         );
       }
-
-      print(error);
     }
   }
 
