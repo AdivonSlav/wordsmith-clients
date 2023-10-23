@@ -24,9 +24,14 @@ class _ProfileScreenWidgetState extends State<ProfileScreenWidget> {
   late UserProvider _userProvider;
   late UserLoginProvider _userLoginProvider;
 
-  Future _updateUsername() async {
+  Future _updateProfile() async {
     String newUsername = widget._usernameController.text;
-    var payload = UserUpdate(username: newUsername);
+    String newEmail = widget._emailController.text;
+
+    var payload = UserUpdate(
+      username: newUsername.isEmpty ? null : newUsername,
+      email: newEmail.isEmpty ? null : newEmail,
+    );
     var bearerToken = await _userLoginProvider.getAccessToken(context);
 
     if (bearerToken == null) return;
@@ -43,10 +48,15 @@ class _ProfileScreenWidgetState extends State<ProfileScreenWidget> {
         await showErrorDialog(
             context, const Text("Error"), Text(error.message));
       }
+    } on Exception catch (error) {
+      if (context.mounted) {
+        await showErrorDialog(
+            context, const Text("Error"), Text(error.toString()));
+      }
+
+      print(error);
     }
   }
-
-  Future _updateEmail() async {}
 
   Future _updateProfileImage(XFile file) async {
     var bearerToken = await _userLoginProvider.getAccessToken(context);
@@ -117,14 +127,14 @@ class _ProfileScreenWidgetState extends State<ProfileScreenWidget> {
               labelText: "Username",
               valueText: UserLoginProvider.loggedUser!.username,
               controller: widget._usernameController,
-              callbackFunction: _updateUsername,
+              callbackFunction: _updateProfile,
             ),
             const SizedBox(height: 16.0),
             ProfileInfoFieldWidget(
               labelText: "Email",
               valueText: UserLoginProvider.loggedUser!.email,
               controller: widget._emailController,
-              callbackFunction: _updateEmail,
+              callbackFunction: _updateProfile,
             )
           ],
         ),
