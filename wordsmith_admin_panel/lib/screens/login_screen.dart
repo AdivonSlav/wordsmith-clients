@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
 import "package:provider/provider.dart";
-import "package:wordsmith_admin_panel/utils/dialogs.dart";
 import "package:wordsmith_admin_panel/widgets/input_field.dart";
+import "package:wordsmith_utils/dialogs.dart";
 import "package:wordsmith_utils/exceptions/base_exception.dart";
 import "package:wordsmith_utils/models/user_login.dart";
 import "package:wordsmith_utils/providers/user_login_provider.dart";
@@ -64,7 +64,7 @@ class _LoginScreenWidgetState extends State<LoginScreenWidget> {
       _toggleLoginInProgress();
 
       if (context.mounted) {
-        showErrorDialog(
+        await showErrorDialog(
           context,
           const Text("Error"),
           Text(error.toString()),
@@ -85,7 +85,7 @@ class _LoginScreenWidgetState extends State<LoginScreenWidget> {
       _toggleLoginInProgress();
 
       if (context.mounted) {
-        showErrorDialog(
+        await showErrorDialog(
           context,
           const Text("Error"),
           const Text("Something unexpected happened"),

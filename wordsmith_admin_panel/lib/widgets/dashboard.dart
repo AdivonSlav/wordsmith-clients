@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import "package:provider/provider.dart";
 import "package:wordsmith_admin_panel/screens/login_screen.dart";
+import "package:wordsmith_admin_panel/screens/profile_screen.dart";
 import "package:wordsmith_admin_panel/widgets/dashboard_trailing.dart";
 import "package:wordsmith_utils/exceptions/base_exception.dart";
 import "package:wordsmith_utils/providers/user_login_provider.dart";
@@ -56,52 +57,58 @@ class _DashboardWidgetState extends State<DashboardWidget> {
     return FutureBuilder<dynamic>(
         future: _checkLogin(),
         builder: (context, AsyncSnapshot<dynamic> snapshot) {
-          return LayoutBuilder(builder: (context, constraints) {
-            switch (_selectedIndex) {
-              case 0:
-                _page = const LoginScreenWidget();
-                break;
-              case 1:
-                _page = const Placeholder();
-                break;
-              case 2:
-                _page = const Placeholder();
-                break;
-              default:
-                throw UnimplementedError("No widget for $_selectedIndex");
-            }
+          return Consumer<UserLoginProvider>(
+              builder: (context, provider, child) {
+            return LayoutBuilder(builder: (context, constraints) {
+              switch (_selectedIndex) {
+                case 0:
+                  _page = UserLoginProvider.loggedUser != null
+                      ? ProfileScreenWidget()
+                      : const LoginScreenWidget();
+                  break;
+                case 1:
+                  _page = const Placeholder();
+                  break;
+                case 2:
+                  _page = const Placeholder();
+                  break;
+                default:
+                  throw UnimplementedError("No widget for $_selectedIndex");
+              }
 
-            return Scaffold(
-              appBar: AppBar(
-                title: widget.title,
-                actions: const <Widget>[
-                  DashboardTrailingWidget(),
-                ],
-              ),
-              body: Row(
-                children: <Widget>[
-                  SafeArea(
-                    child: NavigationRail(
-                      selectedIndex: _selectedIndex,
-                      labelType: _labelType,
-                      extended: _extended,
-                      destinations: _loadNavDestinations(),
-                      onDestinationSelected: (index) {
-                        // Only allow navigation to index 0 if the user isn't logged in
-                        if (index > 0 && UserLoginProvider.loggedUser == null) {
-                          return;
-                        }
-                        setState(() {
-                          _selectedIndex = index;
-                        });
-                      },
+              return Scaffold(
+                appBar: AppBar(
+                  title: widget.title,
+                  actions: const <Widget>[
+                    DashboardTrailingWidget(),
+                  ],
+                ),
+                body: Row(
+                  children: <Widget>[
+                    SafeArea(
+                      child: NavigationRail(
+                        selectedIndex: _selectedIndex,
+                        labelType: _labelType,
+                        extended: _extended,
+                        destinations: _loadNavDestinations(),
+                        onDestinationSelected: (index) {
+                          // Only allow navigation to index 0 if the user isn't logged in
+                          if (index > 0 &&
+                              UserLoginProvider.loggedUser == null) {
+                            return;
+                          }
+                          setState(() {
+                            _selectedIndex = index;
+                          });
+                        },
+                      ),
                     ),
-                  ),
-                  const VerticalDivider(),
-                  Expanded(child: _page),
-                ],
-              ),
-            );
+                    const VerticalDivider(),
+                    Expanded(child: _page),
+                  ],
+                ),
+              );
+            });
           });
         });
   }

@@ -1,9 +1,10 @@
 import "package:flutter/material.dart";
 
-showErrorDialog(BuildContext context, Widget title, Widget content) {
+Future<dynamic> showErrorDialog(
+    BuildContext context, Widget title, Widget content) async {
   if (!context.mounted) return;
 
-  showDialog(
+  return await showDialog(
     context: context,
     builder: (BuildContext context) => AlertDialog(
       title: title,

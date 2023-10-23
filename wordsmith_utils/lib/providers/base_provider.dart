@@ -53,6 +53,36 @@ abstract class BaseProvider<T> with ChangeNotifier {
     return queryResult;
   }
 
+  Future<T> put(
+      {int? id,
+      dynamic request,
+      String additionalEndpoint = "",
+      String bearerToken = ""}) async {
+    var url = "$_apiUrl$_endpoint$additionalEndpoint";
+    Uri uri;
+
+    if (id != null) url += "/$id";
+
+    try {
+      uri = Uri.parse(url);
+    } catch (error) {
+      print("Invalid URL: $url");
+      print(error);
+      throw Exception(error);
+    }
+
+    var headers = createHeaders(bearerToken: bearerToken);
+    var jsonRequest = jsonEncode(request);
+    var response = await http.put(uri, body: jsonRequest, headers: headers);
+
+    if (isValidResponse(response)) {
+      var data = jsonDecode(response.body);
+      return fromJson(data);
+    }
+
+    throw Exception("Unknown error");
+  }
+
   T fromJson(dynamic data) {
     throw UnimplementedError();
   }

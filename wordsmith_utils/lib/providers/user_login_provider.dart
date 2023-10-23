@@ -1,3 +1,6 @@
+import "package:flutter/material.dart";
+import "package:flutter/widgets.dart";
+import "package:wordsmith_utils/dialogs.dart";
 import "package:wordsmith_utils/models/user.dart";
 import "package:wordsmith_utils/models/user_login.dart";
 import "package:wordsmith_utils/providers/base_provider.dart";
@@ -11,6 +14,42 @@ class UserLoginProvider extends BaseProvider<UserLogin> {
   @override
   UserLogin fromJson(dynamic data) {
     return UserLogin.fromJson(data);
+  }
+
+  Future<String?> getAccessToken(BuildContext context) async {
+    var accessToken = await SecureStore.getValue("access_token");
+
+    if (accessToken == null) {
+      if (context.mounted) {
+        await showErrorDialog(
+          context,
+          const Text("Error"),
+          const Text("Login has timed out"),
+        );
+      }
+
+      await eraseLogin();
+    }
+
+    return accessToken;
+  }
+
+  Future<String?> getRefreshToken(BuildContext context) async {
+    var refreshToken = await SecureStore.getValue("refresh_token");
+
+    if (refreshToken == null) {
+      if (context.mounted) {
+        await showErrorDialog(
+          context,
+          const Text("Error"),
+          const Text("Login has timed out"),
+        );
+      }
+
+      await eraseLogin();
+    }
+
+    return refreshToken;
   }
 
   Future storeLogin({UserLogin? loginCreds, User? user}) async {

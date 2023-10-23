@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 import "package:provider/provider.dart";
-import "package:wordsmith_admin_panel/utils/popup_menu.dart";
+import "package:wordsmith_utils/popup_menu.dart";
 import "package:wordsmith_utils/providers/user_login_provider.dart";
 
 class DashboardTrailingWidget extends StatefulWidget {

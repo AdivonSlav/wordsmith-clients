@@ -8,6 +8,7 @@ class InputField extends StatelessWidget {
   final Widget? suffixIcon;
   final String? helperText;
   final String? Function(String? value)? validator;
+  final bool? enabled;
 
   const InputField({
     super.key,
@@ -18,6 +19,7 @@ class InputField extends StatelessWidget {
     this.suffixIcon,
     this.helperText,
     this.validator,
+    this.enabled,
   });
 
   @override
@@ -47,6 +49,7 @@ class InputField extends StatelessWidget {
         ),
         validator: validator,
         style: theme.textTheme.bodyMedium,
+        enabled: enabled,
       ),
     );
   }
