@@ -19,6 +19,10 @@ void main() async {
     await windowManager.focus();
   });
 
+  FlutterError.onError = (FlutterErrorDetails details) {
+    print("Uncaught error: ${details.exception}");
+  };
+
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(

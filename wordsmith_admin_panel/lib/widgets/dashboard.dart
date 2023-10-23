@@ -2,6 +2,8 @@ import "package:flutter/material.dart";
 import "package:provider/provider.dart";
 import "package:wordsmith_admin_panel/screens/login_screen.dart";
 import "package:wordsmith_admin_panel/screens/profile_screen.dart";
+import "package:wordsmith_admin_panel/widgets/dashboard_error.dart";
+import "package:wordsmith_admin_panel/widgets/dashboard_loading.dart";
 import "package:wordsmith_admin_panel/widgets/dashboard_trailing.dart";
 import "package:wordsmith_utils/exceptions/base_exception.dart";
 import "package:wordsmith_utils/providers/user_login_provider.dart";
@@ -46,6 +48,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
       print(error);
     } on Exception catch (error) {
       print(error);
+      return Future.error(error.toString());
     }
   }
 
@@ -57,6 +60,14 @@ class _DashboardWidgetState extends State<DashboardWidget> {
     return FutureBuilder<dynamic>(
         future: _checkLogin(),
         builder: (context, AsyncSnapshot<dynamic> snapshot) {
+          if (snapshot.connectionState != ConnectionState.done) {
+            return DashboardLoadingWidget(title: widget.title);
+          }
+
+          if (snapshot.hasError) {
+            return DashboardErrorWidget(title: widget.title);
+          }
+
           return Consumer<UserLoginProvider>(
               builder: (context, provider, child) {
             return LayoutBuilder(builder: (context, constraints) {
