@@ -6,6 +6,7 @@ import "package:wordsmith_admin_panel/widgets/dashboard.dart";
 import "package:wordsmith_utils/logger.dart";
 import "package:wordsmith_utils/providers/user_login_provider.dart";
 import "package:wordsmith_utils/providers/user_provider.dart";
+import "package:wordsmith_utils/size_config.dart";
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -51,6 +52,8 @@ class Application extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SizeConfig.init(context);
+
     return MaterialApp(
       title: "Wordsmith Admin Panel",
       theme: ThemeData(
