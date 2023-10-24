@@ -1,10 +1,11 @@
 import "package:flutter/material.dart";
+import "package:wordsmith_utils/size_config.dart";
 
 class InputField extends StatelessWidget {
   final String labelText;
   final TextEditingController controller;
-  final double width;
   final bool obscureText;
+  final double? width;
   final Widget? suffixIcon;
   final String? helperText;
   final String? Function(String? value)? validator;
@@ -14,8 +15,8 @@ class InputField extends StatelessWidget {
     super.key,
     required this.labelText,
     required this.controller,
-    this.width = 300,
     this.obscureText = false,
+    this.width,
     this.suffixIcon,
     this.helperText,
     this.validator,
@@ -27,7 +28,7 @@ class InputField extends StatelessWidget {
     var theme = Theme.of(context);
 
     return Container(
-      width: width,
+      width: width ?? SizeConfig.safeBlockHorizontal * 40.0,
       decoration: BoxDecoration(
         color: theme.inputDecorationTheme.fillColor,
       ),
@@ -42,9 +43,9 @@ class InputField extends StatelessWidget {
           suffixIcon: suffixIcon,
           labelText: labelText,
           helperText: helperText,
-          contentPadding: const EdgeInsets.symmetric(
-            vertical: 5.0,
-            horizontal: 5.0,
+          contentPadding: EdgeInsets.symmetric(
+            vertical: SizeConfig.safeBlockVertical * 0.5,
+            horizontal: SizeConfig.safeBlockHorizontal * 0.5,
           ),
         ),
         validator: validator,

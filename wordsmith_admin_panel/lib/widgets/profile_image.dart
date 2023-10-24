@@ -1,6 +1,7 @@
 import "package:file_selector/file_selector.dart";
 import "package:flutter/material.dart";
 import "package:wordsmith_utils/image_helper.dart";
+import "package:wordsmith_utils/size_config.dart";
 
 class ProfileImageWidget extends StatefulWidget {
   final String placeholderImage =
@@ -64,16 +65,16 @@ class _ProfileImageWidgetState extends State<ProfileImageWidget> {
                     ? widget.placeholderImage
                     : "$_apiUrl${widget.profileImagePath}",
                 scale: widget.scale ?? 1.0,
-                width: widget.width ?? 256.0,
-                height: widget.height ?? 256.0,
+                width: widget.width ?? SizeConfig.safeBlockHorizontal * 25.0,
+                height: widget.height ?? SizeConfig.safeBlockVertical * 25.0,
               ),
             ),
             Positioned(
               child: Visibility(
                 visible: _isHovered,
-                child: const Icon(
+                child: Icon(
                   Icons.edit,
-                  size: 48.0,
+                  size: SizeConfig.safeBlockHorizontal * 5.0,
                 ),
               ),
             ),

@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:wordsmith_admin_panel/widgets/input_field.dart";
+import "package:wordsmith_utils/size_config.dart";
 
 class ProfileInfoFieldWidget extends StatefulWidget {
   final String labelText;
@@ -37,19 +38,21 @@ class _ProfileInfoFieldWidgetState extends State<ProfileInfoFieldWidget> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-        SizedBox(width: 70.0, child: Text(widget.labelText)),
-        const SizedBox(width: 16.0),
+        SizedBox(
+            width: SizeConfig.safeBlockHorizontal * 9.0,
+            child: Text(widget.labelText)),
+        SizedBox(width: SizeConfig.safeBlockHorizontal * 2.0),
         InputField(
           labelText: widget.valueText,
           controller: widget.controller,
           enabled: editable,
         ),
-        const SizedBox(width: 16.0),
+        SizedBox(width: SizeConfig.safeBlockHorizontal * 2.0),
         IconButton(
           onPressed: _toggleEditable,
           icon: Icon(!editable ? Icons.edit : Icons.edit_off),
         ),
-        const SizedBox(width: 8.0),
+        SizedBox(width: SizeConfig.safeBlockHorizontal * 2.0),
         Visibility(
           visible: editable,
           child: IconButton(

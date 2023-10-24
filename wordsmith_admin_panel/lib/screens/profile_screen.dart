@@ -11,6 +11,7 @@ import "package:wordsmith_utils/logger.dart";
 import "package:wordsmith_utils/models/user_update.dart";
 import "package:wordsmith_utils/providers/user_login_provider.dart";
 import "package:wordsmith_utils/providers/user_provider.dart";
+import "package:wordsmith_utils/size_config.dart";
 
 class ProfileScreenWidget extends StatefulWidget {
   ProfileScreenWidget({super.key});
@@ -123,14 +124,14 @@ class _ProfileScreenWidgetState extends State<ProfileScreenWidget> {
                   UserLoginProvider.loggedUser!.profileImage?.imagePath,
               callbackFunction: _updateProfileImage,
             ),
-            const SizedBox(height: 32.0),
+            SizedBox(height: SizeConfig.safeBlockVertical * 3.0),
             ProfileInfoFieldWidget(
               labelText: "Username",
               valueText: UserLoginProvider.loggedUser!.username,
               controller: widget._usernameController,
               callbackFunction: _updateProfile,
             ),
-            const SizedBox(height: 16.0),
+            SizedBox(height: SizeConfig.safeBlockVertical * 1.5),
             ProfileInfoFieldWidget(
               labelText: "Email",
               valueText: UserLoginProvider.loggedUser!.email,

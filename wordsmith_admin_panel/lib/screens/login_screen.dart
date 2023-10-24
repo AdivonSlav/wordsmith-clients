@@ -103,7 +103,7 @@ class _LoginScreenWidgetState extends State<LoginScreenWidget> {
 
     return SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.all(24.0),
+        padding: const EdgeInsets.all(16.0),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -112,7 +112,7 @@ class _LoginScreenWidgetState extends State<LoginScreenWidget> {
                 "Login to your admin account",
                 style: theme.textTheme.headlineSmall,
               ),
-              const SizedBox(height: 20.0),
+              SizedBox(height: SizeConfig.safeBlockVertical * 2.0),
               Form(
                 key: _formKey,
                 child: Column(
@@ -121,9 +121,9 @@ class _LoginScreenWidgetState extends State<LoginScreenWidget> {
                       labelText: "Username",
                       controller: _usernameController,
                       validator: validateRequired,
-                      width: 310,
+                      width: SizeConfig.safeBlockHorizontal * 45.0,
                     ),
-                    const SizedBox(height: 8.0),
+                    SizedBox(height: SizeConfig.safeBlockVertical * 0.9),
                     InputField(
                       labelText: "Password",
                       controller: _passwordController,
@@ -137,55 +137,52 @@ class _LoginScreenWidgetState extends State<LoginScreenWidget> {
                         ),
                       ),
                       validator: validateRequired,
-                      width: 310,
+                      width: SizeConfig.safeBlockHorizontal * 45.0,
                     ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 16.0, horizontal: 8.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            width: 100,
-                            height: 35,
-                            child: ElevatedButton(
-                              onPressed: () async {
-                                if (_formKey.currentState!.validate() &&
-                                    !_loginInProgress) {
-                                  var loginCreds = await _submitLogin();
+                    SizedBox(height: SizeConfig.safeBlockVertical * 2.0),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: SizeConfig.safeBlockHorizontal * 15.0,
+                          height: SizeConfig.safeBlockVertical * 3.5,
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              if (_formKey.currentState!.validate() &&
+                                  !_loginInProgress) {
+                                var loginCreds = await _submitLogin();
 
-                                  if (loginCreds != null) {
-                                    await _handleCredentials(loginCreds);
-                                  }
-                                } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                        content: Text(
-                                            "Please fill all the inputs!")),
-                                  );
+                                if (loginCreds != null) {
+                                  await _handleCredentials(loginCreds);
                                 }
-                              },
-                              child: !_loginInProgress
-                                  ? const Text("Submit")
-                                  : const SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(),
-                                    ),
-                            ),
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content:
+                                          Text("Please fill all the inputs!")),
+                                );
+                              }
+                            },
+                            child: !_loginInProgress
+                                ? const Text("Submit")
+                                : const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(),
+                                  ),
                           ),
-                          const SizedBox(width: 12.0),
-                          SizedBox(
-                            height: 35,
-                            child: ElevatedButton(
-                              onPressed: () async {
-                                await showRegistrationDialog(context);
-                              },
-                              child: const Text("Don't have an account?"),
-                            ),
+                        ),
+                        SizedBox(width: SizeConfig.safeBlockHorizontal * 2.0),
+                        SizedBox(
+                          height: SizeConfig.safeBlockVertical * 3.5,
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              await showRegistrationDialog(context);
+                            },
+                            child: const Text("Don't have an account?"),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     )
                   ],
                 ),

@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:wordsmith_utils/size_config.dart";
 
 class DashboardLoadingWidget extends StatelessWidget {
   final Widget? title;
@@ -15,14 +16,14 @@ class DashboardLoadingWidget extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const SizedBox(
-              width: 128,
-              height: 128,
+            SizedBox(
+              width: SizeConfig.safeBlockHorizontal * 15.0,
+              height: SizeConfig.safeBlockHorizontal * 15.0,
               child: CircularProgressIndicator(
-                strokeWidth: 8.0,
+                strokeWidth: SizeConfig.safeBlockHorizontal * 0.75,
               ),
             ),
-            const SizedBox(height: 16.0),
+            SizedBox(height: SizeConfig.safeBlockVertical * 2.0),
             Text(
               "Loading...",
               style: theme.textTheme.headlineMedium,
