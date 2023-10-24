@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:provider/provider.dart";
+import "package:wordsmith_utils/size_config.dart";
 import "package:wordsmith_admin_panel/widgets/input_field.dart";
 import "package:wordsmith_utils/dialogs.dart";
 import "package:wordsmith_utils/exceptions/base_exception.dart";
@@ -120,6 +121,7 @@ class _LoginScreenWidgetState extends State<LoginScreenWidget> {
                       labelText: "Username",
                       controller: _usernameController,
                       validator: validateRequired,
+                      width: 310,
                     ),
                     const SizedBox(height: 8.0),
                     InputField(
@@ -135,38 +137,54 @@ class _LoginScreenWidgetState extends State<LoginScreenWidget> {
                         ),
                       ),
                       validator: validateRequired,
+                      width: 310,
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(
                           vertical: 16.0, horizontal: 8.0),
-                      child: SizedBox(
-                        width: 100,
-                        height: 35,
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            if (_formKey.currentState!.validate() &&
-                                !_loginInProgress) {
-                              var loginCreds = await _submitLogin();
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            width: 100,
+                            height: 35,
+                            child: ElevatedButton(
+                              onPressed: () async {
+                                if (_formKey.currentState!.validate() &&
+                                    !_loginInProgress) {
+                                  var loginCreds = await _submitLogin();
 
-                              if (loginCreds != null) {
-                                await _handleCredentials(loginCreds);
-                              }
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content:
-                                        Text("Please fill all the inputs!")),
-                              );
-                            }
-                          },
-                          child: !_loginInProgress
-                              ? const Text("Submit")
-                              : const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(),
-                                ),
-                        ),
+                                  if (loginCreds != null) {
+                                    await _handleCredentials(loginCreds);
+                                  }
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content: Text(
+                                            "Please fill all the inputs!")),
+                                  );
+                                }
+                              },
+                              child: !_loginInProgress
+                                  ? const Text("Submit")
+                                  : const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(),
+                                    ),
+                            ),
+                          ),
+                          const SizedBox(width: 12.0),
+                          SizedBox(
+                            height: 35,
+                            child: ElevatedButton(
+                              onPressed: () async {
+                                await showRegistrationDialog(context);
+                              },
+                              child: const Text("Don't have an account?"),
+                            ),
+                          ),
+                        ],
                       ),
                     )
                   ],
@@ -178,4 +196,91 @@ class _LoginScreenWidgetState extends State<LoginScreenWidget> {
       ),
     );
   }
+}
+
+Future<dynamic> showRegistrationDialog(BuildContext context) async {
+  final logger = LogManager.getLogger("RegistrationDialog");
+  final formKey = GlobalKey<FormState>();
+  final usernameController = TextEditingController();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
+  bool registerInProgress = false;
+  var theme = Theme.of(context);
+
+  return await showDialog(
+    context: context,
+    builder: (BuildContext context) => AlertDialog(
+      title: const Text("Register"),
+      content: SingleChildScrollView(
+        child: SizedBox(
+          height: SizeConfig.safeBlockVertical * 35.0,
+          width: SizeConfig.safeBlockHorizontal * 50.0,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Form(
+                key: formKey,
+                child: Column(
+                  children: <Widget>[
+                    InputField(
+                      labelText: "Username",
+                      controller: usernameController,
+                      validator: validateUsername,
+                      width: SizeConfig.safeBlockHorizontal * 45.0,
+                    ),
+                    SizedBox(height: SizeConfig.safeBlockVertical * 0.9),
+                    InputField(
+                      labelText: "Email",
+                      controller: emailController,
+                      validator: validateEmail,
+                      width: SizeConfig.safeBlockHorizontal * 45.0,
+                    ),
+                    SizedBox(height: SizeConfig.safeBlockVertical * 0.9),
+                    InputField(
+                      labelText: "Password",
+                      controller: passwordController,
+                      validator: validatePassword,
+                      width: SizeConfig.safeBlockHorizontal * 45.0,
+                    ),
+                    SizedBox(height: SizeConfig.safeBlockVertical * 0.9),
+                    InputField(
+                      labelText: "Confirm password",
+                      controller: confirmPasswordController,
+                      validator: (value) {
+                        return value == passwordController.text
+                            ? null
+                            : "The passwords do not match!";
+                      },
+                      width: SizeConfig.safeBlockHorizontal * 45.0,
+                    ),
+                    SizedBox(height: SizeConfig.safeBlockVertical * 2.0),
+                    ElevatedButton(
+                      onPressed: () async {
+                        if (formKey.currentState!.validate()) {
+                          registerInProgress = true;
+                        }
+                      },
+                      child: !registerInProgress
+                          ? const Text("Register")
+                          : const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(),
+                            ),
+                    )
+                  ],
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
+      actions: <Widget>[
+        TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"))
+      ],
+    ),
+  );
 }

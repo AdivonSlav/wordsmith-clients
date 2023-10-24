@@ -88,16 +88,22 @@ abstract class BaseProvider<T> with ChangeNotifier {
   }
 
   bool isValidResponse(http.Response response) {
+    String? details;
+
+    if (response.body.isNotEmpty) {
+      details = jsonDecode(response.body)["detail"];
+    } else {
+      details = response.reasonPhrase;
+    }
+
     if (response.statusCode < 299) {
       return true;
     } else if (response.statusCode == 400) {
-      throw BaseException(
-          "Bad request: ${jsonDecode(response.body)["detail"]}");
+      throw BaseException("Bad request: $details");
     } else if (response.statusCode == 401) {
-      throw BaseException(
-          "Unauthorized: ${jsonDecode(response.body)["detail"]}");
+      throw BaseException("Unauthorized: $details");
     } else if (response.statusCode == 403) {
-      throw BaseException("Forbidden: ${jsonDecode(response.body)["detail"]}");
+      throw BaseException("Forbidden: $details");
     } else {
       _logger.severe(response.body);
       throw BaseException("Something bad happened");
