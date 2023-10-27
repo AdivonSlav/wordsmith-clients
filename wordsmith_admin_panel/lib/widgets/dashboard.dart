@@ -3,6 +3,7 @@ import "package:logging/logging.dart";
 import "package:provider/provider.dart";
 import "package:wordsmith_admin_panel/screens/login_screen.dart";
 import "package:wordsmith_admin_panel/screens/profile_screen.dart";
+import "package:wordsmith_admin_panel/screens/reports_screen.dart";
 import "package:wordsmith_admin_panel/widgets/dashboard_error.dart";
 import "package:wordsmith_admin_panel/widgets/dashboard_loading.dart";
 import "package:wordsmith_admin_panel/widgets/dashboard_trailing.dart";
@@ -81,7 +82,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                       : const LoginScreenWidget();
                   break;
                 case 1:
-                  _page = const Placeholder();
+                  _page = ReportsScreenWidget();
                   break;
                 case 2:
                   _page = const Placeholder();

@@ -13,6 +13,7 @@ ReportDetails _$ReportDetailsFromJson(Map<String, dynamic> json) =>
       DateTime.parse(json["submissionDate"] as String),
       json["isClosed"] as bool,
       User.fromJson(json["reporter"] as Map<String, dynamic>),
+      ReportReason.fromJson(json["reportReason"] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$ReportDetailsToJson(ReportDetails instance) =>
@@ -22,4 +23,5 @@ Map<String, dynamic> _$ReportDetailsToJson(ReportDetails instance) =>
       "submissionDate": instance.submissionDate.toIso8601String(),
       "isClosed": instance.isClosed,
       "reporter": instance.reporter,
+      "reportReason": instance.reportReason,
     };

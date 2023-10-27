@@ -1,4 +1,5 @@
 import "package:json_annotation/json_annotation.dart";
+import "package:wordsmith_utils/models/report_details.dart";
 import "package:wordsmith_utils/models/user.dart";
 
 part "user_report.g.dart";
@@ -7,8 +8,9 @@ part "user_report.g.dart";
 class UserReport {
   final int id;
   final User reportedUser;
+  final ReportDetails reportDetails;
 
-  UserReport(this.id, this.reportedUser);
+  UserReport(this.id, this.reportedUser, this.reportDetails);
 
   factory UserReport.fromJson(Map<String, dynamic> json) =>
       _$UserReportFromJson(json);
