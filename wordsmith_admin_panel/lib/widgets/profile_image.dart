@@ -5,7 +5,7 @@ import "package:wordsmith_utils/size_config.dart";
 
 class ProfileImageWidget extends StatefulWidget {
   final String placeholderImage =
-      "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.seekpng.com%2Fpng%2Fdetail%2F966-9665317_placeholder-image-person-jpg.png&f=1&nofb=1&ipt=16ad683638fad0ce17f7db419814205d2f0be829616a4e8972803eabb30e58f4&ipo=images";
+      "assets/images/profile_image_placeholder.jpeg";
   final String? profileImagePath;
   final double? width;
   final double? height;
@@ -56,19 +56,26 @@ class _ProfileImageWidgetState extends State<ProfileImageWidget> {
           alignment: Alignment.center,
           children: <Widget>[
             ColorFiltered(
-              colorFilter: ColorFilter.mode(
-                Colors.black.withOpacity(_isHovered ? 0.5 : 1.0),
-                BlendMode.dstATop,
-              ),
-              child: Image.network(
-                widget.profileImagePath == null
-                    ? widget.placeholderImage
-                    : "$_apiUrl${widget.profileImagePath}",
-                scale: widget.scale ?? 1.0,
-                width: widget.width ?? SizeConfig.safeBlockHorizontal * 25.0,
-                height: widget.height ?? SizeConfig.safeBlockVertical * 25.0,
-              ),
-            ),
+                colorFilter: ColorFilter.mode(
+                  Colors.black.withOpacity(_isHovered ? 0.5 : 1.0),
+                  BlendMode.dstATop,
+                ),
+                child: widget.profileImagePath == null
+                    ? Image.asset(
+                        widget.placeholderImage,
+                        scale: widget.scale ?? 1.0,
+                        width: widget.width ??
+                            SizeConfig.safeBlockHorizontal * 25.0,
+                        height: widget.height ??
+                            SizeConfig.safeBlockVertical * 25.0,
+                      )
+                    : Image.network(
+                        "$_apiUrl${widget.profileImagePath}",
+                        width: widget.width ??
+                            SizeConfig.safeBlockHorizontal * 25.0,
+                        height: widget.height ??
+                            SizeConfig.safeBlockVertical * 25.0,
+                      )),
             Positioned(
               child: Visibility(
                 visible: _isHovered,

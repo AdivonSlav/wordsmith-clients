@@ -1,7 +1,8 @@
 import "package:flutter/material.dart";
 import "package:provider/provider.dart";
-import "package:wordsmith_admin_panel/widgets/loading.dart";
-import "package:wordsmith_utils/dialogs.dart";
+import "package:wordsmith_admin_panel/widgets/input_field.dart";
+import "package:wordsmith_admin_panel/widgets/pagination_nav.dart";
+import "package:wordsmith_admin_panel/widgets/reports_list.dart";
 import "package:wordsmith_utils/exceptions/base_exception.dart";
 import "package:wordsmith_utils/logger.dart";
 import "package:wordsmith_utils/models/query_result.dart";
@@ -22,10 +23,31 @@ class ReportsScreenWidget extends StatefulWidget {
 class _ReportsScreenWidgetState extends State<ReportsScreenWidget> {
   late UserLoginProvider _userLoginProvider;
   late UserReportsProvider _userReportsProvider;
+  final TextEditingController _searchController = TextEditingController();
+  int selectedView = 0;
 
-  int _pageSize = 10;
-  late QueryResult<UserReport> _userReports;
+  int _currentPage = 1;
+  int _totalPages = 0;
+  int _pageSize = 1;
+  late Future<QueryResult<UserReport>?> _userReports;
   // EBookReports should also be a property here when implemented
+
+  @override
+  void initState() {
+    _userLoginProvider = context.read<UserLoginProvider>();
+    _userReportsProvider = context.read<UserReportsProvider>();
+
+    try {
+      _userReports = getUserReports();
+    } on BaseException catch (error) {
+      _userReports = Future.error(error);
+    } on Exception catch (error) {
+      widget._logger.severe(error);
+      _userReports = Future.error(error);
+    }
+
+    super.initState();
+  }
 
   Future<QueryResult<UserReport>?> getUserReports() async {
     String? accessToken = await _userLoginProvider.getAccessToken(context);
@@ -33,80 +55,93 @@ class _ReportsScreenWidgetState extends State<ReportsScreenWidget> {
     if (accessToken == null) return null;
 
     Map<String, String> queries = {
-      "page": "1",
+      "page": _currentPage.toString(),
       "pageSize": _pageSize.toString(),
     };
 
     var result = await _userReportsProvider.get(
         filter: queries, bearerToken: accessToken);
 
+    _totalPages = result.totalPages!;
+
     return result;
   }
 
-  Future<void> getAllReports() async {
-    try {
-      var userReportResult = await getUserReports();
+  void forward() async {
+    if (_currentPage < _totalPages) {
+      setState(() {
+        _currentPage++;
+        _userReports = getUserReports();
+      });
+    }
+  }
 
-      if (userReportResult != null) {
-        _userReports = userReportResult;
-      }
-    } on BaseException catch (error) {
-      return Future.error(error);
-    } on Exception catch (error) {
-      widget._logger.severe(error);
-      return Future.error(error);
+  void back() async {
+    if (_currentPage > 1) {
+      setState(() {
+        _currentPage--;
+        _userReports = getUserReports();
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    _userLoginProvider = context.read<UserLoginProvider>();
-    _userReportsProvider = context.read<UserReportsProvider>();
     var theme = Theme.of(context);
 
-    return FutureBuilder(
-      future: getAllReports(),
-      builder: (context, AsyncSnapshot<dynamic> snapshot) {
-        if (snapshot.connectionState != ConnectionState.done) {
-          return const LoadingWidget();
-        }
-
-        if (snapshot.hasError) {
-          return Column(
-            children: <Widget>[
-              const Text("An error occurred while fetching results."),
-              Text(snapshot.error.toString())
-            ],
-          );
-        }
-
-        return SingleChildScrollView(
-          child: Column(
-            children: <Widget>[
-              Text("User reports: ${_userReports.totalCount}"),
-              SizedBox(
-                width: SizeConfig.safeBlockHorizontal * 30.0,
-                height: SizeConfig.safeBlockVertical * 30.0,
-                child: Card(
-                  child: ListView.builder(
-                    itemCount: _userReports.result.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return ListTile(
-                        leading:
-                            !_userReports.result[index].reportDetails.isClosed
-                                ? Icon(Icons.warning)
-                                : Icon(Icons.check),
-                        title: Text(_userReports
-                            .result[index].reportDetails.reportReason.reason),
-                      );
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Wrap(
+                runSpacing: 8.0,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  InputField(
+                      labelText: "Search", controller: _searchController),
+                  SizedBox(
+                    width: SizeConfig.safeBlockHorizontal * 1.0,
+                  ),
+                  IconButton(onPressed: () {}, icon: const Icon(Icons.search)),
+                  SizedBox(
+                    width: SizeConfig.safeBlockHorizontal * 6.0,
+                  ),
+                  SegmentedButton(
+                    showSelectedIcon: false,
+                    segments: const <ButtonSegment<int>>[
+                      ButtonSegment<int>(value: 0, label: Text("User reports")),
+                      ButtonSegment<int>(
+                          value: 1, label: Text("eBook reports")),
+                    ],
+                    selected: <int>{selectedView},
+                    onSelectionChanged: (Set<int> newSelection) {
+                      setState(() {
+                        selectedView = newSelection.first;
+                      });
                     },
                   ),
-                ),
+                ],
               ),
-            ],
-          ),
-        );
-      },
+            ),
+            ReportsListWidget(userReports: _userReports),
+            FutureBuilder(
+              future: _userReports,
+              builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+                return PaginationNavWidget(
+                  currentPage: _currentPage,
+                  lastPage: _totalPages,
+                  forwardCallback: forward,
+                  backCallback: back,
+                );
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

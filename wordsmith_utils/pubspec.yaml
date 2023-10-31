@@ -16,6 +16,7 @@ dependencies:
   file_selector: ^1.0.1
   mime: ^1.0.4
   logging: ^1.2.0
+  intl: ^0.18.1
 
 dev_dependencies:
   flutter_test:
