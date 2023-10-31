@@ -112,7 +112,7 @@ class _LoginScreenWidgetState extends State<LoginScreenWidget> {
                 "Login to your admin account",
                 style: theme.textTheme.headlineSmall,
               ),
-              SizedBox(height: SizeConfig.safeBlockVertical * 2.0),
+              const SizedBox(height: 20.0),
               Form(
                 key: _formKey,
                 child: Column(
@@ -121,7 +121,6 @@ class _LoginScreenWidgetState extends State<LoginScreenWidget> {
                       labelText: "Username",
                       controller: _usernameController,
                       validator: validateRequired,
-                      width: SizeConfig.safeBlockHorizontal * 45.0,
                     ),
                     SizedBox(height: SizeConfig.safeBlockVertical * 0.9),
                     InputField(
@@ -137,15 +136,14 @@ class _LoginScreenWidgetState extends State<LoginScreenWidget> {
                         ),
                       ),
                       validator: validateRequired,
-                      width: SizeConfig.safeBlockHorizontal * 45.0,
                     ),
-                    SizedBox(height: SizeConfig.safeBlockVertical * 2.0),
+                    const SizedBox(height: 20.0),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         SizedBox(
-                          width: SizeConfig.safeBlockHorizontal * 15.0,
-                          height: SizeConfig.safeBlockVertical * 3.5,
+                          width: 100.0,
+                          height: 30.0,
                           child: ElevatedButton(
                             onPressed: () async {
                               if (_formKey.currentState!.validate() &&
@@ -172,9 +170,9 @@ class _LoginScreenWidgetState extends State<LoginScreenWidget> {
                                   ),
                           ),
                         ),
-                        SizedBox(width: SizeConfig.safeBlockHorizontal * 2.0),
+                        const SizedBox(width: 20.0),
                         SizedBox(
-                          height: SizeConfig.safeBlockVertical * 3.5,
+                          height: 30.0,
                           child: ElevatedButton(
                             onPressed: () async {
                               await showRegistrationDialog(context);

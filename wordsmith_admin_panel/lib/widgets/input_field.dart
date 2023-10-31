@@ -28,7 +28,7 @@ class InputField extends StatelessWidget {
     var theme = Theme.of(context);
 
     return Container(
-      width: width ?? SizeConfig.safeBlockHorizontal * 40.0,
+      width: width ?? 350,
       decoration: BoxDecoration(
         color: theme.inputDecorationTheme.fillColor,
       ),
