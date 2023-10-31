@@ -54,14 +54,13 @@ class _LoginScreenWidgetState extends State<LoginScreenWidget> {
     };
 
     try {
-      var result = await _userLoginProvider.get(filter: request);
-      var loginCreds = result.result[0];
+      var result = await _userLoginProvider.post(request: request);
 
-      if (loginCreds.accessToken == null || loginCreds.refreshToken == null) {
+      if (result.accessToken == null || result.refreshToken == null) {
         throw BaseException("Could not login");
       }
 
-      return loginCreds;
+      return result;
     } on BaseException catch (error) {
       _toggleLoginInProgress();
 

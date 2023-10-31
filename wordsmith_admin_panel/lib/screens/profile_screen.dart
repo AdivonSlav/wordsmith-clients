@@ -42,7 +42,7 @@ class _ProfileScreenWidgetState extends State<ProfileScreenWidget> {
 
     try {
       var result = await _userProvider.put(
-          additionalEndpoint: "/profile",
+          additionalRoute: "/profile",
           request: payload,
           bearerToken: bearerToken);
 
