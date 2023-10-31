@@ -9,6 +9,7 @@ import "package:wordsmith_admin_panel/widgets/dashboard_loading.dart";
 import "package:wordsmith_admin_panel/widgets/dashboard_trailing.dart";
 import "package:wordsmith_utils/exceptions/base_exception.dart";
 import "package:wordsmith_utils/logger.dart";
+import "package:wordsmith_utils/models/user_login.dart";
 import "package:wordsmith_utils/providers/user_login_provider.dart";
 import "package:wordsmith_utils/providers/user_provider.dart";
 
@@ -75,20 +76,23 @@ class _DashboardWidgetState extends State<DashboardWidget> {
           return Consumer<UserLoginProvider>(
               builder: (context, provider, child) {
             return LayoutBuilder(builder: (context, constraints) {
-              switch (_selectedIndex) {
-                case 0:
-                  _page = UserLoginProvider.loggedUser != null
-                      ? ProfileScreenWidget()
-                      : const LoginScreenWidget();
-                  break;
-                case 1:
-                  _page = ReportsScreenWidget();
-                  break;
-                case 2:
-                  _page = const Placeholder();
-                  break;
-                default:
-                  throw UnimplementedError("No widget for $_selectedIndex");
+              if (UserLoginProvider.loggedUser != null) {
+                switch (_selectedIndex) {
+                  case 0:
+                    _page = ProfileScreenWidget();
+                    break;
+                  case 1:
+                    _page = ReportsScreenWidget();
+                    break;
+                  case 2:
+                    _page = const Placeholder();
+                    break;
+                  default:
+                    throw UnimplementedError("No widget for $_selectedIndex");
+                }
+              } else {
+                _selectedIndex = 0;
+                _page = const LoginScreenWidget();
               }
 
               return Scaffold(
