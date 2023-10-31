@@ -32,9 +32,9 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.2
   provider: ^6.0.5
-  window_manager: ^0.3.7
   file_selector: ^1.0.1
   logging: ^1.2.0
+  window_manager: ^0.3.7
   wordsmith_utils:
     path: ../wordsmith_utils
 
