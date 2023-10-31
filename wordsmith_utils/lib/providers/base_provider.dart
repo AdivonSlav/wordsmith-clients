@@ -16,10 +16,10 @@ abstract class BaseProvider<T> with ChangeNotifier {
   }
 
   Future<QueryResult<T>> get(
-      {String additionalEndpoint = "",
+      {String additionalRoute = "",
       dynamic filter,
       String bearerToken = ""}) async {
-    var url = "$_apiUrl$_endpoint$additionalEndpoint";
+    var url = "$_apiUrl$_endpoint$additionalRoute";
 
     if (filter != null) {
       var queryString = getQueryString(filter);
@@ -57,9 +57,9 @@ abstract class BaseProvider<T> with ChangeNotifier {
   Future<T> put(
       {int? id,
       dynamic request,
-      String additionalEndpoint = "",
+      String additionalRoute = "",
       String bearerToken = ""}) async {
-    var url = "$_apiUrl$_endpoint$additionalEndpoint";
+    var url = "$_apiUrl$_endpoint$additionalRoute";
     Uri uri;
 
     if (id != null) url += "/$id";
@@ -74,6 +74,32 @@ abstract class BaseProvider<T> with ChangeNotifier {
     var headers = createHeaders(bearerToken: bearerToken);
     var jsonRequest = jsonEncode(request);
     var response = await http.put(uri, body: jsonRequest, headers: headers);
+
+    if (isValidResponse(response)) {
+      var data = jsonDecode(response.body);
+      return fromJson(data);
+    }
+
+    throw Exception("Unknown error");
+  }
+
+  Future<T> post(
+      {dynamic request,
+      String additionalRoute = "",
+      String bearerToken = ""}) async {
+    var url = "$_apiUrl$_endpoint$additionalRoute";
+    Uri uri;
+
+    try {
+      uri = Uri.parse(url);
+    } catch (error) {
+      _logger.severe("Invalid URL: $url");
+      throw Exception(error);
+    }
+
+    var headers = createHeaders(bearerToken: bearerToken);
+    var jsonRequest = jsonEncode(request);
+    var response = await http.post(uri, body: jsonRequest, headers: headers);
 
     if (isValidResponse(response)) {
       var data = jsonDecode(response.body);

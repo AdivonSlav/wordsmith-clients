@@ -12,7 +12,7 @@ class UserProvider extends BaseProvider<User> {
     if (accessToken == null || accessToken.isEmpty) return null;
 
     var result =
-        await get(additionalEndpoint: "/profile", bearerToken: accessToken);
+        await get(additionalRoute: "/profile", bearerToken: accessToken);
 
     return result.result[0];
   }
