@@ -1,12 +1,15 @@
 import "package:flutter/material.dart";
 import "package:provider/provider.dart";
 import "package:wordsmith_admin_panel/widgets/input_field.dart";
+import "package:wordsmith_admin_panel/widgets/loading.dart";
 import "package:wordsmith_admin_panel/widgets/pagination_nav.dart";
 import "package:wordsmith_admin_panel/widgets/reports_list.dart";
 import "package:wordsmith_utils/exceptions/base_exception.dart";
 import "package:wordsmith_utils/logger.dart";
+import "package:wordsmith_utils/models/ebook_report.dart";
 import "package:wordsmith_utils/models/query_result.dart";
 import "package:wordsmith_utils/models/user_report.dart";
+import "package:wordsmith_utils/providers/ebook_reports_provider.dart";
 import "package:wordsmith_utils/providers/user_login_provider.dart";
 import "package:wordsmith_utils/providers/user_reports_provider.dart";
 import "package:wordsmith_utils/size_config.dart";
@@ -23,19 +26,21 @@ class ReportsScreenWidget extends StatefulWidget {
 class _ReportsScreenWidgetState extends State<ReportsScreenWidget> {
   late UserLoginProvider _userLoginProvider;
   late UserReportsProvider _userReportsProvider;
+  late EBookReportsProvider _eBookReportsProvider;
   final TextEditingController _searchController = TextEditingController();
   int selectedView = 0;
 
   int _currentPage = 1;
   int _totalPages = 0;
-  int _pageSize = 1;
+  int _pageSize = 10;
   late Future<QueryResult<UserReport>?> _userReports;
-  // EBookReports should also be a property here when implemented
+  late Future<QueryResult<EBookReport>?> _eBookReports;
 
   @override
   void initState() {
     _userLoginProvider = context.read<UserLoginProvider>();
     _userReportsProvider = context.read<UserReportsProvider>();
+    _eBookReportsProvider = context.read<EBookReportsProvider>();
 
     try {
       _userReports = getUserReports();
@@ -44,6 +49,15 @@ class _ReportsScreenWidgetState extends State<ReportsScreenWidget> {
     } on Exception catch (error) {
       widget._logger.severe(error);
       _userReports = Future.error(error);
+    }
+
+    try {
+      _eBookReports = getEBookReports();
+    } on BaseException catch (error) {
+      _eBookReports = Future.error(error);
+    } on Exception catch (error) {
+      widget._logger.severe(error);
+      _eBookReports = Future.error(error);
     }
 
     super.initState();
@@ -62,7 +76,21 @@ class _ReportsScreenWidgetState extends State<ReportsScreenWidget> {
     var result = await _userReportsProvider.get(
         filter: queries, bearerToken: accessToken);
 
-    _totalPages = result.totalPages!;
+    return result;
+  }
+
+  Future<QueryResult<EBookReport>?> getEBookReports() async {
+    String? accessToken = await _userLoginProvider.getAccessToken(context);
+
+    if (accessToken == null) return null;
+
+    Map<String, String> queries = {
+      "page": _currentPage.toString(),
+      "pageSize": _pageSize.toString(),
+    };
+
+    var result = await _eBookReportsProvider.get(
+        filter: queries, bearerToken: accessToken);
 
     return result;
   }
@@ -127,13 +155,20 @@ class _ReportsScreenWidgetState extends State<ReportsScreenWidget> {
                 ],
               ),
             ),
-            ReportsListWidget(userReports: _userReports),
+            ReportsListWidget(
+                reports: selectedView == 0 ? _userReports : _eBookReports),
             FutureBuilder(
-              future: _userReports,
+              future: selectedView == 0 ? _userReports : _eBookReports,
               builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+                if (snapshot.connectionState != ConnectionState.done) {
+                  return const LoadingWidget();
+                }
+
                 return PaginationNavWidget(
                   currentPage: _currentPage,
-                  lastPage: _totalPages,
+                  lastPage: selectedView == 0
+                      ? (snapshot.data as QueryResult<UserReport>).totalPages!
+                      : (snapshot.data as QueryResult<EBookReport>).totalPages!,
                   forwardCallback: forward,
                   backCallback: back,
                 );
