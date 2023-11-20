@@ -115,8 +115,6 @@ class _ReportsScreenWidgetState extends State<ReportsScreenWidget> {
 
   @override
   Widget build(BuildContext context) {
-    var theme = Theme.of(context);
-
     return Align(
       alignment: Alignment.bottomCenter,
       child: SingleChildScrollView(

@@ -2,7 +2,6 @@ import "package:flutter/material.dart";
 import "package:wordsmith_admin_panel/widgets/loading.dart";
 import "package:wordsmith_admin_panel/widgets/report_dialog.dart";
 import "package:wordsmith_utils/datetime_formatter.dart";
-import "package:wordsmith_utils/logger.dart";
 import "package:wordsmith_utils/models/ebook_report.dart";
 import "package:wordsmith_utils/models/query_result.dart";
 import "package:wordsmith_utils/models/user_report.dart";
@@ -10,7 +9,6 @@ import "package:wordsmith_utils/providers/cast.dart";
 import "package:wordsmith_utils/size_config.dart";
 
 class ReportsListWidget extends StatefulWidget {
-  final _logger = LogManager.getLogger("ReportsList");
   final Future<dynamic> reports;
 
   ReportsListWidget({super.key, required this.reports});

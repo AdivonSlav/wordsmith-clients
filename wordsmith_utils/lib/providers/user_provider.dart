@@ -7,7 +7,7 @@ class UserProvider extends BaseProvider<User> {
 
   Future<User?> getLoggedUser() async {
     String? accessToken = await SecureStore.getValue("access_token");
-    String? expiration = await SecureStore.getValue("access_expiration");
+    //String? expiration = await SecureStore.getValue("access_expiration"); // The expiration can also be retrieved if necessary
 
     if (accessToken == null || accessToken.isEmpty) return null;
 
