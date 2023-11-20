@@ -3,6 +3,7 @@ import "package:intl/intl.dart";
 import "package:wordsmith_admin_panel/widgets/text_field.dart";
 import "package:wordsmith_utils/datetime_formatter.dart";
 import "package:wordsmith_utils/dialogs.dart";
+import "package:wordsmith_utils/logger.dart";
 import "package:wordsmith_utils/models/ebook_report.dart";
 import "package:wordsmith_utils/models/user_report.dart";
 import "package:wordsmith_utils/size_config.dart";
@@ -15,6 +16,8 @@ Future<dynamic> showReportDialog(
     return showErrorDialog(context, const Text("Error opening report"),
         const Text("The report could not be opened!"));
   }
+
+  var logger = LogManager.getLogger("ReportDialog");
 
   return await showDialog(
     context: context,
@@ -36,7 +39,7 @@ Future<dynamic> showReportDialog(
                   const Text("By"),
                   InkWell(
                     onTap: () {
-                      print("Tapped!");
+                      logger.info("Tapped by");
                     },
                     child: SizedBox(
                       width: SizeConfig.safeBlockHorizontal * 10.0,
@@ -59,7 +62,7 @@ Future<dynamic> showReportDialog(
                   const Text("Reported user"),
                   InkWell(
                     onTap: () {
-                      print("Tapped!");
+                      logger.info("Tapped reported");
                     },
                     child: SizedBox(
                       width: SizeConfig.safeBlockHorizontal * 10.0,
