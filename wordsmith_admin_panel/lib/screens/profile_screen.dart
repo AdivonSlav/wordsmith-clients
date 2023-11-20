@@ -79,8 +79,8 @@ class _ProfileScreenWidgetState extends State<ProfileScreenWidget> {
       }
     }
 
-    var imageInsert = await ImageHelper.toImageInsert(file);
-    var payload = UserUpdate(profileImage: imageInsert);
+    //var imageInsert = await ImageHelper.toImageInsert(file);
+    //var payload = UserUpdate(profileImage: imageInsert);
 
     if (context.mounted) {
       await showErrorDialog(
