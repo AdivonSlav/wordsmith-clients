@@ -1,6 +1,8 @@
 import "package:flutter/material.dart";
 import "package:wordsmith_admin_panel/widgets/loading.dart";
+import "package:wordsmith_admin_panel/widgets/report_dialog.dart";
 import "package:wordsmith_utils/datetime_formatter.dart";
+import "package:wordsmith_utils/logger.dart";
 import "package:wordsmith_utils/models/ebook_report.dart";
 import "package:wordsmith_utils/models/query_result.dart";
 import "package:wordsmith_utils/models/user_report.dart";
@@ -8,9 +10,10 @@ import "package:wordsmith_utils/providers/cast.dart";
 import "package:wordsmith_utils/size_config.dart";
 
 class ReportsListWidget extends StatefulWidget {
+  final _logger = LogManager.getLogger("ReportsList");
   final Future<dynamic> reports;
 
-  const ReportsListWidget({super.key, required this.reports});
+  ReportsListWidget({super.key, required this.reports});
 
   @override
   State<StatefulWidget> createState() => _ReportsListWidgetState();
@@ -94,6 +97,17 @@ class _ReportsListWidgetState extends State<ReportsListWidget> {
                           format: "yyyy-MM-dd H:m:s",
                         ),
                       ),
+                      onTap: () async {
+                        if (userReports != null) {
+                          await showReportDialog(
+                              context: context,
+                              userReport: userReports.result[index]);
+                        } else if (eBookReports != null) {
+                          await showReportDialog(
+                              context: context,
+                              eBookReport: eBookReports.result[index]);
+                        }
+                      },
                     ),
                   );
                 },
