@@ -11,7 +11,7 @@ import "package:wordsmith_utils/size_config.dart";
 class ReportsListWidget extends StatefulWidget {
   final Future<dynamic> reports;
 
-  ReportsListWidget({super.key, required this.reports});
+  const ReportsListWidget({super.key, required this.reports});
 
   @override
   State<StatefulWidget> createState() => _ReportsListWidgetState();
