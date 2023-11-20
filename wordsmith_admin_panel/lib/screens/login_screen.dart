@@ -169,16 +169,6 @@ class _LoginScreenWidgetState extends State<LoginScreenWidget> {
                                   ),
                           ),
                         ),
-                        const SizedBox(width: 20.0),
-                        SizedBox(
-                          height: 30.0,
-                          child: ElevatedButton(
-                            onPressed: () async {
-                              await showRegistrationDialog(context);
-                            },
-                            child: const Text("Don't have an account?"),
-                          ),
-                        ),
                       ],
                     )
                   ],
@@ -190,91 +180,4 @@ class _LoginScreenWidgetState extends State<LoginScreenWidget> {
       ),
     );
   }
-}
-
-Future<dynamic> showRegistrationDialog(BuildContext context) async {
-  final logger = LogManager.getLogger("RegistrationDialog");
-  final formKey = GlobalKey<FormState>();
-  final usernameController = TextEditingController();
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
-  final confirmPasswordController = TextEditingController();
-  bool registerInProgress = false;
-  var theme = Theme.of(context);
-
-  return await showDialog(
-    context: context,
-    builder: (BuildContext context) => AlertDialog(
-      title: const Text("Register"),
-      content: SingleChildScrollView(
-        child: SizedBox(
-          height: SizeConfig.safeBlockVertical * 35.0,
-          width: SizeConfig.safeBlockHorizontal * 50.0,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Form(
-                key: formKey,
-                child: Column(
-                  children: <Widget>[
-                    InputField(
-                      labelText: "Username",
-                      controller: usernameController,
-                      validator: validateUsername,
-                      width: SizeConfig.safeBlockHorizontal * 45.0,
-                    ),
-                    SizedBox(height: SizeConfig.safeBlockVertical * 0.9),
-                    InputField(
-                      labelText: "Email",
-                      controller: emailController,
-                      validator: validateEmail,
-                      width: SizeConfig.safeBlockHorizontal * 45.0,
-                    ),
-                    SizedBox(height: SizeConfig.safeBlockVertical * 0.9),
-                    InputField(
-                      labelText: "Password",
-                      controller: passwordController,
-                      validator: validatePassword,
-                      width: SizeConfig.safeBlockHorizontal * 45.0,
-                    ),
-                    SizedBox(height: SizeConfig.safeBlockVertical * 0.9),
-                    InputField(
-                      labelText: "Confirm password",
-                      controller: confirmPasswordController,
-                      validator: (value) {
-                        return value == passwordController.text
-                            ? null
-                            : "The passwords do not match!";
-                      },
-                      width: SizeConfig.safeBlockHorizontal * 45.0,
-                    ),
-                    SizedBox(height: SizeConfig.safeBlockVertical * 2.0),
-                    ElevatedButton(
-                      onPressed: () async {
-                        if (formKey.currentState!.validate()) {
-                          registerInProgress = true;
-                        }
-                      },
-                      child: !registerInProgress
-                          ? const Text("Register")
-                          : const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(),
-                            ),
-                    )
-                  ],
-                ),
-              )
-            ],
-          ),
-        ),
-      ),
-      actions: <Widget>[
-        TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel"))
-      ],
-    ),
-  );
 }
