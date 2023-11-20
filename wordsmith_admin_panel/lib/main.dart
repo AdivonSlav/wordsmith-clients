@@ -25,9 +25,9 @@ void main() async {
   });
 
   if (kReleaseMode) {
-    LogManager.init(LogLevel.INFO);
-  } else {
     LogManager.init(LogLevel.WARNING);
+  } else {
+    LogManager.init(LogLevel.INFO);
   }
 
   final mainLogger = LogManager.getLogger("Main");
