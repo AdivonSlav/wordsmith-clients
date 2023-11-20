@@ -4,7 +4,6 @@ import "package:provider/provider.dart";
 import "package:window_manager/window_manager.dart";
 import "package:wordsmith_admin_panel/widgets/dashboard.dart";
 import "package:wordsmith_utils/logger.dart";
-import "package:wordsmith_utils/models/ebook_report.dart";
 import "package:wordsmith_utils/providers/ebook_reports_provider.dart";
 import "package:wordsmith_utils/providers/user_login_provider.dart";
 import "package:wordsmith_utils/providers/user_provider.dart";
