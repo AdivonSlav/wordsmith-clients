@@ -162,11 +162,13 @@ class _ReportsScreenWidgetState extends State<ReportsScreenWidget> {
                   return const LoadingWidget();
                 }
 
+                _totalPages = selectedView == 0
+                    ? (snapshot.data as QueryResult<UserReport>).totalPages!
+                    : (snapshot.data as QueryResult<EBookReport>).totalPages!;
+
                 return PaginationNavWidget(
                   currentPage: _currentPage,
-                  lastPage: selectedView == 0
-                      ? (snapshot.data as QueryResult<UserReport>).totalPages!
-                      : (snapshot.data as QueryResult<EBookReport>).totalPages!,
+                  lastPage: _totalPages,
                   forwardCallback: forward,
                   backCallback: back,
                 );
