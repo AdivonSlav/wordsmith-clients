@@ -32,7 +32,7 @@ class _ReportsScreenWidgetState extends State<ReportsScreenWidget> {
 
   int _currentPage = 1;
   int _totalPages = 0;
-  int _pageSize = 10;
+  final int _pageSize = 10;
   late Future<QueryResult<UserReport>?> _userReports;
   late Future<QueryResult<EBookReport>?> _eBookReports;
 
