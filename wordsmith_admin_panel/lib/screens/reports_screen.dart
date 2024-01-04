@@ -108,7 +108,11 @@ class _ReportsScreenWidgetState extends State<ReportsScreenWidget> {
     if (_currentPage > 1) {
       setState(() {
         _currentPage--;
-        _userReports = getUserReports();
+        if (selectedView == 0) {
+          _userReports = getUserReports();
+        } else {
+          _eBookReports = getEBookReports();
+        }
       });
     }
   }
