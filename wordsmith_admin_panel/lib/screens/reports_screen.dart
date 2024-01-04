@@ -27,7 +27,7 @@ class _ReportsScreenWidgetState extends State<ReportsScreenWidget> {
   late UserLoginProvider _userLoginProvider;
   late UserReportsProvider _userReportsProvider;
   late EBookReportsProvider _eBookReportsProvider;
-  final TextEditingController _searchController = TextEditingController();
+  final TextEditingController _reasonFilterController = TextEditingController();
   int selectedView = 0;
 
   int _currentPage = 1;
@@ -63,7 +63,8 @@ class _ReportsScreenWidgetState extends State<ReportsScreenWidget> {
     super.initState();
   }
 
-  Future<QueryResult<UserReport>?> getUserReports() async {
+  Future<QueryResult<UserReport>?> getUserReports(
+      {String? reason, DateTime? reportDate}) async {
     String? accessToken = await _userLoginProvider.getAccessToken(context);
 
     if (accessToken == null) return null;
@@ -72,6 +73,13 @@ class _ReportsScreenWidgetState extends State<ReportsScreenWidget> {
       "page": _currentPage.toString(),
       "pageSize": _pageSize.toString(),
     };
+
+    if (reason != null && reason.isNotEmpty) {
+      queries["reason"] = reason;
+    }
+    if (reportDate != null) {
+      queries["reportDate"] = reportDate.toIso8601String();
+    }
 
     var result = await _userReportsProvider.get(
         filter: queries, bearerToken: accessToken);
@@ -79,7 +87,8 @@ class _ReportsScreenWidgetState extends State<ReportsScreenWidget> {
     return result;
   }
 
-  Future<QueryResult<EBookReport>?> getEBookReports() async {
+  Future<QueryResult<EBookReport>?> getEBookReports(
+      {String? reason, DateTime? reportDate}) async {
     String? accessToken = await _userLoginProvider.getAccessToken(context);
 
     if (accessToken == null) return null;
@@ -88,6 +97,13 @@ class _ReportsScreenWidgetState extends State<ReportsScreenWidget> {
       "page": _currentPage.toString(),
       "pageSize": _pageSize.toString(),
     };
+
+    if (reason != null && reason.isNotEmpty) {
+      queries["reason"] = reason;
+    }
+    if (reportDate != null) {
+      queries["reportDate"] = reportDate.toIso8601String();
+    }
 
     var result = await _eBookReportsProvider.get(
         filter: queries, bearerToken: accessToken);
@@ -117,6 +133,62 @@ class _ReportsScreenWidgetState extends State<ReportsScreenWidget> {
     }
   }
 
+  void filterByReason() {
+    var filter = _reasonFilterController.text;
+
+    if (selectedView == 0) {
+      setState(() {
+        _userReports = getUserReports(reason: filter);
+        widget._logger.info("Got new user reports from reason filtering!");
+      });
+    } else if (selectedView == 1) {
+      setState(() {
+        _eBookReports = getEBookReports(reason: filter);
+        widget._logger.info("Got new ebook reports from reason filtering!");
+      });
+    }
+  }
+
+  void filterByDate() async {
+    var filter = await showDatePicker(
+      context: context,
+      firstDate: DateTime(2001),
+      lastDate: DateTime(2101),
+    );
+
+    if (filter != null && filter != DateTime.now()) {
+      if (selectedView == 0) {
+        setState(() {
+          _userReports = getUserReports(reportDate: filter);
+          widget._logger.info("Got new user reports from date filtering!");
+        });
+      } else if (selectedView == 1) {
+        setState(() {
+          _eBookReports = getEBookReports(reportDate: filter);
+          widget._logger.info("Got new ebook reports from date filtering!");
+        });
+      }
+    }
+  }
+
+  void clearAllFilters() {
+    _reasonFilterController.clear();
+
+    setState(() {
+      if (selectedView == 0) {
+        setState(() {
+          _userReports = getUserReports();
+          widget._logger.info("Cleared all filters for user reports!");
+        });
+      } else if (selectedView == 1) {
+        setState(() {
+          _eBookReports = getEBookReports();
+          widget._logger.info("Cleared all filters for ebook reports!");
+        });
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Align(
@@ -132,11 +204,37 @@ class _ReportsScreenWidgetState extends State<ReportsScreenWidget> {
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   InputField(
-                      labelText: "Search", controller: _searchController),
+                      labelText: "Reason", controller: _reasonFilterController),
                   SizedBox(
                     width: SizeConfig.safeBlockHorizontal * 1.0,
                   ),
-                  IconButton(onPressed: () {}, icon: const Icon(Icons.search)),
+                  IconButton(
+                    onPressed: () {
+                      filterByReason();
+                    },
+                    icon: const Icon(Icons.search),
+                    tooltip: "Search by reason",
+                  ),
+                  SizedBox(
+                    width: SizeConfig.safeBlockHorizontal * 1.0,
+                  ),
+                  IconButton(
+                    onPressed: () async {
+                      filterByDate();
+                    },
+                    icon: const Icon(Icons.edit_calendar),
+                    tooltip: "Filter date",
+                  ),
+                  SizedBox(
+                    width: SizeConfig.safeBlockHorizontal * 1.0,
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      clearAllFilters();
+                    },
+                    icon: const Icon(Icons.clear),
+                    tooltip: "Clear all filters",
+                  ),
                   SizedBox(
                     width: SizeConfig.safeBlockHorizontal * 6.0,
                   ),
@@ -151,6 +249,7 @@ class _ReportsScreenWidgetState extends State<ReportsScreenWidget> {
                     onSelectionChanged: (Set<int> newSelection) {
                       setState(() {
                         selectedView = newSelection.first;
+                        _reasonFilterController.clear();
                       });
                     },
                   ),
