@@ -16,7 +16,7 @@ String? validateEmail(String? value) {
   if (value == null || value.isEmpty) {
     return "Please enter an email!";
   }
-  
+
   // Not even going to try and explain this, it should correspond to any email format
   const pattern = r"(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'"
       r'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-'
@@ -35,12 +35,12 @@ String? validatePassword(String? value) {
     return "Please enter a password!";
   }
 
-  // Contains at least one digit and one special character
-  final regex =
-      RegExp(r"^(?=.*?[0-9])(?=.*?[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-])$");
+  // Contains at least one digit and one special character, between 6 and 20 characters in length
+  final regex = RegExp(
+      r'^(?=.*?[A-Za-z])(?=.*?[0-9])(?=.*?[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]).{6,20}$');
 
   if (!regex.hasMatch(value)) {
-    return "Password must contain at least one digit and one special character";
+    return "Password must be between 6 and 20 characters, contain one special character and one digit";
   }
 
   return null;
