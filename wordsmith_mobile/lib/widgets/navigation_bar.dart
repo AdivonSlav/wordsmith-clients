@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wordsmith_mobile/screens/registration_screen.dart';
 import 'package:wordsmith_utils/logger.dart';
 
 class NavigationBarWidget extends StatefulWidget {
@@ -18,12 +19,12 @@ class NavigationBarWidgetState extends State<NavigationBarWidget> {
   List<NavigationDestination> _loadNavDestinations() {
     return <NavigationDestination>[
       const NavigationDestination(
-        icon: Icon(Icons.person),
-        label: "Profile",
+        icon: Icon(Icons.wrong_location),
+        label: "Placeholder",
       ),
       const NavigationDestination(
         icon: Icon(Icons.person),
-        label: "Placeholder1",
+        label: "Profile",
       ),
     ];
   }
@@ -35,7 +36,7 @@ class NavigationBarWidgetState extends State<NavigationBarWidget> {
         _page = const Placeholder();
         break;
       case 1:
-        _page = const Placeholder();
+        _page = const RegistrationScreenWidget();
         break;
       default:
         throw UnimplementedError("No widget for $_selectedIndex");
@@ -54,10 +55,11 @@ class NavigationBarWidgetState extends State<NavigationBarWidget> {
         selectedIndex: _selectedIndex,
         destinations: _loadNavDestinations(),
       ),
-      body: SafeArea(
-        child: Expanded(
-          child: _page,
-        ),
+      body: Flex(
+        direction: Axis.vertical,
+        children: <Widget>[
+          Expanded(child: _page),
+        ],
       ),
     );
   }
