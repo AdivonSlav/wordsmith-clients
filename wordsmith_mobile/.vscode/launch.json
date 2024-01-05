@@ -1,0 +1,30 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Mobile Client (Debug)",
+      "cwd": "wordsmith_mobile",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "debug",
+      "toolArgs": ["--dart-define", "API_URL=https://localhost:6443/"],
+      
+    },
+    {
+      "name": "Mobile Client (Profile)",
+      "cwd": "wordsmith_mobile",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "profile",
+      "toolArgs": ["--dart-define", "API_URL=https://localhost:6443/"]
+    },
+    {
+      "name": "Mobile Client (Release)",
+      "cwd": "wordsmith_mobile",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "release",
+      "toolArgs": ["--dart-define", "API_URL=https://localhost:6443/"]
+    }
+  ]
+}
