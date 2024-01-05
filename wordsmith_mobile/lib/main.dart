@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:wordsmith_mobile/widgets/navigation_bar.dart';
 import 'package:wordsmith_utils/logger.dart';
 import 'package:wordsmith_utils/size_config.dart';
 
@@ -42,7 +43,9 @@ class Application extends StatelessWidget {
           ),
         ),
       ),
-      home: const Placeholder(),
+      home: const NavigationBarWidget(
+        title: Text("Wordsmith"),
+      ),
     );
   }
 }
