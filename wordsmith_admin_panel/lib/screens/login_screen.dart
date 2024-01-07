@@ -48,15 +48,10 @@ class _LoginScreenWidgetState extends State<LoginScreenWidget> {
 
     _logger.info("Attempting login with $username:$password");
 
-    Map<String, String> request = {
-      "username": username,
-      "password": password,
-    };
-
     try {
-      var result = await _userLoginProvider.post(request: request);
+      var result = await _userLoginProvider.getUserLogin(username, password);
 
-      if (result.accessToken == null || result.refreshToken == null) {
+      if (result == null) {
         throw BaseException("Could not login");
       }
 
@@ -76,23 +71,6 @@ class _LoginScreenWidgetState extends State<LoginScreenWidget> {
     }
 
     return null;
-  }
-
-  Future _handleCredentials(UserLogin loginCreds) async {
-    try {
-      await _userLoginProvider.storeLogin(loginCreds: loginCreds);
-      _toggleLoginInProgress();
-    } catch (error) {
-      _toggleLoginInProgress();
-
-      if (context.mounted) {
-        await showErrorDialog(
-          context,
-          const Text("Error"),
-          const Text("Something unexpected happened"),
-        );
-      }
-    }
   }
 
   @override
@@ -150,7 +128,8 @@ class _LoginScreenWidgetState extends State<LoginScreenWidget> {
                                 var loginCreds = await _submitLogin();
 
                                 if (loginCreds != null) {
-                                  await _handleCredentials(loginCreds);
+                                  _logger.info(
+                                      "Logged in with access token ${loginCreds.accessToken}");
                                 }
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
