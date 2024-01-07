@@ -16,6 +16,22 @@ class UserLoginProvider extends BaseProvider<UserLogin> {
     return UserLogin.fromJson(data);
   }
 
+  Future<UserLogin?> getUserLogin(String username, String password) async {
+    Map<String, String> request = {
+      "username": username,
+      "password": password,
+    };
+
+    var result = await post(request: request);
+
+    if (result.accessToken != null && result.refreshToken != null) {
+      await storeLogin(loginCreds: result);
+      return result;
+    } else {
+      return null;
+    }
+  }
+
   Future<String?> getAccessToken(BuildContext context) async {
     var accessToken = await SecureStore.getValue("access_token");
 

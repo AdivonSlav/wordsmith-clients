@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of "maturity_rating.dart";
+part of 'maturity_rating.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
@@ -8,12 +8,12 @@ part of "maturity_rating.dart";
 
 MaturityRating _$MaturityRatingFromJson(Map<String, dynamic> json) =>
     MaturityRating(
-      json["id"] as int,
-      json["name"] as String,
+      json['id'] as int,
+      json['name'] as String,
     );
 
 Map<String, dynamic> _$MaturityRatingToJson(MaturityRating instance) =>
     <String, dynamic>{
-      "id": instance.id,
-      "name": instance.name,
+      'id': instance.id,
+      'name': instance.name,
     };

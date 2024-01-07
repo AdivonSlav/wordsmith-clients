@@ -1,25 +1,26 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'user.dart';
+part of 'user_insert.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-User _$UserFromJson(Map<String, dynamic> json) => User(
-      json['id'] as int,
+UserInsert _$UserInsertFromJson(Map<String, dynamic> json) => UserInsert(
       json['username'] as String,
       json['email'] as String,
+      json['password'] as String,
+      json['confirmPassword'] as String,
       json['profileImage'] == null
           ? null
-          : Image.fromJson(json['profileImage'] as Map<String, dynamic>),
-      DateTime.parse(json['registrationDate'] as String),
+          : ImageInsert.fromJson(json['profileImage'] as Map<String, dynamic>),
     );
 
-Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
-      'id': instance.id,
+Map<String, dynamic> _$UserInsertToJson(UserInsert instance) =>
+    <String, dynamic>{
       'username': instance.username,
       'email': instance.email,
+      'password': instance.password,
+      'confirmPassword': instance.confirmPassword,
       'profileImage': instance.profileImage,
-      'registrationDate': instance.registrationDate.toIso8601String(),
     };
