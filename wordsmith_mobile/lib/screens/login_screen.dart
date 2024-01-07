@@ -12,7 +12,7 @@ class LoginScreenWidget extends StatefulWidget {
 }
 
 class LoginScreenWidgetState extends State<LoginScreenWidget> {
-  final _logger = LogManager.getLogger("RegistrationScreen");
+  final _logger = LogManager.getLogger("LoginScreen");
   final _formKey = GlobalKey<FormState>();
   final _usernameController = TextEditingController(text: "");
   final _passwordController = TextEditingController(text: "");
