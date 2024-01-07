@@ -30,6 +30,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  provider: ^6.0.5
   logging: ^1.2.0
   wordsmith_utils:
     path: ../wordsmith_utils

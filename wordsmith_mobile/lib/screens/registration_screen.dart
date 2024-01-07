@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:wordsmith_mobile/widgets/input_field.dart';
+import 'package:wordsmith_utils/dialogs.dart';
+import 'package:wordsmith_utils/exceptions/base_exception.dart';
 import 'package:wordsmith_utils/logger.dart';
+import 'package:wordsmith_utils/models/user_insert.dart';
+import 'package:wordsmith_utils/models/user_login.dart';
+import 'package:wordsmith_utils/providers/user_login_provider.dart';
+import 'package:wordsmith_utils/providers/user_provider.dart';
 import 'package:wordsmith_utils/size_config.dart';
 import 'package:wordsmith_utils/validators.dart';
 
@@ -18,6 +25,10 @@ class RegistrationScreenWidgetState extends State<RegistrationScreenWidget> {
   final _emailController = TextEditingController(text: "");
   final _passwordController = TextEditingController(text: "");
   final _confirmPasswordController = TextEditingController(text: "");
+
+  late UserProvider _userProvider;
+  late UserLoginProvider _userLoginProvider;
+
   bool _obscuredPassword = true;
   bool _registrationInProgress = false;
 
@@ -33,9 +44,64 @@ class RegistrationScreenWidgetState extends State<RegistrationScreenWidget> {
     return null;
   }
 
+  void _toggleRegistrationInProgress() {
+    setState(() {
+      _registrationInProgress = !_registrationInProgress;
+    });
+  }
+
+  Future<UserLogin?> _submitRegistration() async {
+    _toggleRegistrationInProgress();
+    _logger.info("Attempting registration for ${_usernameController.text}");
+
+    try {
+      var userInsert = UserInsert(
+          _usernameController.text,
+          _emailController.text,
+          _passwordController.text,
+          _confirmPasswordController.text,
+          null);
+
+      var registerResult = await _userProvider.postNewUser(userInsert);
+
+      // Small delay to allow synchronization with the backend identity server
+      UserLogin? loginResult = await Future.delayed(
+        const Duration(milliseconds: 500),
+        () async {
+          return await _userLoginProvider.getUserLogin(
+            registerResult.username,
+            userInsert.password,
+          );
+        },
+      );
+
+      if (loginResult == null) {
+        throw BaseException("Could not login");
+      }
+
+      return loginResult;
+    } on BaseException catch (error) {
+      _toggleRegistrationInProgress();
+
+      if (context.mounted) {
+        await showErrorDialog(
+          context,
+          const Text("Error"),
+          Text(
+            error.toString(),
+          ),
+        );
+      }
+
+      return null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
+    _userProvider = context.read<UserProvider>();
+    _userLoginProvider = context.read<UserLoginProvider>();
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
@@ -106,8 +172,19 @@ class RegistrationScreenWidgetState extends State<RegistrationScreenWidget> {
                   width: SizeConfig.safeBlockHorizontal * 40.0,
                   height: SizeConfig.safeBlockVertical * 6.0,
                   child: ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       _logger.info("Registration in progress...");
+
+                      if (_formKey.currentState!.validate() &&
+                          !_registrationInProgress) {
+                        var loginCreds = await _submitRegistration();
+
+                        if (loginCreds != null) {
+                          _logger.info(
+                              "Registered and logged in with ${loginCreds.accessToken}");
+                          _toggleRegistrationInProgress();
+                        }
+                      }
                     },
                     child: !_registrationInProgress
                         ? const Text("Register")
