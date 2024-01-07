@@ -184,6 +184,11 @@ class RegistrationScreenWidgetState extends State<RegistrationScreenWidget> {
                               "Registered and logged in with ${loginCreds.accessToken}");
                           _toggleRegistrationInProgress();
                         }
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text("Please fill all the inputs!")),
+                        );
                       }
                     },
                     child: !_registrationInProgress
