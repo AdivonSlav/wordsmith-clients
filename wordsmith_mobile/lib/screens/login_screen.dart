@@ -127,7 +127,7 @@ class LoginScreenWidgetState extends State<LoginScreenWidget> {
                       SizedBox(
                         width: SizeConfig.safeBlockHorizontal * 40.0,
                         height: SizeConfig.safeBlockVertical * 6.0,
-                        child: ElevatedButton(
+                        child: FilledButton(
                           onPressed: () async {
                             if (_formKey.currentState!.validate() &&
                                 !_loginInProgress) {

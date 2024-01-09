@@ -179,7 +179,7 @@ class RegistrationScreenWidgetState extends State<RegistrationScreenWidget> {
                           SizedBox(
                             width: SizeConfig.safeBlockHorizontal * 40.0,
                             height: SizeConfig.safeBlockVertical * 6.0,
-                            child: ElevatedButton(
+                            child: FilledButton(
                               onPressed: () async {
                                 _logger.info("Registration in progress...");
 
