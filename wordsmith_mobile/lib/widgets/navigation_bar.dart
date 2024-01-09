@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wordsmith_mobile/screens/intro_screen.dart';
-import 'package:wordsmith_mobile/screens/login_screen.dart';
 import 'package:wordsmith_mobile/screens/profile_screen.dart';
 import 'package:wordsmith_mobile/widgets/navigation_bar_error.dart';
 import 'package:wordsmith_mobile/widgets/navigation_bar_loading.dart';
