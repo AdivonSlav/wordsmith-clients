@@ -31,7 +31,7 @@
       "request": "launch",
       "type": "dart",
       "flutterMode": "debug",
-      "toolArgs": ["--dart-define", "API_URL=https://localhost:6443/"]
+      "toolArgs": ["--dart-define", "API_URL=https://10.0.2.2:6443/"]
     },
     {
       "name": "Mobile Client (Profile)",
@@ -39,7 +39,7 @@
       "request": "launch",
       "type": "dart",
       "flutterMode": "profile",
-      "toolArgs": ["--dart-define", "API_URL=https://localhost:6443/"]
+      "toolArgs": ["--dart-define", "API_URL=https://10.0.2.2:6443/"]
     },
     {
       "name": "Mobile Client (Release)",
@@ -47,7 +47,7 @@
       "request": "launch",
       "type": "dart",
       "flutterMode": "release",
-      "toolArgs": ["--dart-define", "API_URL=https://localhost:6443/"]
+      "toolArgs": ["--dart-define", "API_URL=https://10.0.2.2:6443/"]
     }
   ]
 }
