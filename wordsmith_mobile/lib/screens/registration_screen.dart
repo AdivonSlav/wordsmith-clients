@@ -103,107 +103,134 @@ class RegistrationScreenWidgetState extends State<RegistrationScreenWidget> {
     _userProvider = context.read<UserProvider>();
     _userLoginProvider = context.read<UserLoginProvider>();
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: Center(
-        child: Column(children: [
-          Text(
-            "Register an account",
-            style: theme.textTheme.headlineSmall,
-          ),
-          SizedBox(
-            height: SizeConfig.safeBlockVertical * 6.0,
-          ),
-          Form(
-            key: _formKey,
+    return Scaffold(
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+              vertical: SizeConfig.safeBlockVertical * 14.0, horizontal: 16.0),
+          child: Center(
             child: Column(
-              children: <Widget>[
-                InputField(
-                  labelText: "Username",
-                  controller: _usernameController,
-                  obscureText: false,
-                  validator: validateUsername,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "Register an account",
+                  style: theme.textTheme.headlineSmall,
                 ),
                 SizedBox(
-                  height: SizeConfig.safeBlockHorizontal * 5.0,
-                ),
-                InputField(
-                  labelText: "Email",
-                  controller: _emailController,
-                  obscureText: false,
-                  validator: validateEmail,
-                ),
-                SizedBox(
-                  height: SizeConfig.safeBlockHorizontal * 5.0,
-                ),
-                InputField(
-                  labelText: "Password",
-                  controller: _passwordController,
-                  obscureText: _obscuredPassword,
-                  validator: validatePassword,
-                  suffixIcon: IconButton(
-                    onPressed: () {
-                      if (_registrationInProgress) {
-                        return;
-                      }
-
-                      setState(() {
-                        _obscuredPassword = !_obscuredPassword;
-                      });
-                    },
-                    icon: Icon(_obscuredPassword
-                        ? Icons.visibility_off
-                        : Icons.visibility),
-                  ),
-                ),
-                SizedBox(
-                  height: SizeConfig.safeBlockHorizontal * 5.0,
-                ),
-                InputField(
-                  labelText: "Confirm password",
-                  controller: _confirmPasswordController,
-                  obscureText: true,
-                  validator: _validatePasswordConfirmation,
-                ),
-                SizedBox(
-                  height: SizeConfig.safeBlockHorizontal * 5.0,
-                ),
-                SizedBox(
-                  width: SizeConfig.safeBlockHorizontal * 40.0,
                   height: SizeConfig.safeBlockVertical * 6.0,
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      _logger.info("Registration in progress...");
-
-                      if (_formKey.currentState!.validate() &&
-                          !_registrationInProgress) {
-                        var loginCreds = await _submitRegistration();
-
-                        if (loginCreds != null) {
-                          _logger.info(
-                              "Registered and logged in with ${loginCreds.accessToken}");
-                          _toggleRegistrationInProgress();
-                        }
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text("Please fill all the inputs!")),
-                        );
-                      }
-                    },
-                    child: !_registrationInProgress
-                        ? const Text("Register")
-                        : const SizedBox(
-                            width: 20.0,
-                            height: 20.0,
-                            child: CircularProgressIndicator(),
-                          ),
-                  ),
                 ),
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    children: <Widget>[
+                      InputField(
+                        labelText: "Username",
+                        controller: _usernameController,
+                        obscureText: false,
+                        validator: validateUsername,
+                      ),
+                      SizedBox(
+                        height: SizeConfig.safeBlockHorizontal * 5.0,
+                      ),
+                      InputField(
+                        labelText: "Email",
+                        controller: _emailController,
+                        obscureText: false,
+                        validator: validateEmail,
+                      ),
+                      SizedBox(
+                        height: SizeConfig.safeBlockHorizontal * 5.0,
+                      ),
+                      InputField(
+                        labelText: "Password",
+                        controller: _passwordController,
+                        obscureText: _obscuredPassword,
+                        validator: validatePassword,
+                        suffixIcon: IconButton(
+                          onPressed: () {
+                            if (_registrationInProgress) {
+                              return;
+                            }
+
+                            setState(() {
+                              _obscuredPassword = !_obscuredPassword;
+                            });
+                          },
+                          icon: Icon(_obscuredPassword
+                              ? Icons.visibility_off
+                              : Icons.visibility),
+                        ),
+                      ),
+                      SizedBox(
+                        height: SizeConfig.safeBlockHorizontal * 5.0,
+                      ),
+                      InputField(
+                        labelText: "Confirm password",
+                        controller: _confirmPasswordController,
+                        obscureText: true,
+                        validator: _validatePasswordConfirmation,
+                      ),
+                      SizedBox(
+                        height: SizeConfig.safeBlockHorizontal * 5.0,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            width: SizeConfig.safeBlockHorizontal * 40.0,
+                            height: SizeConfig.safeBlockVertical * 6.0,
+                            child: ElevatedButton(
+                              onPressed: () async {
+                                _logger.info("Registration in progress...");
+
+                                if (_formKey.currentState!.validate() &&
+                                    !_registrationInProgress) {
+                                  var loginCreds = await _submitRegistration();
+
+                                  if (loginCreds != null) {
+                                    _logger.info(
+                                        "Registered and logged in with ${loginCreds.accessToken}");
+                                    _toggleRegistrationInProgress();
+
+                                    if (context.mounted) {
+                                      Navigator.of(context).pop();
+                                    }
+                                  }
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content: Text(
+                                            "Please fill all the inputs!")),
+                                  );
+                                }
+                              },
+                              child: !_registrationInProgress
+                                  ? const Text("Register")
+                                  : const SizedBox(
+                                      width: 20.0,
+                                      height: 20.0,
+                                      child: CircularProgressIndicator(),
+                                    ),
+                            ),
+                          ),
+                          SizedBox(
+                            width: SizeConfig.safeBlockHorizontal * 6.0,
+                          ),
+                          OutlinedButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text("Back"),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                )
               ],
             ),
-          )
-        ]),
+          ),
+        ),
       ),
     );
   }
