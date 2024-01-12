@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -54,11 +55,12 @@ class Application extends StatelessWidget {
   Widget build(BuildContext context) {
     SizeConfig.init(context);
 
-    return MaterialApp(
-      title: "Wordsmith Mobile Client",
-      theme: ThemeData(
+    return AdaptiveTheme(
+      light: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.blue, brightness: Brightness.dark),
+          seedColor: Colors.blue,
+          brightness: Brightness.light,
+        ),
         useMaterial3: true,
         fontFamily: "Inter",
         textTheme: const TextTheme(
@@ -70,8 +72,30 @@ class Application extends StatelessWidget {
           ),
         ),
       ),
-      home: const NavigationBarWidget(
-        title: Text("Wordsmith"),
+      dark: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.blue,
+          brightness: Brightness.dark,
+        ),
+        useMaterial3: true,
+        fontFamily: "Inter",
+        textTheme: const TextTheme(
+          headlineSmall: TextStyle(
+            fontWeight: FontWeight.normal,
+          ),
+          bodyMedium: TextStyle(
+            fontWeight: FontWeight.normal,
+          ),
+        ),
+      ),
+      initial: AdaptiveThemeMode.dark,
+      builder: (theme, darkTheme) => MaterialApp(
+        title: "Wordsmith Mobile Client",
+        theme: theme,
+        darkTheme: darkTheme,
+        home: const NavigationBarWidget(
+          title: Text("Wordsmith"),
+        ),
       ),
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wordsmith_mobile/screens/intro_screen.dart';
 import 'package:wordsmith_mobile/screens/profile_screen.dart';
+import 'package:wordsmith_mobile/widgets/app_bar_settings_trailing.dart';
 import 'package:wordsmith_mobile/widgets/navigation_bar_error.dart';
 import 'package:wordsmith_mobile/widgets/navigation_bar_loading.dart';
 import 'package:wordsmith_utils/exceptions/base_exception.dart';
@@ -95,6 +96,9 @@ class NavigationBarWidgetState extends State<NavigationBarWidget> {
                   ? null
                   : AppBar(
                       title: widget.title,
+                      actions: _page is ProfileScreenWidget
+                          ? [const AppBarSettingsTrailingWidget()]
+                          : null,
                     ),
               bottomNavigationBar: UserLoginProvider.loggedUser == null
                   ? null
