@@ -27,8 +27,10 @@ class ProfileImageWidgetState extends State<ProfileImageWidget> {
   final _logger = LogManager.getLogger("ProfileImageWidget");
   final String _apiUrl = const String.fromEnvironment("API_URL");
 
-  final editableImageOpacity = 0.4;
-  final defaultImageOpacity = 0.0;
+  final _editableImageOpacity = 0.4;
+  final _defaultImageOpacity = 0.0;
+
+  final _defaultAvatarRadius = SizeConfig.safeBlockHorizontal * 15.0;
 
   @override
   Widget build(BuildContext context) {
@@ -56,21 +58,21 @@ class ProfileImageWidgetState extends State<ProfileImageWidget> {
           CircleAvatar(
             foregroundImage: profileImage,
             backgroundImage: defaultPlaceholderImage, // Fallback
-            radius: widget.radius ?? SizeConfig.safeBlockHorizontal * 20.0,
+            radius: widget.radius ?? _defaultAvatarRadius,
           ),
           Container(
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: Colors.black.withOpacity(widget.editCallback == null
-                  ? defaultImageOpacity
-                  : editableImageOpacity),
+                  ? _defaultImageOpacity
+                  : _editableImageOpacity),
             ),
             width: widget.radius != null
                 ? widget.radius! * 2.0
-                : SizeConfig.safeBlockHorizontal * 20.0 * 2.0,
+                : _defaultAvatarRadius * 2.0,
             height: widget.radius != null
                 ? widget.radius! * 2.0
-                : SizeConfig.safeBlockHorizontal * 20.0 * 2.0,
+                : _defaultAvatarRadius * 2.0,
           ),
           Positioned(
             child: Visibility(

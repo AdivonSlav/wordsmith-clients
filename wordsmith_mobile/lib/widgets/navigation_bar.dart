@@ -79,7 +79,8 @@ class NavigationBarWidgetState extends State<NavigationBarWidget> {
                   _page = const Placeholder();
                   break;
                 case 1:
-                  _page = const ProfileScreenWidget();
+                  _page =
+                      ProfileScreenWidget(user: UserLoginProvider.loggedUser!);
                   break;
                 default:
                   throw UnimplementedError("No widget for $_selectedIndex");
