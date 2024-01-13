@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wordsmith_mobile/widgets/settings_logout.dart';
 import 'package:wordsmith_mobile/widgets/settings_theme.dart';
 
 class SettingsScreenWidget extends StatefulWidget {
@@ -43,6 +44,21 @@ class SettingsScreenWidgetState extends State<SettingsScreenWidget> {
             Card(
               child: Column(children: <Widget>[
                 const SettingsThemeWidget(),
+              ]),
+            ),
+            const SizedBox(
+              height: 12.0,
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Text(
+                "Account Settings",
+                style: theme.textTheme.labelSmall,
+              ),
+            ),
+            Card(
+              child: Column(children: <Widget>[
+                const SettingsLogoutWidget(),
               ]),
             ),
           ],
