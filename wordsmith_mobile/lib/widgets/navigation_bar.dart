@@ -11,9 +11,7 @@ import 'package:wordsmith_utils/providers/user_login_provider.dart';
 import 'package:wordsmith_utils/providers/user_provider.dart';
 
 class NavigationBarWidget extends StatefulWidget {
-  final Widget? title;
-
-  const NavigationBarWidget({super.key, this.title});
+  const NavigationBarWidget({super.key});
 
   @override
   State<StatefulWidget> createState() => NavigationBarWidgetState();
@@ -41,6 +39,15 @@ class NavigationBarWidgetState extends State<NavigationBarWidget> {
     ];
   }
 
+  String _loadAppBarTitle(int index) {
+    switch (index) {
+      case 3:
+        return "Profile";
+      default:
+        return "Wordsmith";
+    }
+  }
+
   Future<dynamic> _checkLogin() async {
     try {
       var loggedUser = await _userProvider.getLoggedUser();
@@ -64,12 +71,14 @@ class NavigationBarWidgetState extends State<NavigationBarWidget> {
     return FutureBuilder(
       future: _checkLogin(),
       builder: (context, AsyncSnapshot<dynamic> snapshot) {
+        final String appBarTitle = _loadAppBarTitle(_selectedIndex);
+
         if (snapshot.connectionState != ConnectionState.done) {
-          return NavigationBarLoadingWidget(title: widget.title);
+          return NavigationBarLoadingWidget(title: Text(appBarTitle));
         }
 
         if (snapshot.hasError) {
-          return NavigationBarErrorWidget(title: widget.title);
+          return NavigationBarErrorWidget(title: Text(appBarTitle));
         }
 
         return Consumer<UserLoginProvider>(
@@ -95,7 +104,7 @@ class NavigationBarWidgetState extends State<NavigationBarWidget> {
               appBar: UserLoginProvider.loggedUser == null
                   ? null
                   : AppBar(
-                      title: widget.title,
+                      title: Text(appBarTitle),
                       actions: _page is ProfileScreenWidget
                           ? [const AppBarSettingsTrailingWidget()]
                           : null,

@@ -93,9 +93,7 @@ class Application extends StatelessWidget {
         title: "Wordsmith Mobile Client",
         theme: theme,
         darkTheme: darkTheme,
-        home: const NavigationBarWidget(
-          title: Text("Wordsmith"),
-        ),
+        home: const NavigationBarWidget(),
       ),
     );
   }
