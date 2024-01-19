@@ -41,9 +41,9 @@ class SettingsScreenWidgetState extends State<SettingsScreenWidget> {
                 style: theme.textTheme.labelSmall,
               ),
             ),
-            Card(
+            const Card(
               child: Column(children: <Widget>[
-                const SettingsThemeWidget(),
+                SettingsThemeWidget(),
               ]),
             ),
             const SizedBox(
@@ -56,9 +56,9 @@ class SettingsScreenWidgetState extends State<SettingsScreenWidget> {
                 style: theme.textTheme.labelSmall,
               ),
             ),
-            Card(
+            const Card(
               child: Column(children: <Widget>[
-                const SettingsLogoutWidget(),
+                SettingsLogoutWidget(),
               ]),
             ),
           ],
