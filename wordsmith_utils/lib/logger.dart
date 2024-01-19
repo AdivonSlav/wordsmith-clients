@@ -8,7 +8,8 @@ abstract class LogManager {
   static void init(LogLevel rootLevel) {
     Logger.root.level = _getLevel(rootLevel);
     Logger.root.onRecord.listen((record) {
-      print("${record.level.name}: ${record.time}: ${record.message}");
+      print(
+          "${record.time} ${record.loggerName} ${record.level.name}: ${record.message}");
     });
   }
 
