@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:wordsmith_mobile/widgets/ebook_image.dart';
 import 'package:wordsmith_mobile/widgets/input_field.dart';
 import 'package:wordsmith_mobile/widgets/publish_chapters_view.dart';

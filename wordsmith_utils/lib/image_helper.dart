@@ -2,7 +2,6 @@ import "dart:convert";
 import "dart:io";
 import "dart:typed_data";
 import "package:file_selector/file_selector.dart";
-import "package:flutter/widgets.dart";
 import "package:mime/mime.dart";
 import "package:wordsmith_utils/models/image_insert.dart";
 
