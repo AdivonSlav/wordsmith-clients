@@ -32,6 +32,26 @@ class UserLoginProvider extends BaseProvider<UserLogin> {
     }
   }
 
+  Future<UserLogin?> refreshUserLogin() async {
+    var refreshToken = await SecureStore.getValue("refresh_token");
+    var id = await SecureStore.getValue("user_ref_id");
+
+    if (refreshToken == null || id == null) return null;
+
+    Map<String, String> query = {"id": id};
+
+    var result = await get(
+        filter: query, additionalRoute: "/refresh", bearerToken: refreshToken);
+
+    if (result.result[0].accessToken != null &&
+        result.result[0].refreshToken != null) {
+      await storeLogin(loginCreds: result.result[0]);
+      return result.result[0];
+    } else {
+      return null;
+    }
+  }
+
   Future<String?> getAccessToken(BuildContext context) async {
     var accessToken = await SecureStore.getValue("access_token");
 
@@ -73,10 +93,12 @@ class UserLoginProvider extends BaseProvider<UserLogin> {
       String? accessToken = loginCreds.accessToken;
       String? refreshToken = loginCreds.refreshToken;
       int? expiration = loginCreds.expiresIn;
+      int id = loginCreds.user.id;
 
       await SecureStore.writeValue("access_token", accessToken ?? "");
       await SecureStore.writeValue("refresh_token", refreshToken ?? "");
       await SecureStore.writeValue("access_expiration", expiration.toString());
+      await SecureStore.writeValue("user_ref_id", id.toString());
 
       loggedUser = loginCreds.user;
       notifyListeners();
@@ -90,6 +112,7 @@ class UserLoginProvider extends BaseProvider<UserLogin> {
     await SecureStore.deleteValue("access_token");
     await SecureStore.deleteValue("refresh_token");
     await SecureStore.deleteValue("access_expiration");
+    await SecureStore.deleteValue("user_ref_id");
 
     loggedUser = null;
     notifyListeners();

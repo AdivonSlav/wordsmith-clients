@@ -7,6 +7,7 @@ import 'package:wordsmith_mobile/widgets/navigation_bar_error.dart';
 import 'package:wordsmith_mobile/widgets/navigation_bar_loading.dart';
 import 'package:wordsmith_mobile/widgets/navigation_bar_publish.dart';
 import 'package:wordsmith_utils/exceptions/base_exception.dart';
+import 'package:wordsmith_utils/exceptions/unauthorized_exception.dart';
 import 'package:wordsmith_utils/logger.dart';
 import 'package:wordsmith_utils/providers/user_login_provider.dart';
 import 'package:wordsmith_utils/providers/user_provider.dart';
@@ -56,6 +57,24 @@ class NavigationBarWidgetState extends State<NavigationBarWidget> {
       if (loggedUser == null) return;
 
       await _userLoginProvider.storeLogin(user: loggedUser);
+    } on UnauthorizedException {
+      try {
+        _logger.info("Attempting to refresh login session...");
+
+        var refreshedCreds = await _userLoginProvider.refreshUserLogin();
+
+        if (refreshedCreds != null) {
+          _logger.info("Succesfully refreshed login session");
+        } else {
+          _logger.info("Could not refresh login session");
+        }
+      } on BaseException catch (error) {
+        _logger.info(error);
+        _logger.info("Could not refresh login session");
+      } on Exception catch (error) {
+        _logger.severe(error);
+        return Future.error(error.toString());
+      }
     } on BaseException catch (error) {
       _logger.info(error);
     } on Exception catch (error) {

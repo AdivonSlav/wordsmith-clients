@@ -1,6 +1,8 @@
 import "dart:convert";
 import "package:flutter/foundation.dart";
 import "package:wordsmith_utils/exceptions/base_exception.dart";
+import "package:wordsmith_utils/exceptions/forbidden_exception.dart";
+import "package:wordsmith_utils/exceptions/unauthorized_exception.dart";
 import "package:wordsmith_utils/logger.dart";
 import "package:wordsmith_utils/models/query_result.dart";
 import "package:http/http.dart" as http;
@@ -188,9 +190,9 @@ abstract class BaseProvider<T> with ChangeNotifier {
     } else if (response.statusCode == 400) {
       throw BaseException("Bad request: $details");
     } else if (response.statusCode == 401) {
-      throw BaseException("Unauthorized: $details");
+      throw UnauthorizedException("$details");
     } else if (response.statusCode == 403) {
-      throw BaseException("Forbidden: $details");
+      throw ForbiddenException("$details");
     } else {
       _logger.severe(response.body);
       throw BaseException("Something bad happened");
@@ -214,9 +216,9 @@ abstract class BaseProvider<T> with ChangeNotifier {
     } else if (response.statusCode == 400) {
       throw BaseException("Bad request: $details");
     } else if (response.statusCode == 401) {
-      throw BaseException("Unauthorized: $details");
+      throw UnauthorizedException("$details");
     } else if (response.statusCode == 403) {
-      throw BaseException("Forbidden: $details");
+      throw ForbiddenException("$details");
     } else {
       _logger.severe(responseBody);
       throw BaseException("Something bad happened");
