@@ -102,6 +102,7 @@ class LoginScreenWidgetState extends State<LoginScreenWidget> {
                     labelText: "Password",
                     controller: _passwordController,
                     obscureText: _obscuredPassword,
+                    maxLines: 1,
                     validator: validateRequired,
                     suffixIcon: IconButton(
                       onPressed: () {

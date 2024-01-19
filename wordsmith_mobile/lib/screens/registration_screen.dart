@@ -145,6 +145,7 @@ class RegistrationScreenWidgetState extends State<RegistrationScreenWidget> {
                         labelText: "Password",
                         controller: _passwordController,
                         obscureText: _obscuredPassword,
+                        maxLines: 1,
                         validator: validatePassword,
                         suffixIcon: IconButton(
                           onPressed: () {
@@ -168,6 +169,7 @@ class RegistrationScreenWidgetState extends State<RegistrationScreenWidget> {
                         labelText: "Confirm password",
                         controller: _confirmPasswordController,
                         obscureText: true,
+                        maxLines: 1,
                         validator: _validatePasswordConfirmation,
                       ),
                       SizedBox(

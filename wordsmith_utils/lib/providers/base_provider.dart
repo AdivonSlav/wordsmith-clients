@@ -4,6 +4,8 @@ import "package:wordsmith_utils/exceptions/base_exception.dart";
 import "package:wordsmith_utils/logger.dart";
 import "package:wordsmith_utils/models/query_result.dart";
 import "package:http/http.dart" as http;
+import "package:http_parser/http_parser.dart";
+import "package:wordsmith_utils/models/transfer_file.dart";
 
 abstract class BaseProvider<T> with ChangeNotifier {
   static final _logger = LogManager.getLogger("BaseProvider");
@@ -18,6 +20,7 @@ abstract class BaseProvider<T> with ChangeNotifier {
   Future<QueryResult<T>> get(
       {String additionalRoute = "",
       dynamic filter,
+      String contentType = "",
       String bearerToken = ""}) async {
     var url = "$_apiUrl$_endpoint$additionalRoute";
 
@@ -35,7 +38,8 @@ abstract class BaseProvider<T> with ChangeNotifier {
       throw Exception(error);
     }
 
-    var headers = createHeaders(bearerToken: bearerToken);
+    var headers =
+        createHeaders(contentType: contentType, bearerToken: bearerToken);
     var response = await http.get(uri, headers: headers);
     var queryResult = QueryResult<T>();
 
@@ -58,6 +62,7 @@ abstract class BaseProvider<T> with ChangeNotifier {
       {int? id,
       dynamic request,
       String additionalRoute = "",
+      String contentType = "",
       String bearerToken = ""}) async {
     var url = "$_apiUrl$_endpoint$additionalRoute";
     Uri uri;
@@ -71,7 +76,8 @@ abstract class BaseProvider<T> with ChangeNotifier {
       throw Exception(error);
     }
 
-    var headers = createHeaders(bearerToken: bearerToken);
+    var headers =
+        createHeaders(contentType: contentType, bearerToken: bearerToken);
     var jsonRequest = jsonEncode(request);
     var response = await http.put(uri, body: jsonRequest, headers: headers);
 
@@ -86,6 +92,7 @@ abstract class BaseProvider<T> with ChangeNotifier {
   Future<T> post(
       {dynamic request,
       String additionalRoute = "",
+      String contentType = "",
       String bearerToken = ""}) async {
     var url = "$_apiUrl$_endpoint$additionalRoute";
     Uri uri;
@@ -97,12 +104,66 @@ abstract class BaseProvider<T> with ChangeNotifier {
       throw Exception(error);
     }
 
-    var headers = createHeaders(bearerToken: bearerToken);
+    var headers =
+        createHeaders(contentType: contentType, bearerToken: bearerToken);
     var jsonRequest = jsonEncode(request);
     var response = await http.post(uri, body: jsonRequest, headers: headers);
 
     if (isValidResponse(response)) {
       var data = jsonDecode(response.body);
+      return fromJson(data);
+    }
+
+    throw Exception("Unknown error");
+  }
+
+  Future<T> postMultipart(
+      {Map<String, String>? fields,
+      Map<String, TransferFile>? files,
+      String additionalRoute = "",
+      String bearerToken = ""}) async {
+    var url = "$_apiUrl$_endpoint$additionalRoute";
+    Uri uri;
+
+    try {
+      uri = Uri.parse(url);
+    } catch (error) {
+      _logger.severe("Invalid URL: $url");
+      throw Exception(error);
+    }
+
+    var request = http.MultipartRequest('POST', uri);
+
+    if (fields != null) {
+      request.fields.addAll(fields);
+    }
+
+    if (files != null) {
+      files.forEach((fieldName, transferFile) async {
+        MediaType mimeType;
+
+        try {
+          mimeType = MediaType.parse(
+              transferFile.file.mimeType ?? "application/octet-stream");
+        } on FormatException {
+          mimeType = MediaType.parse("application/octet-stream");
+        }
+
+        request.files.add(http.MultipartFile(
+          fieldName,
+          http.ByteStream(transferFile.file.openRead()),
+          await transferFile.file.length(),
+          filename: transferFile.name,
+          contentType: mimeType,
+        ));
+      });
+    }
+
+    var response = await request.send();
+    var responseBody = await isValidStreamedResponse(response);
+
+    if (responseBody != null) {
+      var data = jsonDecode(responseBody);
       return fromJson(data);
     }
 
@@ -136,8 +197,41 @@ abstract class BaseProvider<T> with ChangeNotifier {
     }
   }
 
-  Map<String, String> createHeaders({String bearerToken = ""}) {
-    Map<String, String> headers = {"Content-Type": "application/json"};
+  Future<String?> isValidStreamedResponse(
+      http.StreamedResponse response) async {
+    String? details;
+
+    String responseBody = await response.stream.bytesToString();
+
+    if (responseBody.isNotEmpty) {
+      details = jsonDecode(responseBody)["detail"];
+    } else {
+      details = response.reasonPhrase;
+    }
+
+    if (response.statusCode < 299) {
+      return responseBody;
+    } else if (response.statusCode == 400) {
+      throw BaseException("Bad request: $details");
+    } else if (response.statusCode == 401) {
+      throw BaseException("Unauthorized: $details");
+    } else if (response.statusCode == 403) {
+      throw BaseException("Forbidden: $details");
+    } else {
+      _logger.severe(responseBody);
+      throw BaseException("Something bad happened");
+    }
+  }
+
+  Map<String, String> createHeaders(
+      {String contentType = "", String bearerToken = ""}) {
+    Map<String, String> headers = {};
+
+    if (contentType.isNotEmpty) {
+      headers["Content-Type"] = contentType;
+    } else {
+      headers["Content-Type"] = "application/json";
+    }
 
     if (bearerToken.isNotEmpty) {
       headers["Authorization"] = "Bearer $bearerToken";

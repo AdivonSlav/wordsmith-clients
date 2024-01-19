@@ -5,6 +5,7 @@ import 'package:wordsmith_mobile/screens/profile_screen.dart';
 import 'package:wordsmith_mobile/widgets/app_bar_settings_trailing.dart';
 import 'package:wordsmith_mobile/widgets/navigation_bar_error.dart';
 import 'package:wordsmith_mobile/widgets/navigation_bar_loading.dart';
+import 'package:wordsmith_mobile/widgets/navigation_bar_publish.dart';
 import 'package:wordsmith_utils/exceptions/base_exception.dart';
 import 'package:wordsmith_utils/logger.dart';
 import 'package:wordsmith_utils/providers/user_login_provider.dart';
@@ -126,6 +127,11 @@ class NavigationBarWidgetState extends State<NavigationBarWidget> {
                   Expanded(child: _page),
                 ],
               ),
+              floatingActionButton: UserLoginProvider.loggedUser == null
+                  ? null
+                  : const NavigationBarPublishWidget(),
+              floatingActionButtonLocation:
+                  FloatingActionButtonLocation.centerDocked,
             );
           },
         );
