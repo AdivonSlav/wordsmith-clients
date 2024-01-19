@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:wordsmith_mobile/widgets/ebook_image.dart';
 import 'package:wordsmith_mobile/widgets/input_field.dart';
 import 'package:wordsmith_mobile/widgets/publish_chapters_view.dart';
@@ -26,6 +27,9 @@ class _PublishEditWidgetState extends State<PublishEditWidget> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
+
+  final _titleMaxLength = 40;
+  final _descriptionMaxLength = 800;
 
   @override
   Widget build(BuildContext context) {
@@ -58,6 +62,7 @@ class _PublishEditWidgetState extends State<PublishEditWidget> {
                     labelText: "Title",
                     controller: _titleController,
                     obscureText: false,
+                    maxLength: _titleMaxLength,
                   ),
                   const SizedBox(
                     height: 20.0,
@@ -66,6 +71,7 @@ class _PublishEditWidgetState extends State<PublishEditWidget> {
                     labelText: "Description",
                     controller: _descriptionController,
                     obscureText: false,
+                    maxLength: _descriptionMaxLength,
                   ),
                   const SizedBox(
                     height: 20.0,
