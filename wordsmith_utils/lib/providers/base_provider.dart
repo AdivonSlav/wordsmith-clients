@@ -21,6 +21,14 @@ abstract class BaseProvider<T> extends AuthProvider {
     _apiUrl = const String.fromEnvironment("API_URL");
   }
 
+  /// Makes an HTTP GET request
+  ///
+  /// Parameters:
+  /// - [filter]: The parameters that should be formatted as query string for the request
+  /// - [additionalRoute]: A route to append to the endpoint configured for the provider
+  /// - [contentType]: Content type of the request. Defaults to application/json
+  /// - [bearerToken]: Bearer token if the request needs to be authorized
+  /// - [retryForRefresh]: If set to true and status 401 is the initial response, the provider will attempt to refresh the access token and attempt the request again
   Future<QueryResult<T>> get(
       {String additionalRoute = "",
       dynamic filter,
@@ -47,6 +55,7 @@ abstract class BaseProvider<T> extends AuthProvider {
         createHeaders(contentType: contentType, bearerToken: bearerToken);
     var response = await http.get(uri, headers: headers);
 
+    // If retrying is enabled and status 401 is returned, attempt to refresh the access token and send the request again
     if (retryForRefresh == true && response.statusCode == 401) {
       var success = await attemptTokenRefresh();
 
@@ -75,6 +84,15 @@ abstract class BaseProvider<T> extends AuthProvider {
     return queryResult;
   }
 
+  /// Makes an HTTP PUT request
+  ///
+  /// Parameters:
+  /// - [id]: Optional id of the entity being updated
+  /// - [request]: The body of the request
+  /// - [additionalRoute]: A route to append to the endpoint configured for the provider
+  /// - [contentType]: Content type of the request. Defaults to application/json
+  /// - [bearerToken]: Bearer token if the request needs to be authorized
+  /// - [retryForRefresh]: If set to true and status 401 is the initial response, the provider will attempt to refresh the access token and attempt the request again
   Future<T> put(
       {int? id,
       dynamic request,
@@ -99,6 +117,7 @@ abstract class BaseProvider<T> extends AuthProvider {
     var jsonRequest = jsonEncode(request);
     var response = await http.put(uri, body: jsonRequest, headers: headers);
 
+    // If retrying is enabled and status 401 is returned, attempt to refresh the access token and send the request again
     if (retryForRefresh == true && response.statusCode == 401) {
       var success = await attemptTokenRefresh();
 
@@ -118,6 +137,14 @@ abstract class BaseProvider<T> extends AuthProvider {
     throw Exception("Unknown error");
   }
 
+  /// Makes an HTTP POST request
+  ///
+  /// Parameters:
+  /// - [request]: The body of the request
+  /// - [additionalRoute]: A route to append to the endpoint configured for the provider
+  /// - [contentType]: Content type of the request. Defaults to application/json
+  /// - [bearerToken]: Bearer token if the request needs to be authorized
+  /// - [retryForRefresh]: If set to true and status 401 is the initial response, the provider will attempt to refresh the access token and attempt the request again
   Future<T> post(
       {dynamic request,
       String additionalRoute = "",
@@ -139,6 +166,7 @@ abstract class BaseProvider<T> extends AuthProvider {
     var jsonRequest = jsonEncode(request);
     var response = await http.post(uri, body: jsonRequest, headers: headers);
 
+    // If retrying is enabled and status 401 is returned, attempt to refresh the access token and send the request again
     if (retryForRefresh == true && response.statusCode == 401) {
       var success = await attemptTokenRefresh();
 
@@ -158,6 +186,14 @@ abstract class BaseProvider<T> extends AuthProvider {
     throw Exception("Unknown error");
   }
 
+  /// Makes a multipart HTTP POST request
+  ///
+  /// Parameters:
+  /// - [fields]: A map of fields in the multipart request.
+  /// - [files]: A map of files in the multipart request.
+  /// - [additionalRoute]: A route to append to the endpoint configured for the provider
+  /// - [bearerToken]: Bearer token if the request needs to be authorized
+  /// - [retryForRefresh]: If set to true and status 401 is the initial response, the provider will attempt to refresh the access token and attempt the request again
   Future<T> postMultipart(
       {Map<String, String>? fields,
       Map<String, TransferFile>? files,
@@ -207,6 +243,7 @@ abstract class BaseProvider<T> extends AuthProvider {
 
     var response = await request.send();
 
+    // If retrying is enabled and status 401 is returned, attempt to refresh the access token and send the request again
     if (retryForRefresh == true && response.statusCode == 401) {
       var success = await attemptTokenRefresh();
 
@@ -232,6 +269,9 @@ abstract class BaseProvider<T> extends AuthProvider {
     throw UnimplementedError();
   }
 
+  /// Checks what status the Response returned
+  ///
+  /// If the response is >=299, an exception is thrown depending on the status which should be handled externally
   bool isValidResponse(http.Response response) {
     String? details;
 
@@ -255,6 +295,9 @@ abstract class BaseProvider<T> extends AuthProvider {
     }
   }
 
+  /// Checks what status the StreamedResponse returned
+  ///
+  /// If the response is >=299, an exception is thrown depending on the status which should be handled externally
   Future<String?> isValidStreamedResponse(
       http.StreamedResponse response) async {
     String? details;
@@ -281,6 +324,11 @@ abstract class BaseProvider<T> extends AuthProvider {
     }
   }
 
+  /// Attempts to retrieve a new access token using the stored refresh token
+  ///
+  /// Returns true if new access credentials were stored
+  ///
+  /// If the token cannot be refreshed, all stored credentials are deleted and the login session is considered terminated
   Future<bool> attemptTokenRefresh() async {
     var refreshToken = await SecureStore.getValue("refresh_token");
     Map<String, String> query = {
@@ -325,6 +373,9 @@ abstract class BaseProvider<T> extends AuthProvider {
     return true;
   }
 
+  /// Creates HTTP headers for content type and authorization
+  ///
+  /// Defaults to application/json if not specified
   Map<String, String> createHeaders(
       {String contentType = "", String bearerToken = ""}) {
     Map<String, String> headers = {};
@@ -342,6 +393,7 @@ abstract class BaseProvider<T> extends AuthProvider {
     return headers;
   }
 
+  /// Constructs a query string for requests using the passed map
   String getQueryString(Map params,
       {String prefix = "&", bool inRecursion = false}) {
     String query = "";
