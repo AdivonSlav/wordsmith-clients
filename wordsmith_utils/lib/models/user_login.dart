@@ -7,7 +7,7 @@ part "user_login.g.dart";
 class UserLogin {
   final String? accessToken;
   final String? refreshToken;
-  final int? expiresIn;
+  final DateTime? expiresIn;
   final User user;
 
   UserLogin(this.accessToken, this.refreshToken, this.expiresIn, this.user);

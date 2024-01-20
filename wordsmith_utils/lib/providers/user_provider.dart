@@ -12,14 +12,12 @@ class UserProvider extends BaseProvider<User> {
     return result;
   }
 
-  Future<User?> getLoggedUser() async {
+  Future<User> getLoggedUser() async {
     String? accessToken = await SecureStore.getValue("access_token");
     //String? expiration = await SecureStore.getValue("access_expiration"); // The expiration can also be retrieved if necessary
 
-    if (accessToken == null || accessToken.isEmpty) return null;
-
     var result =
-        await get(additionalRoute: "/profile", bearerToken: accessToken);
+        await get(additionalRoute: "/profile", bearerToken: accessToken ?? "");
 
     return result.result[0];
   }

@@ -7,11 +7,8 @@ import "package:wordsmith_admin_panel/screens/reports_screen.dart";
 import "package:wordsmith_admin_panel/widgets/dashboard_error.dart";
 import "package:wordsmith_admin_panel/widgets/dashboard_loading.dart";
 import "package:wordsmith_admin_panel/widgets/dashboard_trailing.dart";
-import "package:wordsmith_utils/exceptions/base_exception.dart";
-import "package:wordsmith_utils/exceptions/unauthorized_exception.dart";
 import "package:wordsmith_utils/logger.dart";
 import "package:wordsmith_utils/providers/user_login_provider.dart";
-import "package:wordsmith_utils/providers/user_provider.dart";
 
 class DashboardWidget extends StatefulWidget {
   final Widget? title;
@@ -28,7 +25,6 @@ class _DashboardWidgetState extends State<DashboardWidget> {
   late Widget _page;
   final bool _extended = false;
   final NavigationRailLabelType _labelType = NavigationRailLabelType.selected;
-  late UserProvider _userProvider;
   late UserLoginProvider _userLoginProvider;
 
   List<NavigationRailDestination> _loadNavDestinations() {
@@ -43,41 +39,11 @@ class _DashboardWidgetState extends State<DashboardWidget> {
   }
 
   Future<dynamic> _checkLogin() async {
-    try {
-      var loggedUser = await _userProvider.getLoggedUser();
-
-      if (loggedUser == null) return;
-
-      await _userLoginProvider.storeLogin(user: loggedUser);
-    } on UnauthorizedException {
-      try {
-        _logger.info("Attempting to refresh login session...");
-
-        var refreshedCreds = await _userLoginProvider.refreshUserLogin();
-
-        if (refreshedCreds != null) {
-          _logger.info("Succesfully refreshed login session");
-        } else {
-          _logger.info("Could not refresh login session");
-        }
-      } on BaseException catch (error) {
-        _logger.info(error);
-        _logger.info("Could not refresh login session");
-      } on Exception catch (error) {
-        _logger.severe(error);
-        return Future.error(error.toString());
-      }
-    } on BaseException catch (error) {
-      _logger.info(error);
-    } on Exception catch (error) {
-      _logger.severe(error);
-      return Future.error(error.toString());
-    }
+    await _userLoginProvider.validateUserLogin();
   }
 
   @override
   Widget build(BuildContext context) {
-    _userProvider = context.read<UserProvider>();
     _userLoginProvider = context.read<UserLoginProvider>();
 
     return FutureBuilder<dynamic>(
