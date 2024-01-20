@@ -19,6 +19,7 @@ class NavigationBarWidget extends StatefulWidget {
 class NavigationBarWidgetState extends State<NavigationBarWidget> {
   final _logger = LogManager.getLogger("NavigationBar");
 
+  late Future<dynamic> _checkLogin;
   late UserLoginProvider _userLoginProvider;
 
   int _selectedIndex = 0;
@@ -46,16 +47,17 @@ class NavigationBarWidgetState extends State<NavigationBarWidget> {
     }
   }
 
-  Future<dynamic> _checkLogin() async {
-    await _userLoginProvider.validateUserLogin();
+  @override
+  void initState() {
+    _userLoginProvider = context.read<UserLoginProvider>();
+    _checkLogin = _userLoginProvider.validateUserLogin();
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    _userLoginProvider = context.read<UserLoginProvider>();
-
     return FutureBuilder(
-      future: _checkLogin(),
+      future: _checkLogin,
       builder: (context, AsyncSnapshot<dynamic> snapshot) {
         final String appBarTitle = _loadAppBarTitle(_selectedIndex);
 
