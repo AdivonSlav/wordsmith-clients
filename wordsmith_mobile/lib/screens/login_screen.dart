@@ -5,6 +5,7 @@ import 'package:wordsmith_utils/dialogs.dart';
 import 'package:wordsmith_utils/exceptions/base_exception.dart';
 import 'package:wordsmith_utils/logger.dart';
 import 'package:wordsmith_utils/models/user_login.dart';
+import 'package:wordsmith_utils/providers/auth_provider.dart';
 import 'package:wordsmith_utils/providers/user_login_provider.dart';
 import 'package:wordsmith_utils/size_config.dart';
 import 'package:wordsmith_utils/validators.dart';
@@ -23,6 +24,7 @@ class LoginScreenWidgetState extends State<LoginScreenWidget> {
   final _passwordController = TextEditingController(text: "");
 
   late UserLoginProvider _userLoginProvider;
+  late AuthProvider _authProvider;
 
   bool _obscuredPassword = true;
   bool _loginInProgress = false;
@@ -70,6 +72,7 @@ class LoginScreenWidgetState extends State<LoginScreenWidget> {
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
     _userLoginProvider = context.read<UserLoginProvider>();
+    _authProvider = context.read<AuthProvider>();
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -140,6 +143,9 @@ class LoginScreenWidgetState extends State<LoginScreenWidget> {
                                 _logger.info(
                                     "Logged in with access token ${loginCreds.accessToken}");
                                 _toggleLoginInProgress();
+
+                                await _authProvider.storeLogin(
+                                    loginCreds: loginCreds);
 
                                 if (context.mounted) {
                                   Navigator.of(context).pop();

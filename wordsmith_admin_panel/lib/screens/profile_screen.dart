@@ -9,6 +9,7 @@ import "package:wordsmith_utils/exceptions/base_exception.dart";
 import "package:wordsmith_utils/image_helper.dart";
 import "package:wordsmith_utils/logger.dart";
 import "package:wordsmith_utils/models/user_update.dart";
+import "package:wordsmith_utils/providers/auth_provider.dart";
 import "package:wordsmith_utils/providers/user_login_provider.dart";
 import "package:wordsmith_utils/providers/user_provider.dart";
 import "package:wordsmith_utils/size_config.dart";
@@ -108,7 +109,7 @@ class _ProfileScreenWidgetState extends State<ProfileScreenWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (UserLoginProvider.loggedUser == null) return const Placeholder();
+    if (AuthProvider.loggedUser == null) return const Placeholder();
 
     _userProvider = context.read<UserProvider>();
     _userLoginProvider = context.read<UserLoginProvider>();
@@ -121,20 +122,20 @@ class _ProfileScreenWidgetState extends State<ProfileScreenWidget> {
           children: <Widget>[
             ProfileImageWidget(
               profileImagePath:
-                  UserLoginProvider.loggedUser!.profileImage?.imagePath,
+                  AuthProvider.loggedUser!.profileImage?.imagePath,
               callbackFunction: _updateProfileImage,
             ),
             SizedBox(height: SizeConfig.safeBlockVertical * 3.0),
             ProfileInfoFieldWidget(
               labelText: "Username",
-              valueText: UserLoginProvider.loggedUser!.username,
+              valueText: AuthProvider.loggedUser!.username,
               controller: widget._usernameController,
               callbackFunction: _updateProfile,
             ),
             SizedBox(height: SizeConfig.safeBlockVertical * 1.5),
             ProfileInfoFieldWidget(
               labelText: "Email",
-              valueText: UserLoginProvider.loggedUser!.email,
+              valueText: AuthProvider.loggedUser!.email,
               controller: widget._emailController,
               callbackFunction: _updateProfile,
             )

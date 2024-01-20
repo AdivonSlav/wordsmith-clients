@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:provider/provider.dart";
+import "package:wordsmith_utils/providers/auth_provider.dart";
 import "package:wordsmith_utils/size_config.dart";
 import "package:wordsmith_admin_panel/widgets/input_field.dart";
 import "package:wordsmith_utils/dialogs.dart";
@@ -24,7 +25,10 @@ class _LoginScreenWidgetState extends State<LoginScreenWidget> {
       TextEditingController(text: "");
   final TextEditingController _passwordController =
       TextEditingController(text: "");
+
   late UserLoginProvider _userLoginProvider;
+  late AuthProvider _authProvider;
+
   bool _obscuredPassword = true;
   bool _loginInProgress = false;
 
@@ -77,6 +81,7 @@ class _LoginScreenWidgetState extends State<LoginScreenWidget> {
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
     _userLoginProvider = context.read<UserLoginProvider>();
+    _authProvider = context.read<AuthProvider>();
 
     return SingleChildScrollView(
       child: Padding(
@@ -130,6 +135,11 @@ class _LoginScreenWidgetState extends State<LoginScreenWidget> {
                                 if (loginCreds != null) {
                                   _logger.info(
                                       "Logged in with access token ${loginCreds.accessToken}");
+
+                                  _toggleLoginInProgress();
+
+                                  await _authProvider.storeLogin(
+                                      loginCreds: loginCreds);
                                 }
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(

@@ -1,5 +1,4 @@
 import "dart:convert";
-import "package:flutter/foundation.dart";
 import "package:wordsmith_utils/exceptions/base_exception.dart";
 import "package:wordsmith_utils/exceptions/forbidden_exception.dart";
 import "package:wordsmith_utils/exceptions/unauthorized_exception.dart";
@@ -8,8 +7,11 @@ import "package:wordsmith_utils/models/query_result.dart";
 import "package:http/http.dart" as http;
 import "package:http_parser/http_parser.dart";
 import "package:wordsmith_utils/models/transfer_file.dart";
+import "package:wordsmith_utils/models/user_login.dart";
+import "package:wordsmith_utils/providers/auth_provider.dart";
+import "package:wordsmith_utils/secure_store.dart";
 
-abstract class BaseProvider<T> with ChangeNotifier {
+abstract class BaseProvider<T> extends AuthProvider {
   static final _logger = LogManager.getLogger("BaseProvider");
   String _endpoint = "";
   static String? _apiUrl;
@@ -23,7 +25,8 @@ abstract class BaseProvider<T> with ChangeNotifier {
       {String additionalRoute = "",
       dynamic filter,
       String contentType = "",
-      String bearerToken = ""}) async {
+      String bearerToken = "",
+      bool retryForRefresh = false}) async {
     var url = "$_apiUrl$_endpoint$additionalRoute";
 
     if (filter != null) {
@@ -43,6 +46,18 @@ abstract class BaseProvider<T> with ChangeNotifier {
     var headers =
         createHeaders(contentType: contentType, bearerToken: bearerToken);
     var response = await http.get(uri, headers: headers);
+
+    if (retryForRefresh == true && response.statusCode == 401) {
+      var success = await attemptTokenRefresh();
+
+      if (success == true) {
+        bearerToken = await SecureStore.getValue("access_token") ?? "";
+        response = await http.get(uri, headers: headers);
+      } else {
+        throw UnauthorizedException("Failed despite a token refresh attempt");
+      }
+    }
+
     var queryResult = QueryResult<T>();
 
     if (isValidResponse(response)) {
@@ -65,7 +80,8 @@ abstract class BaseProvider<T> with ChangeNotifier {
       dynamic request,
       String additionalRoute = "",
       String contentType = "",
-      String bearerToken = ""}) async {
+      String bearerToken = "",
+      bool retryForRefresh = false}) async {
     var url = "$_apiUrl$_endpoint$additionalRoute";
     Uri uri;
 
@@ -83,6 +99,17 @@ abstract class BaseProvider<T> with ChangeNotifier {
     var jsonRequest = jsonEncode(request);
     var response = await http.put(uri, body: jsonRequest, headers: headers);
 
+    if (retryForRefresh == true && response.statusCode == 401) {
+      var success = await attemptTokenRefresh();
+
+      if (success == true) {
+        bearerToken = await SecureStore.getValue("access_token") ?? "";
+        response = await http.put(uri, body: jsonRequest, headers: headers);
+      } else {
+        throw UnauthorizedException("Failed despite a token refresh attempt");
+      }
+    }
+
     if (isValidResponse(response)) {
       var data = jsonDecode(response.body);
       return fromJson(data);
@@ -95,7 +122,8 @@ abstract class BaseProvider<T> with ChangeNotifier {
       {dynamic request,
       String additionalRoute = "",
       String contentType = "",
-      String bearerToken = ""}) async {
+      String bearerToken = "",
+      bool retryForRefresh = false}) async {
     var url = "$_apiUrl$_endpoint$additionalRoute";
     Uri uri;
 
@@ -111,6 +139,17 @@ abstract class BaseProvider<T> with ChangeNotifier {
     var jsonRequest = jsonEncode(request);
     var response = await http.post(uri, body: jsonRequest, headers: headers);
 
+    if (retryForRefresh == true && response.statusCode == 401) {
+      var success = await attemptTokenRefresh();
+
+      if (success == true) {
+        bearerToken = await SecureStore.getValue("access_token") ?? "";
+        response = await http.post(uri, body: jsonRequest, headers: headers);
+      } else {
+        throw UnauthorizedException("Failed despite a token refresh attempt");
+      }
+    }
+
     if (isValidResponse(response)) {
       var data = jsonDecode(response.body);
       return fromJson(data);
@@ -123,7 +162,8 @@ abstract class BaseProvider<T> with ChangeNotifier {
       {Map<String, String>? fields,
       Map<String, TransferFile>? files,
       String additionalRoute = "",
-      String bearerToken = ""}) async {
+      String bearerToken = "",
+      bool retryForRefresh = false}) async {
     var url = "$_apiUrl$_endpoint$additionalRoute";
     Uri uri;
 
@@ -162,6 +202,18 @@ abstract class BaseProvider<T> with ChangeNotifier {
     }
 
     var response = await request.send();
+
+    if (retryForRefresh == true && response.statusCode == 401) {
+      var success = await attemptTokenRefresh();
+
+      if (success == true) {
+        bearerToken = await SecureStore.getValue("access_token") ?? "";
+        response = await request.send();
+      } else {
+        throw UnauthorizedException("Failed despite a token refresh attempt");
+      }
+    }
+
     var responseBody = await isValidStreamedResponse(response);
 
     if (responseBody != null) {
@@ -223,6 +275,50 @@ abstract class BaseProvider<T> with ChangeNotifier {
       _logger.severe(responseBody);
       throw BaseException("Something bad happened");
     }
+  }
+
+  Future<bool> attemptTokenRefresh() async {
+    var refreshToken = await SecureStore.getValue("refresh_token");
+    Map<String, String> query = {
+      "id": await SecureStore.getValue("user_ref_id") ?? ""
+    };
+
+    var headers = createHeaders(bearerToken: refreshToken ?? "");
+    var queryString = getQueryString(query);
+    var url = Uri.parse("${_apiUrl}users/login/refresh?$queryString");
+
+    var refreshResponse = await http.get(url, headers: headers);
+    var refreshResult = QueryResult<UserLogin>();
+
+    try {
+      if (isValidResponse(refreshResponse)) {
+        var data = jsonDecode(refreshResponse.body);
+
+        refreshResult.page = data["page"];
+        refreshResult.totalCount = data["totalCount"];
+        refreshResult.totalPages = data["totalPages"];
+
+        for (var item in data["result"]) {
+          refreshResult.result.add(UserLogin.fromJson(item));
+        }
+
+        if (refreshResult.result[0].accessToken != null) {
+          await storeLogin(
+              loginCreds: refreshResult.result[0], shouldNotify: false);
+          return true;
+        }
+      }
+    } on BaseException {
+      _logger.info("Could not refresh token");
+      await eraseLogin();
+      return false;
+    } on Exception catch (error) {
+      _logger.severe(error);
+      await eraseLogin();
+      return false;
+    }
+
+    return true;
   }
 
   Map<String, String> createHeaders(

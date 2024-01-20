@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import "package:provider/provider.dart";
 import "package:wordsmith_utils/popup_menu.dart";
+import "package:wordsmith_utils/providers/auth_provider.dart";
 import "package:wordsmith_utils/providers/user_login_provider.dart";
 
 class DashboardTrailingWidget extends StatefulWidget {
@@ -11,20 +12,20 @@ class DashboardTrailingWidget extends StatefulWidget {
 }
 
 class _DashboardTrailingState extends State<DashboardTrailingWidget> {
-  late UserLoginProvider _userLoginProvider;
+  late AuthProvider _authProvider;
 
   @override
   Widget build(BuildContext context) {
-    _userLoginProvider = context.read<UserLoginProvider>();
+    _authProvider = context.read<AuthProvider>();
 
     return Consumer<UserLoginProvider>(
       builder: (context, provider, child) {
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 14.0, horizontal: 32.0),
-          child: UserLoginProvider.loggedUser != null
+          child: AuthProvider.loggedUser != null
               ? Row(
                   children: <Widget>[
-                    Text(UserLoginProvider.loggedUser?.username ?? ""),
+                    Text(AuthProvider.loggedUser?.username ?? ""),
                     const SizedBox(
                       width: 8.0,
                     ),
@@ -35,7 +36,7 @@ class _DashboardTrailingState extends State<DashboardTrailingWidget> {
                             value: "logout",
                             child: const Text("Logout"),
                             onTap: () {
-                              _userLoginProvider.eraseLogin();
+                              _authProvider.eraseLogin();
                             },
                           )
                         ]);

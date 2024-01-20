@@ -14,10 +14,12 @@ class UserProvider extends BaseProvider<User> {
 
   Future<User> getLoggedUser() async {
     String? accessToken = await SecureStore.getValue("access_token");
-    //String? expiration = await SecureStore.getValue("access_expiration"); // The expiration can also be retrieved if necessary
 
-    var result =
-        await get(additionalRoute: "/profile", bearerToken: accessToken ?? "");
+    var result = await get(
+      additionalRoute: "/profile",
+      bearerToken: accessToken ?? "",
+      retryForRefresh: true,
+    );
 
     return result.result[0];
   }

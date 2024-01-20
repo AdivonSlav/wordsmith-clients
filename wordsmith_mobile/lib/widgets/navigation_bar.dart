@@ -6,8 +6,10 @@ import 'package:wordsmith_mobile/widgets/app_bar_settings_trailing.dart';
 import 'package:wordsmith_mobile/widgets/navigation_bar_error.dart';
 import 'package:wordsmith_mobile/widgets/navigation_bar_loading.dart';
 import 'package:wordsmith_mobile/widgets/navigation_bar_publish.dart';
+import 'package:wordsmith_utils/exceptions/base_exception.dart';
 import 'package:wordsmith_utils/logger.dart';
-import 'package:wordsmith_utils/providers/user_login_provider.dart';
+import 'package:wordsmith_utils/providers/auth_provider.dart';
+import 'package:wordsmith_utils/providers/user_provider.dart';
 
 class NavigationBarWidget extends StatefulWidget {
   const NavigationBarWidget({super.key});
@@ -19,8 +21,9 @@ class NavigationBarWidget extends StatefulWidget {
 class NavigationBarWidgetState extends State<NavigationBarWidget> {
   final _logger = LogManager.getLogger("NavigationBar");
 
-  late Future<dynamic> _checkLogin;
-  late UserLoginProvider _userLoginProvider;
+  late Future<dynamic> _checkLoggedUserFuture;
+  late UserProvider _userProvider;
+  late AuthProvider _authProvider;
 
   int _selectedIndex = 0;
   late Widget _page;
@@ -47,17 +50,32 @@ class NavigationBarWidgetState extends State<NavigationBarWidget> {
     }
   }
 
+  Future<dynamic> _checkLoggedUser() async {
+    try {
+      var loggedUser = await _userProvider.getLoggedUser();
+      await _authProvider.storeLogin(user: loggedUser);
+    } on BaseException catch (error) {
+      _logger.info(error);
+    } on Exception catch (error) {
+      _logger.severe(error);
+      return Future.error(error);
+    }
+  }
+
   @override
   void initState() {
-    _userLoginProvider = context.read<UserLoginProvider>();
-    _checkLogin = _userLoginProvider.validateUserLogin();
+    _userProvider = context.read<UserProvider>();
+    _authProvider = context.read<AuthProvider>();
+
+    _checkLoggedUserFuture = _checkLoggedUser();
+
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: _checkLogin,
+      future: _checkLoggedUserFuture,
       builder: (context, AsyncSnapshot<dynamic> snapshot) {
         final String appBarTitle = _loadAppBarTitle(_selectedIndex);
 
@@ -69,16 +87,15 @@ class NavigationBarWidgetState extends State<NavigationBarWidget> {
           return NavigationBarErrorWidget(title: Text(appBarTitle));
         }
 
-        return Consumer<UserLoginProvider>(
+        return Consumer<AuthProvider>(
           builder: (context, provider, child) {
-            if (UserLoginProvider.loggedUser != null) {
+            if (AuthProvider.loggedUser != null) {
               switch (_selectedIndex) {
                 case 0:
                   _page = const Placeholder();
                   break;
                 case 1:
-                  _page =
-                      ProfileScreenWidget(user: UserLoginProvider.loggedUser!);
+                  _page = ProfileScreenWidget(user: AuthProvider.loggedUser!);
                   break;
                 default:
                   throw UnimplementedError("No widget for $_selectedIndex");
@@ -89,7 +106,7 @@ class NavigationBarWidgetState extends State<NavigationBarWidget> {
             }
 
             return Scaffold(
-              appBar: UserLoginProvider.loggedUser == null
+              appBar: AuthProvider.loggedUser == null
                   ? null
                   : AppBar(
                       title: Text(appBarTitle),
@@ -97,7 +114,7 @@ class NavigationBarWidgetState extends State<NavigationBarWidget> {
                           ? [const AppBarSettingsTrailingWidget()]
                           : null,
                     ),
-              bottomNavigationBar: UserLoginProvider.loggedUser == null
+              bottomNavigationBar: AuthProvider.loggedUser == null
                   ? null
                   : NavigationBar(
                       onDestinationSelected: (int index) {
@@ -114,7 +131,7 @@ class NavigationBarWidgetState extends State<NavigationBarWidget> {
                   Expanded(child: _page),
                 ],
               ),
-              floatingActionButton: UserLoginProvider.loggedUser == null
+              floatingActionButton: AuthProvider.loggedUser == null
                   ? null
                   : const NavigationBarPublishWidget(),
               floatingActionButtonLocation:

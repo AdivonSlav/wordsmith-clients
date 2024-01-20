@@ -6,6 +6,7 @@ import 'package:wordsmith_utils/exceptions/base_exception.dart';
 import 'package:wordsmith_utils/logger.dart';
 import 'package:wordsmith_utils/models/ebook_parse.dart';
 import 'package:wordsmith_utils/providers/ebook_parse_provider.dart';
+import 'package:wordsmith_utils/providers/user_login_provider.dart';
 import 'package:wordsmith_utils/size_config.dart';
 
 class PublishUploadWidget extends StatelessWidget {
@@ -20,6 +21,7 @@ class PublishUploadWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final logger = LogManager.getLogger("PublishUploadWidget");
     final eBookParseProvider = context.read<EBookParseProvider>();
+    final userLoginProvider = context.read<UserLoginProvider>();
 
     return Center(
       child: Row(

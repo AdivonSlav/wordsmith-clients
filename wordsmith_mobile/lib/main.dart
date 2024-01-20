@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:wordsmith_mobile/widgets/navigation_bar.dart';
 import 'package:wordsmith_utils/datetime_formatter.dart';
 import 'package:wordsmith_utils/logger.dart';
+import 'package:wordsmith_utils/providers/auth_provider.dart';
 import 'package:wordsmith_utils/providers/ebook_parse_provider.dart';
 import 'package:wordsmith_utils/providers/user_login_provider.dart';
 import 'package:wordsmith_utils/providers/user_provider.dart';
@@ -40,6 +41,9 @@ void main() {
 
   runApp(MultiProvider(
     providers: [
+      ChangeNotifierProvider(
+        create: (_) => AuthProvider(),
+      ),
       ChangeNotifierProvider(
         create: (_) => UserLoginProvider(),
       ),
