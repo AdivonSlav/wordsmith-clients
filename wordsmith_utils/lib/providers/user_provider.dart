@@ -1,5 +1,6 @@
 import "package:wordsmith_utils/models/user.dart";
 import "package:wordsmith_utils/models/user_insert.dart";
+import "package:wordsmith_utils/models/user_update.dart";
 import "package:wordsmith_utils/providers/base_provider.dart";
 import "package:wordsmith_utils/secure_store.dart";
 
@@ -22,6 +23,19 @@ class UserProvider extends BaseProvider<User> {
     );
 
     return result.result[0];
+  }
+
+  Future<User> updateLoggeduser(UserUpdate update) async {
+    String? accessToken = await SecureStore.getValue("access_token");
+
+    var result = await put(
+      request: update,
+      additionalRoute: "/profile",
+      bearerToken: accessToken ?? "",
+      retryForRefresh: true,
+    );
+
+    return result;
   }
 
   @override

@@ -10,7 +10,6 @@ import "package:wordsmith_utils/image_helper.dart";
 import "package:wordsmith_utils/logger.dart";
 import "package:wordsmith_utils/models/user_update.dart";
 import "package:wordsmith_utils/providers/auth_provider.dart";
-import "package:wordsmith_utils/providers/user_login_provider.dart";
 import "package:wordsmith_utils/providers/user_provider.dart";
 import "package:wordsmith_utils/size_config.dart";
 
@@ -27,7 +26,7 @@ class ProfileScreenWidget extends StatefulWidget {
 class _ProfileScreenWidgetState extends State<ProfileScreenWidget> {
   final Logger _logger = LogManager.getLogger("ProfileScreen");
   late UserProvider _userProvider;
-  late UserLoginProvider _userLoginProvider;
+  late AuthProvider _authProvider;
 
   Future _updateProfile() async {
     String newUsername = widget._usernameController.text;
@@ -37,17 +36,11 @@ class _ProfileScreenWidgetState extends State<ProfileScreenWidget> {
       username: newUsername.isEmpty ? null : newUsername,
       email: newEmail.isEmpty ? null : newEmail,
     );
-    var bearerToken = await _userLoginProvider.getAccessToken(context);
-
-    if (bearerToken == null) return;
 
     try {
-      var result = await _userProvider.put(
-          additionalRoute: "/profile",
-          request: payload,
-          bearerToken: bearerToken);
+      var result = await _userProvider.updateLoggeduser(payload);
 
-      await _userLoginProvider.storeLogin(user: result);
+      await _authProvider.storeLogin(user: result);
     } on BaseException catch (error) {
       if (context.mounted) {
         await showErrorDialog(
@@ -64,10 +57,6 @@ class _ProfileScreenWidgetState extends State<ProfileScreenWidget> {
   }
 
   Future _updateProfileImage(XFile file) async {
-    var bearerToken = await _userLoginProvider.getAccessToken(context);
-
-    if (bearerToken == null) return null;
-
     if (!await ImageHelper.verifySize(file)) {
       if (context.mounted) {
         await showErrorDialog(
@@ -112,7 +101,7 @@ class _ProfileScreenWidgetState extends State<ProfileScreenWidget> {
     if (AuthProvider.loggedUser == null) return const Placeholder();
 
     _userProvider = context.read<UserProvider>();
-    _userLoginProvider = context.read<UserLoginProvider>();
+    _authProvider = context.read<AuthProvider>();
 
     return SingleChildScrollView(
       child: Padding(

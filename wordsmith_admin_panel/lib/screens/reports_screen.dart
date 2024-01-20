@@ -10,7 +10,6 @@ import "package:wordsmith_utils/models/ebook_report.dart";
 import "package:wordsmith_utils/models/query_result.dart";
 import "package:wordsmith_utils/models/user_report.dart";
 import "package:wordsmith_utils/providers/ebook_reports_provider.dart";
-import "package:wordsmith_utils/providers/user_login_provider.dart";
 import "package:wordsmith_utils/providers/user_reports_provider.dart";
 import "package:wordsmith_utils/size_config.dart";
 
@@ -24,7 +23,6 @@ class ReportsScreenWidget extends StatefulWidget {
 }
 
 class _ReportsScreenWidgetState extends State<ReportsScreenWidget> {
-  late UserLoginProvider _userLoginProvider;
   late UserReportsProvider _userReportsProvider;
   late EBookReportsProvider _eBookReportsProvider;
   final TextEditingController _reasonFilterController = TextEditingController();
@@ -33,12 +31,11 @@ class _ReportsScreenWidgetState extends State<ReportsScreenWidget> {
   int _currentPage = 1;
   int _totalPages = 0;
   final int _pageSize = 10;
-  late Future<QueryResult<UserReport>?> _userReports;
-  late Future<QueryResult<EBookReport>?> _eBookReports;
+  late Future<QueryResult<UserReport>> _userReports;
+  late Future<QueryResult<EBookReport>> _eBookReports;
 
   @override
   void initState() {
-    _userLoginProvider = context.read<UserLoginProvider>();
     _userReportsProvider = context.read<UserReportsProvider>();
     _eBookReportsProvider = context.read<EBookReportsProvider>();
 
@@ -63,52 +60,16 @@ class _ReportsScreenWidgetState extends State<ReportsScreenWidget> {
     super.initState();
   }
 
-  Future<QueryResult<UserReport>?> getUserReports(
+  Future<QueryResult<UserReport>> getUserReports(
       {String? reason, DateTime? reportDate}) async {
-    String? accessToken = await _userLoginProvider.getAccessToken(context);
-
-    if (accessToken == null) return null;
-
-    Map<String, String> queries = {
-      "page": _currentPage.toString(),
-      "pageSize": _pageSize.toString(),
-    };
-
-    if (reason != null && reason.isNotEmpty) {
-      queries["reason"] = reason;
-    }
-    if (reportDate != null) {
-      queries["reportDate"] = reportDate.toIso8601String();
-    }
-
-    var result = await _userReportsProvider.get(
-        filter: queries, bearerToken: accessToken);
-
-    return result;
+    return await _userReportsProvider.getUserReports(
+        page: _currentPage, pageSize: _pageSize);
   }
 
-  Future<QueryResult<EBookReport>?> getEBookReports(
+  Future<QueryResult<EBookReport>> getEBookReports(
       {String? reason, DateTime? reportDate}) async {
-    String? accessToken = await _userLoginProvider.getAccessToken(context);
-
-    if (accessToken == null) return null;
-
-    Map<String, String> queries = {
-      "page": _currentPage.toString(),
-      "pageSize": _pageSize.toString(),
-    };
-
-    if (reason != null && reason.isNotEmpty) {
-      queries["reason"] = reason;
-    }
-    if (reportDate != null) {
-      queries["reportDate"] = reportDate.toIso8601String();
-    }
-
-    var result = await _eBookReportsProvider.get(
-        filter: queries, bearerToken: accessToken);
-
-    return result;
+    return await _eBookReportsProvider.getEBookReports(
+        page: _currentPage, pageSize: _pageSize);
   }
 
   void forward() async {
