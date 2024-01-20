@@ -15,6 +15,7 @@ class EBookParseProvider extends BaseProvider<EBookParse> {
       files: files,
       additionalRoute: "/parse",
       bearerToken: accessToken ?? "",
+      retryForRefresh: true,
     );
   }
 

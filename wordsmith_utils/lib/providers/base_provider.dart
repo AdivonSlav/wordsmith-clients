@@ -176,6 +176,10 @@ abstract class BaseProvider<T> extends AuthProvider {
 
     var request = http.MultipartRequest('POST', uri);
 
+    if (bearerToken.isNotEmpty) {
+      request.headers["Authorization"] = "Bearer $bearerToken";
+    }
+
     if (fields != null) {
       request.fields.addAll(fields);
     }
