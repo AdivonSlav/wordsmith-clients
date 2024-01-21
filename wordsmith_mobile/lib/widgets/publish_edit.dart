@@ -62,6 +62,7 @@ class _PublishEditWidgetState extends State<PublishEditWidget> {
                     controller: _titleController,
                     obscureText: false,
                     maxLength: _titleMaxLength,
+                    enabled: false,
                   ),
                   const SizedBox(
                     height: 20.0,
@@ -71,6 +72,7 @@ class _PublishEditWidgetState extends State<PublishEditWidget> {
                     controller: _descriptionController,
                     obscureText: false,
                     maxLength: _descriptionMaxLength,
+                    enabled: false,
                   ),
                   const SizedBox(
                     height: 20.0,
