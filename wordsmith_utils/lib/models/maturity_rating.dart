@@ -6,8 +6,9 @@ part "maturity_rating.g.dart";
 class MaturityRating {
   final int id;
   final String name;
+  final String shortName;
 
-  MaturityRating(this.id, this.name);
+  MaturityRating(this.id, this.name, this.shortName);
 
   factory MaturityRating.fromJson(Map<String, dynamic> json) =>
       _$MaturityRatingFromJson(json);
