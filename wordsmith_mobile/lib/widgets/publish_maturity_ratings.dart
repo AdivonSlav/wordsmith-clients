@@ -92,17 +92,21 @@ class _PublishMaturityRatingsWidgetState
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      for (var i = 0; i < _maturityRatings.length; i++)
-                        Expanded(
-                          child: ChoiceChip(
-                            label: Text(_maturityRatings[i].name),
-                            selected: _selectedIndex == i,
-                            onSelected: (bool selected) =>
-                                _onSelected(selected, i),
-                          ),
+                    children: [
+                      Expanded(
+                        child: Wrap(
+                          alignment: WrapAlignment.spaceEvenly,
+                          children: List<Widget>.generate(
+                              _maturityRatings.length, (index) {
+                            return ChoiceChip(
+                              label: Text(_maturityRatings[index].name),
+                              selected: _selectedIndex == index,
+                              onSelected: (bool selected) =>
+                                  _onSelected(selected, index),
+                            );
+                          }),
                         ),
+                      ),
                     ],
                   ),
                 ),
