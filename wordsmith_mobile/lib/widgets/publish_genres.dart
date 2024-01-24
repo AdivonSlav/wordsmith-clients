@@ -68,57 +68,78 @@ class _PublishGenresWidgetState extends State<PublishGenresWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    var theme = Theme.of(context);
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Expanded(
-          child: Card(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: FutureBuilder(
-                future: _getGenresFuture,
-                builder: (context, AsyncSnapshot<QueryResult<Genre>> snapshot) {
-                  if (snapshot.connectionState != ConnectionState.done) {
-                    return const CircularProgressIndicator();
-                  }
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 5.0),
+          child: Text(
+            "Choose a genre",
+            style: theme.textTheme.labelLarge,
+            textAlign: TextAlign.left,
+          ),
+        ),
+        const SizedBox(height: 5.0),
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: FutureBuilder(
+                    future: _getGenresFuture,
+                    builder:
+                        (context, AsyncSnapshot<QueryResult<Genre>> snapshot) {
+                      if (snapshot.connectionState != ConnectionState.done) {
+                        return const CircularProgressIndicator();
+                      }
 
-                  if (snapshot.hasError || snapshot.data == null) {
-                    return Text(snapshot.error.toString());
-                  }
+                      if (snapshot.hasError || snapshot.data == null) {
+                        return Text(snapshot.error.toString());
+                      }
 
-                  // snapshot.data will never be null here.
-                  _items = _parseGenreNames(snapshot.data!.result);
+                      // snapshot.data will never be null here.
+                      _items = _parseGenreNames(snapshot.data!.result);
 
-                  return Column(
-                    children: [
-                      OutlinedButton(
-                        onPressed: () async {
-                          var results = await _openGenresDialog();
+                      return Column(
+                        children: [
+                          OutlinedButton(
+                            onPressed: () async {
+                              var results = await _openGenresDialog();
 
-                          if (results != null) {
-                            setState(() {
-                              _selectedItems = results;
-                              var selectedGenreObjects = snapshot.data!.result
-                                  .where((e) => _selectedItems.contains(e.name))
-                                  .toList();
-                              widget.onGenreSelect(selectedGenreObjects);
-                            });
-                          }
-                        },
-                        child: const Text("Select genres"),
-                      ),
-                      const Divider(
-                        height: 30.0,
-                      ),
-                      Wrap(
-                        spacing: 6.0,
-                        children: _selectedItems
-                            .map((e) => Chip(label: Text(e)))
-                            .toList(),
-                      )
-                    ],
-                  );
-                },
-              ),
+                              if (results != null) {
+                                setState(() {
+                                  _selectedItems = results;
+                                  var selectedGenreObjects = snapshot
+                                      .data!.result
+                                      .where((e) =>
+                                          _selectedItems.contains(e.name))
+                                      .toList();
+                                  widget.onGenreSelect(selectedGenreObjects);
+                                });
+                              }
+                            },
+                            child: const Text("Select genres"),
+                          ),
+                          const Divider(
+                            height: 30.0,
+                          ),
+                          Wrap(
+                            spacing: 6.0,
+                            children: _selectedItems
+                                .map((e) => Chip(label: Text(e)))
+                                .toList(),
+                          )
+                        ],
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
           ),
         ),
