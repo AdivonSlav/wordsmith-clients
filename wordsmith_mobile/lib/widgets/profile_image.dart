@@ -20,10 +20,10 @@ class ProfileImageWidget extends StatefulWidget {
       this.editCallback});
 
   @override
-  State<StatefulWidget> createState() => ProfileImageWidgetState();
+  State<StatefulWidget> createState() => _ProfileImageWidgetState();
 }
 
-class ProfileImageWidgetState extends State<ProfileImageWidget> {
+class _ProfileImageWidgetState extends State<ProfileImageWidget> {
   final _logger = LogManager.getLogger("ProfileImageWidget");
   final String _apiUrl = const String.fromEnvironment("API_URL");
 

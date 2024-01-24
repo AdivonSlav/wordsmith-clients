@@ -7,10 +7,10 @@ class PublishScreenWidget extends StatefulWidget {
   const PublishScreenWidget({super.key});
 
   @override
-  State<StatefulWidget> createState() => PublishScreenWidgetState();
+  State<StatefulWidget> createState() => _PublishScreenWidgetState();
 }
 
-class PublishScreenWidgetState extends State<PublishScreenWidget> {
+class _PublishScreenWidgetState extends State<PublishScreenWidget> {
   late EBookParse parsedEbook;
   bool hasParsed = false;
 

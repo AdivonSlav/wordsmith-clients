@@ -7,10 +7,10 @@ class IntroScreenWidget extends StatefulWidget {
   const IntroScreenWidget({super.key});
 
   @override
-  State<StatefulWidget> createState() => IntroScreenWidgetState();
+  State<StatefulWidget> createState() => _IntroScreenWidgetState();
 }
 
-class IntroScreenWidgetState extends State<IntroScreenWidget> {
+class _IntroScreenWidgetState extends State<IntroScreenWidget> {
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);

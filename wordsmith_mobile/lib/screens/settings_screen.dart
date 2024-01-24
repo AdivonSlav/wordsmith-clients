@@ -6,10 +6,10 @@ class SettingsScreenWidget extends StatefulWidget {
   const SettingsScreenWidget({super.key});
 
   @override
-  State<StatefulWidget> createState() => SettingsScreenWidgetState();
+  State<StatefulWidget> createState() => _SettingsScreenWidgetState();
 }
 
-class SettingsScreenWidgetState extends State<SettingsScreenWidget> {
+class _SettingsScreenWidgetState extends State<SettingsScreenWidget> {
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);

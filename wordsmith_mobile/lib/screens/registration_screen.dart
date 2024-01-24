@@ -16,10 +16,10 @@ class RegistrationScreenWidget extends StatefulWidget {
   const RegistrationScreenWidget({super.key});
 
   @override
-  State<StatefulWidget> createState() => RegistrationScreenWidgetState();
+  State<StatefulWidget> createState() => _RegistrationScreenWidgetState();
 }
 
-class RegistrationScreenWidgetState extends State<RegistrationScreenWidget> {
+class _RegistrationScreenWidgetState extends State<RegistrationScreenWidget> {
   final _logger = LogManager.getLogger("RegistrationScreen");
   final _formKey = GlobalKey<FormState>();
   final _usernameController = TextEditingController(text: "");

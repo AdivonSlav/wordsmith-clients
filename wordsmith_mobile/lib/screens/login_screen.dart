@@ -14,10 +14,10 @@ class LoginScreenWidget extends StatefulWidget {
   const LoginScreenWidget({super.key});
 
   @override
-  State<StatefulWidget> createState() => LoginScreenWidgetState();
+  State<StatefulWidget> createState() => _LoginScreenWidgetState();
 }
 
-class LoginScreenWidgetState extends State<LoginScreenWidget> {
+class _LoginScreenWidgetState extends State<LoginScreenWidget> {
   final _logger = LogManager.getLogger("LoginScreen");
   final _formKey = GlobalKey<FormState>();
   final _usernameController = TextEditingController(text: "");

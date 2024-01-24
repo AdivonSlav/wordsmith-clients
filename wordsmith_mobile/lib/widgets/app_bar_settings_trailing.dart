@@ -5,10 +5,10 @@ class AppBarSettingsTrailingWidget extends StatefulWidget {
   const AppBarSettingsTrailingWidget({super.key});
 
   @override
-  State<StatefulWidget> createState() => AppBarSettingsTrailingWidgetState();
+  State<StatefulWidget> createState() => _AppBarSettingsTrailingWidgetState();
 }
 
-class AppBarSettingsTrailingWidgetState
+class _AppBarSettingsTrailingWidgetState
     extends State<AppBarSettingsTrailingWidget> {
   @override
   Widget build(BuildContext context) {

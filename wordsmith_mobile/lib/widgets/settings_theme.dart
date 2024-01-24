@@ -6,10 +6,10 @@ class SettingsThemeWidget extends StatefulWidget {
   const SettingsThemeWidget({super.key});
 
   @override
-  State<StatefulWidget> createState() => SettingsThemeWidgetState();
+  State<StatefulWidget> createState() => _SettingsThemeWidgetState();
 }
 
-class SettingsThemeWidgetState extends State<SettingsThemeWidget> {
+class _SettingsThemeWidgetState extends State<SettingsThemeWidget> {
   late String _currentTheme;
 
   @override

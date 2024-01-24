@@ -10,10 +10,10 @@ class ProfileScreenWidget extends StatefulWidget {
   const ProfileScreenWidget({super.key, required this.user});
 
   @override
-  State<StatefulWidget> createState() => ProfileScreenWidgetState();
+  State<StatefulWidget> createState() => _ProfileScreenWidgetState();
 }
 
-class ProfileScreenWidgetState extends State<ProfileScreenWidget> {
+class _ProfileScreenWidgetState extends State<ProfileScreenWidget> {
   String? _getUserProfileImage() {
     if (widget.user.profileImage?.imagePath != null) {
       return widget.user.profileImage!.imagePath;

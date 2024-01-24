@@ -15,10 +15,10 @@ class NavigationBarWidget extends StatefulWidget {
   const NavigationBarWidget({super.key});
 
   @override
-  State<StatefulWidget> createState() => NavigationBarWidgetState();
+  State<StatefulWidget> createState() => _NavigationBarWidgetState();
 }
 
-class NavigationBarWidgetState extends State<NavigationBarWidget> {
+class _NavigationBarWidgetState extends State<NavigationBarWidget> {
   final _logger = LogManager.getLogger("NavigationBar");
 
   late Future<dynamic> _checkLoggedUserFuture;
