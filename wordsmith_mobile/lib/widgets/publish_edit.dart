@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:wordsmith_mobile/widgets/ebook_image.dart';
 import 'package:wordsmith_mobile/widgets/input_field.dart';
 import 'package:wordsmith_mobile/widgets/publish_chapters_view.dart';
+import 'package:wordsmith_mobile/widgets/publish_genres.dart';
 import 'package:wordsmith_mobile/widgets/publish_instructions.dart';
 import 'package:wordsmith_utils/logger.dart';
 import 'package:wordsmith_utils/models/ebook_parse.dart';
+import 'package:wordsmith_utils/models/genre.dart';
 import 'package:wordsmith_utils/size_config.dart';
 
 class PublishEditWidget extends StatefulWidget {
@@ -30,17 +32,25 @@ class _PublishEditWidgetState extends State<PublishEditWidget> {
   final _titleMaxLength = 40;
   final _descriptionMaxLength = 800;
 
+  List<Genre> _selectedGenres = [];
+
+  void _getSelectedGenres(List<Genre> genres) {
+    setState(() {
+      _selectedGenres = genres;
+      _logger.info("Got ${_selectedGenres.length} genres");
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     _logger.info("Loaded ebook ${widget.parsedEbook.title} for editing");
-    var parsedEbookEdit = widget.parsedEbook;
 
-    _titleController.text = parsedEbookEdit.title;
-    _descriptionController.text = parsedEbookEdit.description;
+    _titleController.text = widget.parsedEbook.title;
+    _descriptionController.text = widget.parsedEbook.description;
 
     return SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.all(10.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
@@ -77,6 +87,12 @@ class _PublishEditWidgetState extends State<PublishEditWidget> {
                   const SizedBox(
                     height: 20.0,
                   ),
+                  PublishGenresWidget(
+                    onGenreSelect: _getSelectedGenres,
+                  ),
+                  const SizedBox(
+                    height: 20.0,
+                  ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -87,7 +103,7 @@ class _PublishEditWidgetState extends State<PublishEditWidget> {
                       ),
                       FilledButton(
                         onPressed: () {
-                          widget.onEditCallback(parsedEbookEdit);
+                          widget.onEditCallback(widget.parsedEbook);
                         },
                         child: const Text("Submit"),
                       ),

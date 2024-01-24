@@ -14,6 +14,7 @@ class InputField extends StatelessWidget {
   final int? maxLines;
   final int? maxLength;
   final List<TextInputFormatter>? inputFormatters;
+  final void Function(String? value)? onChangedCallback;
 
   const InputField({
     super.key,
@@ -28,6 +29,7 @@ class InputField extends StatelessWidget {
     this.maxLines,
     this.maxLength,
     this.inputFormatters,
+    this.onChangedCallback,
   });
 
   @override
@@ -44,20 +46,21 @@ class InputField extends StatelessWidget {
         obscureText: obscureText,
         autovalidateMode: AutovalidateMode.onUserInteraction,
         decoration: InputDecoration(
-          filled: false,
-          fillColor: theme.inputDecorationTheme.fillColor,
-          hintStyle: theme.inputDecorationTheme.hintStyle,
-          suffixIcon: suffixIcon,
-          labelText: labelText,
-          helperText: helperText,
-          border: const OutlineInputBorder(),
-          errorMaxLines: 3,
-        ),
+            filled: false,
+            fillColor: theme.inputDecorationTheme.fillColor,
+            hintStyle: theme.inputDecorationTheme.hintStyle,
+            suffixIcon: suffixIcon,
+            labelText: labelText,
+            helperText: helperText,
+            border: const OutlineInputBorder(),
+            errorMaxLines: 3,
+            contentPadding: const EdgeInsets.all(16.0)),
         validator: validator,
         enabled: enabled,
         maxLines: maxLines,
         maxLength: maxLength,
         inputFormatters: inputFormatters,
+        onChanged: onChangedCallback,
       ),
     );
   }
