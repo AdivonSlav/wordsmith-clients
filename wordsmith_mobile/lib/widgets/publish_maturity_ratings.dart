@@ -58,6 +58,8 @@ class _PublishMaturityRatingsWidgetState
 
   @override
   Widget build(BuildContext context) {
+    var theme = Theme.of(context);
+
     return FutureBuilder(
         future: _getMaturityRatingsFuture,
         builder:
@@ -72,23 +74,40 @@ class _PublishMaturityRatingsWidgetState
 
           _maturityRatings = snapshot.data!.result;
 
-          return Card(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  for (var i = 0; i < _maturityRatings.length; i++)
-                    Expanded(
-                      child: ChoiceChip(
-                        label: Text(_maturityRatings[i].name),
-                        selected: _selectedIndex == i,
-                        onSelected: (bool selected) => _onSelected(selected, i),
-                      ),
-                    ),
-                ],
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                child: Text(
+                  "Choose a maturity rating",
+                  style: theme.textTheme.labelLarge,
+                  textAlign: TextAlign.left,
+                ),
               ),
-            ),
+              const SizedBox(height: 5.0),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      for (var i = 0; i < _maturityRatings.length; i++)
+                        Expanded(
+                          child: ChoiceChip(
+                            label: Text(_maturityRatings[i].name),
+                            selected: _selectedIndex == i,
+                            onSelected: (bool selected) =>
+                                _onSelected(selected, i),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           );
         });
   }
