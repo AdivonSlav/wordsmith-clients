@@ -9,6 +9,7 @@ import 'package:wordsmith_utils/logger.dart';
 import 'package:wordsmith_utils/providers/auth_provider.dart';
 import 'package:wordsmith_utils/providers/ebook_parse_provider.dart';
 import 'package:wordsmith_utils/providers/genre_provider.dart';
+import 'package:wordsmith_utils/providers/maturity_ratings_provider.dart';
 import 'package:wordsmith_utils/providers/user_login_provider.dart';
 import 'package:wordsmith_utils/providers/user_provider.dart';
 import 'package:wordsmith_utils/size_config.dart';
@@ -56,6 +57,9 @@ void main() {
       ),
       ChangeNotifierProvider(
         create: (_) => GenreProvider(),
+      ),
+      ChangeNotifierProvider(
+        create: (_) => MaturityRatingsProvider(),
       )
     ],
     child: const Application(),

@@ -4,9 +4,11 @@ import 'package:wordsmith_mobile/widgets/input_field.dart';
 import 'package:wordsmith_mobile/widgets/publish_chapters_view.dart';
 import 'package:wordsmith_mobile/widgets/publish_genres.dart';
 import 'package:wordsmith_mobile/widgets/publish_instructions.dart';
+import 'package:wordsmith_mobile/widgets/publish_maturity_ratings.dart';
 import 'package:wordsmith_utils/logger.dart';
 import 'package:wordsmith_utils/models/ebook_parse.dart';
 import 'package:wordsmith_utils/models/genre.dart';
+import 'package:wordsmith_utils/models/maturity_rating.dart';
 import 'package:wordsmith_utils/size_config.dart';
 
 class PublishEditWidget extends StatefulWidget {
@@ -33,11 +35,19 @@ class _PublishEditWidgetState extends State<PublishEditWidget> {
   final _descriptionMaxLength = 800;
 
   List<Genre> _selectedGenres = [];
+  MaturityRating? _selectedMaturityRating;
 
   void _getSelectedGenres(List<Genre> genres) {
     setState(() {
       _selectedGenres = genres;
       _logger.info("Got ${_selectedGenres.length} genres");
+    });
+  }
+
+  void _getSelectedMaturityRating(MaturityRating maturityRating) {
+    setState(() {
+      _selectedMaturityRating = maturityRating;
+      _logger.info("Selected ${maturityRating.name} maturity rating");
     });
   }
 
@@ -89,6 +99,12 @@ class _PublishEditWidgetState extends State<PublishEditWidget> {
                   ),
                   PublishGenresWidget(
                     onGenreSelect: _getSelectedGenres,
+                  ),
+                  const SizedBox(
+                    height: 20.0,
+                  ),
+                  PublishMaturityRatingsWidget(
+                    onMaturityRatingSelect: _getSelectedMaturityRating,
                   ),
                   const SizedBox(
                     height: 20.0,

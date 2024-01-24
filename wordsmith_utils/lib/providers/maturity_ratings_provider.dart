@@ -6,19 +6,22 @@ class MaturityRatingsProvider extends BaseProvider<MaturityRating> {
   MaturityRatingsProvider() : super("maturity-ratings");
 
   Future<QueryResult<MaturityRating>> getMaturityRatings(
-      {required int page, required int pageSize, String? name}) async {
-    Map<String, String> queries = {
-      "page": page.toString(),
-      "pageSize": pageSize.toString(),
-    };
+      {int? page, int? pageSize, String? name}) async {
+    Map<String, String> queries = {};
+
+    if (page != null) {
+      queries["page"] = page.toString();
+    }
+
+    if (pageSize != null) {
+      queries["pageSize"] = pageSize.toString();
+    }
 
     if (name != null) {
       queries["name"] = name;
     }
 
-    var result = await get(filter: queries);
-
-    return result;
+    return queries.isEmpty ? await get() : await get(filter: queries);
   }
 
   @override
