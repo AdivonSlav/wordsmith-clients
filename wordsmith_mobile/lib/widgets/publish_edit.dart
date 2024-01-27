@@ -5,15 +5,18 @@ import 'package:wordsmith_mobile/widgets/publish_chapters_view.dart';
 import 'package:wordsmith_mobile/widgets/publish_genres.dart';
 import 'package:wordsmith_mobile/widgets/publish_instructions.dart';
 import 'package:wordsmith_mobile/widgets/publish_maturity_ratings.dart';
+import 'package:wordsmith_utils/dialogs.dart';
 import 'package:wordsmith_utils/logger.dart';
+import 'package:wordsmith_utils/models/ebook_insert.dart';
 import 'package:wordsmith_utils/models/ebook_parse.dart';
 import 'package:wordsmith_utils/models/genre.dart';
 import 'package:wordsmith_utils/models/maturity_rating.dart';
+import 'package:wordsmith_utils/providers/auth_provider.dart';
 import 'package:wordsmith_utils/size_config.dart';
 
 class PublishEditWidget extends StatefulWidget {
   final EBookParse parsedEbook;
-  final void Function(EBookParse ebook) onEditCallback;
+  final void Function(EBookInsert ebook) onEditCallback;
 
   const PublishEditWidget({
     super.key,
@@ -44,11 +47,44 @@ class _PublishEditWidgetState extends State<PublishEditWidget> {
     });
   }
 
-  void _getSelectedMaturityRating(MaturityRating maturityRating) {
+  void _getSelectedMaturityRating(MaturityRating? maturityRating) {
     setState(() {
       _selectedMaturityRating = maturityRating;
-      _logger.info("Selected ${maturityRating.name} maturity rating");
+      _logger.info("Selected ${maturityRating?.name} maturity rating");
     });
+  }
+
+  void _onSubmit() async {
+    if (_selectedGenres.isEmpty) {
+      await showErrorDialog(
+        context,
+        const Text("Error"),
+        const Text("You must select at least one genre"),
+      );
+      return;
+    }
+    if (_selectedMaturityRating == null) {
+      await showErrorDialog(
+        context,
+        const Text("Error"),
+        const Text("You must select at least one maturity rating"),
+      );
+      return;
+    }
+
+    var authorId = AuthProvider.loggedUser!.id;
+    var genreIds = _selectedGenres.map((e) => e.id).toList();
+    var insert = EBookInsert(
+        widget.parsedEbook.title,
+        widget.parsedEbook.description,
+        widget.parsedEbook.encodedCoverArt,
+        widget.parsedEbook.chapters,
+        null, // TODO: Pass when payment system is implemented
+        authorId,
+        genreIds,
+        _selectedMaturityRating!.id);
+
+    widget.onEditCallback(insert);
   }
 
   @override
@@ -118,9 +154,7 @@ class _PublishEditWidgetState extends State<PublishEditWidget> {
                         width: SizeConfig.safeBlockHorizontal * 8.0,
                       ),
                       FilledButton(
-                        onPressed: () {
-                          widget.onEditCallback(widget.parsedEbook);
-                        },
+                        onPressed: _onSubmit,
                         child: const Text("Submit"),
                       ),
                     ],

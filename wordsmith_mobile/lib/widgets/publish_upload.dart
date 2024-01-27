@@ -5,11 +5,12 @@ import 'package:wordsmith_utils/epub_helper.dart';
 import 'package:wordsmith_utils/exceptions/base_exception.dart';
 import 'package:wordsmith_utils/logger.dart';
 import 'package:wordsmith_utils/models/ebook_parse.dart';
+import 'package:wordsmith_utils/models/transfer_file.dart';
 import 'package:wordsmith_utils/providers/ebook_parse_provider.dart';
 import 'package:wordsmith_utils/size_config.dart';
 
 class PublishUploadWidget extends StatelessWidget {
-  final void Function(EBookParse ebook) onUploadCallback;
+  final void Function(EBookParse ebook, TransferFile file) onUploadCallback;
 
   const PublishUploadWidget({
     super.key,
@@ -54,7 +55,7 @@ class PublishUploadWidget extends StatelessWidget {
 
                           logger.info("Got parsed ebook ${parsedEpub.title}");
 
-                          onUploadCallback(parsedEpub);
+                          onUploadCallback(parsedEpub, transferFile);
                         } on BaseException catch (error) {
                           if (context.mounted) {
                             await showErrorDialog(

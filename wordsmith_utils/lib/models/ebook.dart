@@ -1,5 +1,4 @@
 import "package:json_annotation/json_annotation.dart";
-import "package:wordsmith_utils/models/genre.dart";
 import "package:wordsmith_utils/models/image.dart";
 import "package:wordsmith_utils/models/maturity_rating.dart";
 
@@ -17,7 +16,7 @@ class EBook {
   final int chapterCount;
   final String path;
   final Image coverArt;
-  final Genre genre;
+  final String genres;
   final MaturityRating maturityRating;
 
   EBook(
@@ -31,7 +30,7 @@ class EBook {
       this.chapterCount,
       this.path,
       this.coverArt,
-      this.genre,
+      this.genres,
       this.maturityRating);
 
   factory EBook.fromJson(Map<String, dynamic> json) => _$EBookFromJson(json);

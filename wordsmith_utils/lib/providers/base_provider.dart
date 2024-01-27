@@ -195,7 +195,7 @@ abstract class BaseProvider<T> extends AuthProvider {
   /// - [bearerToken]: Bearer token if the request needs to be authorized
   /// - [retryForRefresh]: If set to true and status 401 is the initial response, the provider will attempt to refresh the access token and attempt the request again
   Future<T> postMultipart(
-      {Map<String, String>? fields,
+      {Map<String, dynamic>? fields,
       Map<String, TransferFile>? files,
       String additionalRoute = "",
       String bearerToken = "",
@@ -217,7 +217,19 @@ abstract class BaseProvider<T> extends AuthProvider {
     }
 
     if (fields != null) {
-      request.fields.addAll(fields);
+      fields.forEach((key, value) {
+        if (value is String) {
+          request.fields[key] = value;
+        } else if (value is List) {
+          for (var listItem in value) {
+            request.files
+                .add(http.MultipartFile.fromString(key, listItem.toString()));
+          }
+        } else {
+          request.files
+              .add(http.MultipartFile.fromString(key, value.toString()));
+        }
+      });
     }
 
     if (files != null) {
@@ -275,8 +287,21 @@ abstract class BaseProvider<T> extends AuthProvider {
   bool isValidResponse(http.Response response) {
     String? details;
 
-    if (response.body.isNotEmpty) {
+    if (response.body.isNotEmpty && response.statusCode >= 299) {
       details = jsonDecode(response.body)["detail"];
+
+      // Need to parse validation errors
+      if (details == null) {
+        details = "";
+        var errorBody = jsonDecode(response.body);
+        Map<String, dynamic> validationErrors = errorBody['errors'];
+
+        validationErrors.forEach((property, errorMessage) {
+          details = details! + errorMessage[0];
+          _logger
+              .severe("Validation error for property $property: $errorMessage");
+        });
+      }
     } else {
       details = response.reasonPhrase;
     }
@@ -304,8 +329,21 @@ abstract class BaseProvider<T> extends AuthProvider {
 
     String responseBody = await response.stream.bytesToString();
 
-    if (responseBody.isNotEmpty) {
+    if (responseBody.isNotEmpty && response.statusCode >= 299) {
       details = jsonDecode(responseBody)["detail"];
+
+      // Need to parse validation errors
+      if (details == null) {
+        details = "";
+        var errorBody = jsonDecode(responseBody);
+        Map<String, dynamic> validationErrors = errorBody['errors'];
+
+        validationErrors.forEach((property, errorMessage) {
+          details = details! + errorMessage[0];
+          _logger
+              .severe("Validation error for property $property: $errorMessage");
+        });
+      }
     } else {
       details = response.reasonPhrase;
     }

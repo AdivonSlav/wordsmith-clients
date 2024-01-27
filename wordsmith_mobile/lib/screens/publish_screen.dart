@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:wordsmith_mobile/widgets/publish_edit.dart';
 import 'package:wordsmith_mobile/widgets/publish_upload.dart';
+import 'package:wordsmith_utils/exceptions/base_exception.dart';
+import 'package:wordsmith_utils/logger.dart';
+import 'package:wordsmith_utils/models/ebook_insert.dart';
 import 'package:wordsmith_utils/models/ebook_parse.dart';
+import 'package:wordsmith_utils/models/transfer_file.dart';
+import 'package:wordsmith_utils/providers/ebook_provider.dart';
 
 class PublishScreenWidget extends StatefulWidget {
   const PublishScreenWidget({super.key});
@@ -11,20 +17,38 @@ class PublishScreenWidget extends StatefulWidget {
 }
 
 class _PublishScreenWidgetState extends State<PublishScreenWidget> {
-  late EBookParse parsedEbook;
-  bool hasParsed = false;
+  final _logger = LogManager.getLogger("PublishScreen");
+  late EBookProvider _ebookProvider;
+  late EBookParse _parsedEbook;
+  late TransferFile _epubFile;
+  bool _hasParsed = false;
 
-  void getParsedEBook(EBookParse ebook) async {
+  void _getParsedEBook(EBookParse ebook, TransferFile file) async {
     setState(() {
-      parsedEbook = ebook;
-      hasParsed = !hasParsed;
+      _parsedEbook = ebook;
+      _epubFile = file;
+      _hasParsed = !_hasParsed;
     });
   }
 
-  void submitEditedEBook(EBookParse ebook) async {}
+  void _submitEditedEBook(EBookInsert ebook) async {
+    try {
+      var result = await _ebookProvider.postEBook(ebook, _epubFile);
+
+      if (context.mounted) {
+        _logger.info("Succesfully published ebook ${result.title}");
+        Navigator.of(context).pop();
+      }
+    } on BaseException catch (error) {
+      _logger.info(error);
+    } on Exception catch (error) {
+      _logger.severe(error);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    _ebookProvider = context.read<EBookProvider>();
     var theme = Theme.of(context);
 
     return Scaffold(
@@ -41,13 +65,13 @@ class _PublishScreenWidgetState extends State<PublishScreenWidget> {
         ),
         centerTitle: true,
       ),
-      body: !hasParsed
+      body: !_hasParsed
           ? PublishUploadWidget(
-              onUploadCallback: getParsedEBook,
+              onUploadCallback: _getParsedEBook,
             )
           : PublishEditWidget(
-              parsedEbook: parsedEbook,
-              onEditCallback: submitEditedEBook,
+              parsedEbook: _parsedEbook,
+              onEditCallback: _submitEditedEBook,
             ),
     );
   }

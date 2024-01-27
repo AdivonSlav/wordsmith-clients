@@ -7,7 +7,7 @@ import 'package:wordsmith_utils/models/query_result.dart';
 import 'package:wordsmith_utils/providers/maturity_ratings_provider.dart';
 
 class PublishMaturityRatingsWidget extends StatefulWidget {
-  final void Function(MaturityRating rating) onMaturityRatingSelect;
+  final void Function(MaturityRating? rating) onMaturityRatingSelect;
 
   const PublishMaturityRatingsWidget({
     super.key,
@@ -26,7 +26,7 @@ class _PublishMaturityRatingsWidgetState
   late Future<QueryResult<MaturityRating>> _getMaturityRatingsFuture;
 
   List<MaturityRating> _maturityRatings = [];
-  int? _selectedIndex = 0;
+  int? _selectedIndex;
 
   Future<QueryResult<MaturityRating>> _loadMaturityRatings() async {
     try {
@@ -44,8 +44,13 @@ class _PublishMaturityRatingsWidgetState
 
   void _onSelected(bool selected, int index) {
     setState(() {
-      _selectedIndex = selected ? index : null;
-      widget.onMaturityRatingSelect(_maturityRatings[index]);
+      if (selected == true) {
+        _selectedIndex = index;
+        widget.onMaturityRatingSelect(_maturityRatings[_selectedIndex!]);
+      } else {
+        _selectedIndex = null;
+        widget.onMaturityRatingSelect(null);
+      }
     });
   }
 

@@ -17,7 +17,7 @@ EBook _$EBookFromJson(Map<String, dynamic> json) => EBook(
       json['chapterCount'] as int,
       json['path'] as String,
       Image.fromJson(json['coverArt'] as Map<String, dynamic>),
-      Genre.fromJson(json['genre'] as Map<String, dynamic>),
+      json['genres'] as String,
       MaturityRating.fromJson(json['maturityRating'] as Map<String, dynamic>),
     );
 
@@ -32,6 +32,6 @@ Map<String, dynamic> _$EBookToJson(EBook instance) => <String, dynamic>{
       'chapterCount': instance.chapterCount,
       'path': instance.path,
       'coverArt': instance.coverArt,
-      'genre': instance.genre,
+      'genres': instance.genres,
       'maturityRating': instance.maturityRating,
     };
