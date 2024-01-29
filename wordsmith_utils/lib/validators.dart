@@ -46,6 +46,30 @@ String? validatePassword(String? value) {
   return null;
 }
 
+String? validateEBookTitle(String? value) {
+  if (value == null || value.isEmpty) {
+    return "Please enter a title!";
+  }
+
+  if (value.length > 40) {
+    return "The title must be 40 characters or less!";
+  }
+
+  return null;
+}
+
+String? validateEBookDescription(String? value) {
+  if (value == null || value.isEmpty) {
+    return "Please enter a description!";
+  }
+
+  if (value.length > 800) {
+    return "The description must be 800 characters or less!";
+  }
+
+  return null;
+}
+
 String? validateRequired(String? value) {
   if (value == null || value.isEmpty) {
     return "This field is required";

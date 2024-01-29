@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wordsmith_mobile/widgets/publish_edit.dart';
 import 'package:wordsmith_mobile/widgets/publish_upload.dart';
+import 'package:wordsmith_utils/dialogs.dart';
 import 'package:wordsmith_utils/exceptions/base_exception.dart';
 import 'package:wordsmith_utils/logger.dart';
 import 'package:wordsmith_utils/models/ebook_insert.dart';
@@ -37,9 +38,16 @@ class _PublishScreenWidgetState extends State<PublishScreenWidget> {
 
       if (context.mounted) {
         _logger.info("Succesfully published ebook ${result.title}");
-        Navigator.of(context).pop();
+        Navigator.of(context).pop(true);
       }
     } on BaseException catch (error) {
+      if (context.mounted) {
+        await showErrorDialog(
+          context,
+          const Text("Error"),
+          Text(error.toString()),
+        );
+      }
       _logger.info(error);
     } on Exception catch (error) {
       _logger.severe(error);
@@ -55,7 +63,7 @@ class _PublishScreenWidgetState extends State<PublishScreenWidget> {
       appBar: AppBar(
         leading: IconButton(
           onPressed: () {
-            Navigator.of(context).pop();
+            Navigator.of(context).pop(false);
           },
           icon: const Icon(Icons.arrow_back),
         ),

@@ -5,13 +5,15 @@ import 'package:wordsmith_utils/logger.dart';
 import 'package:wordsmith_utils/size_config.dart';
 
 class EBookImageWidget extends StatefulWidget {
-  final String encodedCoverArt;
+  final String? encodedCoverArt;
+  final String? coverArtUrl;
   final double? width;
   final double? scale;
 
   const EBookImageWidget({
     super.key,
-    required this.encodedCoverArt,
+    this.encodedCoverArt,
+    this.coverArtUrl,
     this.width,
     this.scale,
   });
@@ -22,6 +24,7 @@ class EBookImageWidget extends StatefulWidget {
 
 class _EBookImageWidgetState extends State<EBookImageWidget> {
   final _logger = LogManager.getLogger("EBookImageWidget");
+  final String _apiUrl = const String.fromEnvironment("API_URL");
 
   final _defaultWidth = SizeConfig.safeBlockHorizontal * 60.0;
 
@@ -31,13 +34,20 @@ class _EBookImageWidgetState extends State<EBookImageWidget> {
 
   @override
   Widget build(BuildContext context) {
-    late Uint8List coverArtBytes;
+    Uint8List? coverArtBytes;
 
     try {
-      coverArtBytes = _toByteArray(widget.encodedCoverArt);
+      if (widget.encodedCoverArt != null) {
+        coverArtBytes = _toByteArray(widget.encodedCoverArt!);
+      }
     } catch (error) {
       _logger.severe("Could not decode ebook cover art $error");
     }
+
+    var imageProvider = (coverArtBytes != null
+            ? MemoryImage(coverArtBytes)
+            : NetworkImage("$_apiUrl${widget.coverArtUrl}"))
+        as ImageProvider<Object>;
 
     return GestureDetector(
       onTap: null,
@@ -51,7 +61,7 @@ class _EBookImageWidgetState extends State<EBookImageWidget> {
                 : widget.width! * 1.5,
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: MemoryImage(coverArtBytes),
+                image: imageProvider,
                 fit: BoxFit.cover,
               ),
             ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:wordsmith_mobile/screens/home_screen.dart';
 import 'package:wordsmith_mobile/screens/intro_screen.dart';
 import 'package:wordsmith_mobile/screens/profile_screen.dart';
 import 'package:wordsmith_mobile/widgets/app_bar_settings_trailing.dart';
@@ -31,8 +32,8 @@ class _NavigationBarWidgetState extends State<NavigationBarWidget> {
   List<NavigationDestination> _loadNavDestinations() {
     return <NavigationDestination>[
       const NavigationDestination(
-        icon: Icon(Icons.wrong_location),
-        label: "Placeholder",
+        icon: Icon(Icons.home),
+        label: "Home",
       ),
       const NavigationDestination(
         icon: Icon(Icons.person),
@@ -43,7 +44,7 @@ class _NavigationBarWidgetState extends State<NavigationBarWidget> {
 
   String _loadAppBarTitle(int index) {
     switch (index) {
-      case 3:
+      case 1:
         return "Profile";
       default:
         return "Wordsmith";
@@ -92,7 +93,7 @@ class _NavigationBarWidgetState extends State<NavigationBarWidget> {
             if (AuthProvider.loggedUser != null) {
               switch (_selectedIndex) {
                 case 0:
-                  _page = const Placeholder();
+                  _page = const HomeScreenWidget();
                   break;
                 case 1:
                   _page = ProfileScreenWidget(user: AuthProvider.loggedUser!);

@@ -13,16 +13,23 @@ import 'package:wordsmith_utils/models/genre.dart';
 import 'package:wordsmith_utils/models/maturity_rating.dart';
 import 'package:wordsmith_utils/providers/auth_provider.dart';
 import 'package:wordsmith_utils/size_config.dart';
+import 'package:wordsmith_utils/validators.dart';
 
 class PublishEditWidget extends StatefulWidget {
   final EBookParse parsedEbook;
   final void Function(EBookInsert ebook) onEditCallback;
 
-  const PublishEditWidget({
+  final _titleController = TextEditingController();
+  final _descriptionController = TextEditingController();
+
+  PublishEditWidget({
     super.key,
     required this.parsedEbook,
     required this.onEditCallback,
-  });
+  }) {
+    _titleController.text = parsedEbook.title;
+    _descriptionController.text = parsedEbook.description;
+  }
 
   @override
   State<StatefulWidget> createState() => _PublishEditWidgetState();
@@ -31,11 +38,11 @@ class PublishEditWidget extends StatefulWidget {
 class _PublishEditWidgetState extends State<PublishEditWidget> {
   final _logger = LogManager.getLogger("PublishEditWidget");
   final _formKey = GlobalKey<FormState>();
-  final _titleController = TextEditingController();
-  final _descriptionController = TextEditingController();
 
   final _titleMaxLength = 40;
   final _descriptionMaxLength = 800;
+
+  var _uploadInProgress = false;
 
   List<Genre> _selectedGenres = [];
   MaturityRating? _selectedMaturityRating;
@@ -55,28 +62,39 @@ class _PublishEditWidgetState extends State<PublishEditWidget> {
   }
 
   void _onSubmit() async {
-    if (_selectedGenres.isEmpty) {
-      await showErrorDialog(
-        context,
-        const Text("Error"),
-        const Text("You must select at least one genre"),
-      );
+    if (_uploadInProgress == true) {
       return;
     }
+
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    var validationErrors = "";
+
+    if (_selectedGenres.isEmpty) {
+      validationErrors += "You must select at least one genre!\n";
+    }
     if (_selectedMaturityRating == null) {
+      validationErrors += "You must select at least one maturity rating!\n";
+    }
+
+    if (validationErrors.isNotEmpty) {
       await showErrorDialog(
         context,
         const Text("Error"),
-        const Text("You must select at least one maturity rating"),
+        Text(validationErrors),
       );
       return;
     }
 
+    _uploadInProgress = true;
+
     var authorId = AuthProvider.loggedUser!.id;
     var genreIds = _selectedGenres.map((e) => e.id).toList();
     var insert = EBookInsert(
-        widget.parsedEbook.title,
-        widget.parsedEbook.description,
+        widget._titleController.text,
+        widget._descriptionController.text.trim(),
         widget.parsedEbook.encodedCoverArt,
         widget.parsedEbook.chapters,
         null, // TODO: Pass when payment system is implemented
@@ -90,9 +108,6 @@ class _PublishEditWidgetState extends State<PublishEditWidget> {
   @override
   Widget build(BuildContext context) {
     _logger.info("Loaded ebook ${widget.parsedEbook.title} for editing");
-
-    _titleController.text = widget.parsedEbook.title;
-    _descriptionController.text = widget.parsedEbook.description;
 
     return SingleChildScrollView(
       child: Padding(
@@ -113,22 +128,28 @@ class _PublishEditWidgetState extends State<PublishEditWidget> {
                   const SizedBox(
                     height: 20.0,
                   ),
-                  InputField(
-                    labelText: "Title",
-                    controller: _titleController,
-                    obscureText: false,
-                    maxLength: _titleMaxLength,
-                    enabled: false,
-                  ),
-                  const SizedBox(
-                    height: 20.0,
-                  ),
-                  InputField(
-                    labelText: "Description",
-                    controller: _descriptionController,
-                    obscureText: false,
-                    maxLength: _descriptionMaxLength,
-                    enabled: false,
+                  Column(
+                    children: [
+                      InputField(
+                        labelText: "Title",
+                        controller: widget._titleController,
+                        obscureText: false,
+                        maxLines: 1,
+                        maxLength: _titleMaxLength,
+                        validator: validateEBookTitle,
+                      ),
+                      const SizedBox(
+                        height: 20.0,
+                      ),
+                      InputField(
+                        labelText: "Description",
+                        controller: widget._descriptionController,
+                        obscureText: false,
+                        maxLines: 15,
+                        maxLength: _descriptionMaxLength,
+                        validator: validateEBookDescription,
+                      ),
+                    ],
                   ),
                   const SizedBox(
                     height: 20.0,
@@ -155,7 +176,13 @@ class _PublishEditWidgetState extends State<PublishEditWidget> {
                       ),
                       FilledButton(
                         onPressed: _onSubmit,
-                        child: const Text("Submit"),
+                        child: !_uploadInProgress
+                            ? const Text("Login")
+                            : const SizedBox(
+                                width: 20.0,
+                                height: 20.0,
+                                child: CircularProgressIndicator(),
+                              ),
                       ),
                     ],
                   ),

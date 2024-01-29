@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:wordsmith_utils/size_config.dart';
 
 class InputField extends StatelessWidget {
   final String labelText;
@@ -13,6 +12,7 @@ class InputField extends StatelessWidget {
   final bool? enabled;
   final int? maxLines;
   final int? maxLength;
+  final bool? readOnly;
   final List<TextInputFormatter>? inputFormatters;
   final void Function(String? value)? onChangedCallback;
 
@@ -28,6 +28,7 @@ class InputField extends StatelessWidget {
     this.enabled,
     this.maxLines,
     this.maxLength,
+    this.readOnly,
     this.inputFormatters,
     this.onChangedCallback,
   });
@@ -37,7 +38,7 @@ class InputField extends StatelessWidget {
     var theme = Theme.of(context);
 
     return Container(
-      width: width ?? SizeConfig.safeBlockHorizontal * 80.0,
+      width: width,
       decoration: BoxDecoration(
         color: theme.inputDecorationTheme.fillColor,
       ),
@@ -59,6 +60,7 @@ class InputField extends StatelessWidget {
         enabled: enabled,
         maxLines: maxLines,
         maxLength: maxLength,
+        readOnly: readOnly ?? false,
         inputFormatters: inputFormatters,
         onChanged: onChangedCallback,
       ),
