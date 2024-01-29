@@ -37,6 +37,10 @@ class HomeEBookDisplayWidget extends StatelessWidget {
               itemCount: ebooks.length,
               itemBuilder:
                   (BuildContext context, int itemIndex, int pageViewIndex) {
+                if (ebooks.isEmpty) {
+                  return Container();
+                }
+
                 return Container(
                   width: MediaQuery.of(context).size.width,
                   margin: const EdgeInsets.symmetric(horizontal: 20.0),
