@@ -7,14 +7,14 @@ import 'package:wordsmith_utils/size_config.dart';
 class EBookImageWidget extends StatefulWidget {
   final String? encodedCoverArt;
   final String? coverArtUrl;
-  final double? width;
+  final double? maxWidth;
   final double? scale;
 
   const EBookImageWidget({
     super.key,
     this.encodedCoverArt,
     this.coverArtUrl,
-    this.width,
+    this.maxWidth,
     this.scale,
   });
 
@@ -26,7 +26,7 @@ class _EBookImageWidgetState extends State<EBookImageWidget> {
   final _logger = LogManager.getLogger("EBookImageWidget");
   final String _apiUrl = const String.fromEnvironment("API_URL");
 
-  final _defaultWidth = SizeConfig.safeBlockHorizontal * 60.0;
+  final _defaultMaxWidth = SizeConfig.safeBlockHorizontal * 70.0;
 
   Uint8List _toByteArray(String encodedImage) {
     return base64Decode(encodedImage);
@@ -54,16 +54,12 @@ class _EBookImageWidgetState extends State<EBookImageWidget> {
       child: Stack(
         alignment: Alignment.center,
         children: <Widget>[
-          Container(
-            width: widget.width ?? _defaultWidth,
-            height: widget.width == null
-                ? _defaultWidth * 1.5
-                : widget.width! * 1.5,
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: imageProvider,
-                fit: BoxFit.cover,
-              ),
+          ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: widget.maxWidth ?? _defaultMaxWidth,
+            ),
+            child: Image(
+              image: imageProvider,
             ),
           ),
         ],
