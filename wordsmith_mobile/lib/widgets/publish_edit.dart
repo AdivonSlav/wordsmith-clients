@@ -48,17 +48,13 @@ class _PublishEditWidgetState extends State<PublishEditWidget> {
   MaturityRating? _selectedMaturityRating;
 
   void _getSelectedGenres(List<Genre> genres) {
-    setState(() {
-      _selectedGenres = genres;
-      _logger.info("Got ${_selectedGenres.length} genres");
-    });
+    _selectedGenres = genres;
+    _logger.info("Got ${_selectedGenres.length} genres");
   }
 
   void _getSelectedMaturityRating(MaturityRating? maturityRating) {
-    setState(() {
-      _selectedMaturityRating = maturityRating;
-      _logger.info("Selected ${maturityRating?.name} maturity rating");
-    });
+    _selectedMaturityRating = maturityRating;
+    _logger.info("Selected ${maturityRating?.name} maturity rating");
   }
 
   void _toggleUploadInProgress() {
@@ -71,8 +67,6 @@ class _PublishEditWidgetState extends State<PublishEditWidget> {
     if (_uploadInProgress == true) {
       return;
     }
-
-    _toggleUploadInProgress();
 
     if (!_formKey.currentState!.validate()) {
       return;
@@ -96,7 +90,7 @@ class _PublishEditWidgetState extends State<PublishEditWidget> {
       return;
     }
 
-    _uploadInProgress = true;
+    _toggleUploadInProgress();
 
     var authorId = AuthProvider.loggedUser!.id;
     var genreIds = _selectedGenres.map((e) => e.id).toList();
