@@ -61,10 +61,18 @@ class _PublishEditWidgetState extends State<PublishEditWidget> {
     });
   }
 
+  void _toggleUploadInProgress() {
+    setState(() {
+      _uploadInProgress = !_uploadInProgress;
+    });
+  }
+
   void _onSubmit() async {
     if (_uploadInProgress == true) {
       return;
     }
+
+    _toggleUploadInProgress();
 
     if (!_formKey.currentState!.validate()) {
       return;
@@ -177,7 +185,7 @@ class _PublishEditWidgetState extends State<PublishEditWidget> {
                       FilledButton(
                         onPressed: _onSubmit,
                         child: !_uploadInProgress
-                            ? const Text("Login")
+                            ? const Text("Submit")
                             : const SizedBox(
                                 width: 20.0,
                                 height: 20.0,
