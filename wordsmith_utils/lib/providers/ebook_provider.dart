@@ -43,6 +43,7 @@ class EBookProvider extends BaseProvider<EBook> {
       files: files,
       fields: fields,
       bearerToken: accessToken ?? "",
+      retryForRefresh: true,
     );
   }
 

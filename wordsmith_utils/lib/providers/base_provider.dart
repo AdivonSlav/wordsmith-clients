@@ -38,7 +38,7 @@ abstract class BaseProvider<T> extends AuthProvider {
     var url = "$_apiUrl$_endpoint$additionalRoute";
 
     if (filter != null) {
-      var queryString = getQueryString(filter);
+      var queryString = _getQueryString(filter);
       url = "$url?$queryString";
     }
 
@@ -52,12 +52,12 @@ abstract class BaseProvider<T> extends AuthProvider {
     }
 
     var headers =
-        createHeaders(contentType: contentType, bearerToken: bearerToken);
+        _createHeaders(contentType: contentType, bearerToken: bearerToken);
     var response = await http.get(uri, headers: headers);
 
     // If retrying is enabled and status 401 is returned, attempt to refresh the access token and send the request again
     if (retryForRefresh == true && response.statusCode == 401) {
-      var success = await attemptTokenRefresh();
+      var success = await _attemptTokenRefresh();
 
       if (success == true) {
         bearerToken = await SecureStore.getValue("access_token") ?? "";
@@ -69,7 +69,7 @@ abstract class BaseProvider<T> extends AuthProvider {
 
     var queryResult = QueryResult<T>();
 
-    if (isValidResponse(response)) {
+    if (_isValidResponse(response)) {
       var data = jsonDecode(response.body);
 
       queryResult.page = data["page"];
@@ -113,13 +113,13 @@ abstract class BaseProvider<T> extends AuthProvider {
     }
 
     var headers =
-        createHeaders(contentType: contentType, bearerToken: bearerToken);
+        _createHeaders(contentType: contentType, bearerToken: bearerToken);
     var jsonRequest = jsonEncode(request);
     var response = await http.put(uri, body: jsonRequest, headers: headers);
 
     // If retrying is enabled and status 401 is returned, attempt to refresh the access token and send the request again
     if (retryForRefresh == true && response.statusCode == 401) {
-      var success = await attemptTokenRefresh();
+      var success = await _attemptTokenRefresh();
 
       if (success == true) {
         bearerToken = await SecureStore.getValue("access_token") ?? "";
@@ -129,7 +129,7 @@ abstract class BaseProvider<T> extends AuthProvider {
       }
     }
 
-    if (isValidResponse(response)) {
+    if (_isValidResponse(response)) {
       var data = jsonDecode(response.body);
       return fromJson(data);
     }
@@ -162,13 +162,13 @@ abstract class BaseProvider<T> extends AuthProvider {
     }
 
     var headers =
-        createHeaders(contentType: contentType, bearerToken: bearerToken);
+        _createHeaders(contentType: contentType, bearerToken: bearerToken);
     var jsonRequest = jsonEncode(request);
     var response = await http.post(uri, body: jsonRequest, headers: headers);
 
     // If retrying is enabled and status 401 is returned, attempt to refresh the access token and send the request again
     if (retryForRefresh == true && response.statusCode == 401) {
-      var success = await attemptTokenRefresh();
+      var success = await _attemptTokenRefresh();
 
       if (success == true) {
         bearerToken = await SecureStore.getValue("access_token") ?? "";
@@ -178,7 +178,7 @@ abstract class BaseProvider<T> extends AuthProvider {
       }
     }
 
-    if (isValidResponse(response)) {
+    if (_isValidResponse(response)) {
       var data = jsonDecode(response.body);
       return fromJson(data);
     }
@@ -212,62 +212,35 @@ abstract class BaseProvider<T> extends AuthProvider {
 
     var request = http.MultipartRequest('POST', uri);
 
+    request =
+        _setMultipartPayload(request: request, fields: fields, files: files);
+
     if (bearerToken.isNotEmpty) {
       request.headers["Authorization"] = "Bearer $bearerToken";
     }
 
-    if (fields != null) {
-      fields.forEach((key, value) {
-        if (value is String) {
-          request.fields[key] = value;
-        } else if (value is List) {
-          for (var listItem in value) {
-            request.files
-                .add(http.MultipartFile.fromString(key, listItem.toString()));
-          }
-        } else {
-          request.files
-              .add(http.MultipartFile.fromString(key, value.toString()));
-        }
-      });
-    }
-
-    if (files != null) {
-      files.forEach((fieldName, transferFile) async {
-        MediaType mimeType;
-
-        try {
-          mimeType = MediaType.parse(
-              transferFile.file.mimeType ?? "application/octet-stream");
-        } on FormatException {
-          mimeType = MediaType.parse("application/octet-stream");
-        }
-
-        request.files.add(http.MultipartFile(
-          fieldName,
-          http.ByteStream(transferFile.file.openRead()),
-          await transferFile.file.length(),
-          filename: transferFile.name,
-          contentType: mimeType,
-        ));
-      });
-    }
-
+    http.MultipartRequest? retryRequest =
+        _copyRequest(request) as http.MultipartRequest;
+    http.StreamedResponse? retryResponse;
     var response = await request.send();
 
     // If retrying is enabled and status 401 is returned, attempt to refresh the access token and send the request again
     if (retryForRefresh == true && response.statusCode == 401) {
-      var success = await attemptTokenRefresh();
+      var success = await _attemptTokenRefresh();
 
       if (success == true) {
         bearerToken = await SecureStore.getValue("access_token") ?? "";
-        response = await request.send();
+        retryRequest.headers["Authorization"] = "Bearer $bearerToken";
+        retryRequest = _setMultipartPayload(
+            request: retryRequest, fields: fields, files: files);
+        retryResponse = await retryRequest.send();
       } else {
         throw UnauthorizedException("Failed despite a token refresh attempt");
       }
     }
 
-    var responseBody = await isValidStreamedResponse(response);
+    var responseBody =
+        await _isValidStreamedResponse(retryResponse ?? response);
 
     if (responseBody != null) {
       var data = jsonDecode(responseBody);
@@ -284,7 +257,7 @@ abstract class BaseProvider<T> extends AuthProvider {
   /// Checks what status the Response returned
   ///
   /// If the response is >=299, an exception is thrown depending on the status which should be handled externally
-  bool isValidResponse(http.Response response) {
+  bool _isValidResponse(http.Response response) {
     String? details;
 
     if (response.body.isNotEmpty && response.statusCode >= 299) {
@@ -323,7 +296,7 @@ abstract class BaseProvider<T> extends AuthProvider {
   /// Checks what status the StreamedResponse returned
   ///
   /// If the response is >=299, an exception is thrown depending on the status which should be handled externally
-  Future<String?> isValidStreamedResponse(
+  Future<String?> _isValidStreamedResponse(
       http.StreamedResponse response) async {
     String? details;
 
@@ -367,21 +340,21 @@ abstract class BaseProvider<T> extends AuthProvider {
   /// Returns true if new access credentials were stored
   ///
   /// If the token cannot be refreshed, all stored credentials are deleted and the login session is considered terminated
-  Future<bool> attemptTokenRefresh() async {
+  Future<bool> _attemptTokenRefresh() async {
     var refreshToken = await SecureStore.getValue("refresh_token");
     Map<String, String> query = {
       "id": await SecureStore.getValue("user_ref_id") ?? ""
     };
 
-    var headers = createHeaders(bearerToken: refreshToken ?? "");
-    var queryString = getQueryString(query);
+    var headers = _createHeaders(bearerToken: refreshToken ?? "");
+    var queryString = _getQueryString(query);
     var url = Uri.parse("${_apiUrl}users/login/refresh?$queryString");
 
     var refreshResponse = await http.get(url, headers: headers);
     var refreshResult = QueryResult<UserLogin>();
 
     try {
-      if (isValidResponse(refreshResponse)) {
+      if (_isValidResponse(refreshResponse)) {
         var data = jsonDecode(refreshResponse.body);
 
         refreshResult.page = data["page"];
@@ -393,6 +366,7 @@ abstract class BaseProvider<T> extends AuthProvider {
         }
 
         if (refreshResult.result[0].accessToken != null) {
+          _logger.info("Succesfully refreshed access!");
           await storeLogin(
               loginCreds: refreshResult.result[0], shouldNotify: false);
           return true;
@@ -414,7 +388,7 @@ abstract class BaseProvider<T> extends AuthProvider {
   /// Creates HTTP headers for content type and authorization
   ///
   /// Defaults to application/json if not specified
-  Map<String, String> createHeaders(
+  Map<String, String> _createHeaders(
       {String contentType = "", String bearerToken = ""}) {
     Map<String, String> headers = {};
 
@@ -432,7 +406,7 @@ abstract class BaseProvider<T> extends AuthProvider {
   }
 
   /// Constructs a query string for requests using the passed map
-  String getQueryString(Map params,
+  String _getQueryString(Map params,
       {String prefix = "&", bool inRecursion = false}) {
     String query = "";
 
@@ -462,11 +436,92 @@ abstract class BaseProvider<T> extends AuthProvider {
 
         (value as Map).forEach((k, v) {
           query +=
-              getQueryString({k: v}, prefix: "$prefix$key", inRecursion: true);
+              _getQueryString({k: v}, prefix: "$prefix$key", inRecursion: true);
         });
       }
     });
 
     return query;
+  }
+
+  /// Takes a multipart request, fills it with the necessary fields and files and returns it
+  ///
+  /// Parameters:
+  /// - [request]: The MultiPart request
+  /// - [fields]: Fields to post, if any
+  /// - [files]: Files to post, if any
+  http.MultipartRequest _setMultipartPayload({
+    required http.MultipartRequest request,
+    Map<String, dynamic>? fields,
+    Map<String, TransferFile>? files,
+  }) {
+    if (fields != null) {
+      fields.forEach((key, value) {
+        if (value is String) {
+          request.fields[key] = value;
+        } else if (value is List) {
+          for (var listItem in value) {
+            request.files
+                .add(http.MultipartFile.fromString(key, listItem.toString()));
+          }
+        } else {
+          request.files
+              .add(http.MultipartFile.fromString(key, value.toString()));
+        }
+      });
+    }
+
+    if (files != null) {
+      files.forEach((fieldName, transferFile) async {
+        MediaType mimeType;
+
+        try {
+          mimeType = MediaType.parse(
+              transferFile.file.mimeType ?? "application/octet-stream");
+        } on FormatException {
+          mimeType = MediaType.parse("application/octet-stream");
+        }
+
+        request.files.add(http.MultipartFile(
+          fieldName,
+          http.ByteStream(transferFile.file.openRead()),
+          await transferFile.file.length(),
+          filename: transferFile.name,
+          contentType: mimeType,
+        ));
+      });
+    }
+
+    return request;
+  }
+
+  /// Takes a request of type BaseRequest and returns a copy.
+  /// If the request is of type MultipartRequest, then the fields and files should be cloned separately
+  /// with a call to setMultipartPayload
+  ///
+  /// Parameters:
+  /// - [request]: The request to copy
+  http.BaseRequest _copyRequest(http.BaseRequest request) {
+    http.BaseRequest requestCopy;
+
+    if (request is http.Request) {
+      requestCopy = http.Request(request.method, request.url)
+        ..encoding = request.encoding
+        ..bodyBytes = request.bodyBytes;
+    } else if (request is http.MultipartRequest) {
+      requestCopy = http.MultipartRequest(request.method, request.url);
+    } else if (request is http.StreamedRequest) {
+      throw Exception('Copying streamed requests is not supported');
+    } else {
+      throw Exception('Request type is unknown, cannot copy');
+    }
+
+    requestCopy
+      ..persistentConnection = request.persistentConnection
+      ..followRedirects = request.followRedirects
+      ..maxRedirects = request.maxRedirects
+      ..headers.addAll(request.headers);
+
+    return requestCopy;
   }
 }
