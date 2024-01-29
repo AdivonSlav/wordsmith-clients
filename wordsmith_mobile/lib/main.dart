@@ -7,6 +7,7 @@ import 'package:wordsmith_mobile/widgets/navigation_bar.dart';
 import 'package:wordsmith_utils/datetime_formatter.dart';
 import 'package:wordsmith_utils/logger.dart';
 import 'package:wordsmith_utils/providers/auth_provider.dart';
+import 'package:wordsmith_utils/providers/base_provider.dart';
 import 'package:wordsmith_utils/providers/ebook_parse_provider.dart';
 import 'package:wordsmith_utils/providers/ebook_provider.dart';
 import 'package:wordsmith_utils/providers/genre_provider.dart';
@@ -41,6 +42,7 @@ void main() {
   HttpOverrides.global = MyHttpOverrides();
 
   initializeDateFormattingForLocale();
+  BaseProvider.configureInterceptors();
 
   runApp(MultiProvider(
     providers: [

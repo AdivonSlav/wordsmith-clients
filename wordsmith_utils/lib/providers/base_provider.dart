@@ -1,7 +1,9 @@
 import "dart:convert";
+import "package:dio/dio.dart";
 import "package:wordsmith_utils/exceptions/base_exception.dart";
 import "package:wordsmith_utils/exceptions/forbidden_exception.dart";
 import "package:wordsmith_utils/exceptions/unauthorized_exception.dart";
+import "package:wordsmith_utils/interceptors/error_interceptor.dart";
 import "package:wordsmith_utils/logger.dart";
 import "package:wordsmith_utils/models/query_result.dart";
 import "package:http/http.dart" as http;
@@ -10,6 +12,16 @@ import "package:wordsmith_utils/models/transfer_file.dart";
 import "package:wordsmith_utils/models/user_login.dart";
 import "package:wordsmith_utils/providers/auth_provider.dart";
 import "package:wordsmith_utils/secure_store.dart";
+
+final dio = Dio(
+  BaseOptions(
+      baseUrl: const String.fromEnvironment("API_URL"),
+      connectTimeout: const Duration(seconds: 60),
+      receiveTimeout: const Duration(seconds: 60),
+      validateStatus: (int? status) {
+        return status != null;
+      }),
+);
 
 abstract class BaseProvider<T> extends AuthProvider {
   static final _logger = LogManager.getLogger("BaseProvider");
@@ -53,32 +65,27 @@ abstract class BaseProvider<T> extends AuthProvider {
 
     var headers =
         createHeaders(contentType: contentType, bearerToken: bearerToken);
-    var response = await http.get(uri, headers: headers);
+    late Response response;
 
-    // If retrying is enabled and status 401 is returned, attempt to refresh the access token and send the request again
-    if (retryForRefresh == true && response.statusCode == 401) {
-      var success = await attemptTokenRefresh();
-
-      if (success == true) {
-        bearerToken = await SecureStore.getValue("access_token") ?? "";
-        response = await http.get(uri, headers: headers);
+    try {
+      response = await dio.getUri(uri, options: Options(headers: headers));
+    } on DioException catch (error) {
+      if (error.response!.statusCode == 401 && retryForRefresh == true) {
+        response = await handleRetry(method: "GET", uri: uri, headers: headers);
       } else {
-        throw UnauthorizedException("Failed despite a token refresh attempt");
+        var details = getErrorsFromResponse(error.response!);
+        throw BaseException(details);
       }
     }
 
     var queryResult = QueryResult<T>();
 
-    if (isValidResponse(response)) {
-      var data = jsonDecode(response.body);
+    queryResult.page = response.data["page"];
+    queryResult.totalCount = response.data["totalCount"];
+    queryResult.totalPages = response.data["totalPages"];
 
-      queryResult.page = data["page"];
-      queryResult.totalCount = data["totalCount"];
-      queryResult.totalPages = data["totalPages"];
-
-      for (var item in data["result"]) {
-        queryResult.result.add(fromJson(item));
-      }
+    for (var item in response.data["result"]) {
+      queryResult.result.add(fromJson(item));
     }
 
     return queryResult;
@@ -115,22 +122,24 @@ abstract class BaseProvider<T> extends AuthProvider {
     var headers =
         createHeaders(contentType: contentType, bearerToken: bearerToken);
     var jsonRequest = jsonEncode(request);
-    var response = await http.put(uri, body: jsonRequest, headers: headers);
+    // var response = await http.put(uri, body: jsonRequest, headers: headers);
+    late Response response;
 
-    // If retrying is enabled and status 401 is returned, attempt to refresh the access token and send the request again
-    if (retryForRefresh == true && response.statusCode == 401) {
-      var success = await attemptTokenRefresh();
-
-      if (success == true) {
-        bearerToken = await SecureStore.getValue("access_token") ?? "";
-        response = await http.put(uri, body: jsonRequest, headers: headers);
+    try {
+      response = await dio.putUri(uri,
+          data: jsonRequest, options: Options(headers: headers));
+    } on DioException catch (error) {
+      if (error.response!.statusCode == 401 && retryForRefresh == true) {
+        response = await handleRetry(
+            method: "PUT", data: jsonRequest, uri: uri, headers: headers);
       } else {
-        throw UnauthorizedException("Failed despite a token refresh attempt");
+        var details = getErrorsFromResponse(error.response!);
+        throw BaseException(details);
       }
     }
 
     if (isValidResponse(response)) {
-      var data = jsonDecode(response.body);
+      var data = jsonDecode(response.data);
       return fromJson(data);
     }
 
@@ -164,26 +173,23 @@ abstract class BaseProvider<T> extends AuthProvider {
     var headers =
         createHeaders(contentType: contentType, bearerToken: bearerToken);
     var jsonRequest = jsonEncode(request);
-    var response = await http.post(uri, body: jsonRequest, headers: headers);
+    // var response = await http.post(uri, body: jsonRequest, headers: headers);
+    late Response response;
 
-    // If retrying is enabled and status 401 is returned, attempt to refresh the access token and send the request again
-    if (retryForRefresh == true && response.statusCode == 401) {
-      var success = await attemptTokenRefresh();
-
-      if (success == true) {
-        bearerToken = await SecureStore.getValue("access_token") ?? "";
-        response = await http.post(uri, body: jsonRequest, headers: headers);
+    try {
+      response = await dio.postUri(uri,
+          data: jsonRequest, options: Options(headers: headers));
+    } on DioException catch (error) {
+      if (error.response!.statusCode == 401 && retryForRefresh == true) {
+        response = await handleRetry(
+            method: "POST", data: jsonRequest, uri: uri, headers: headers);
       } else {
-        throw UnauthorizedException("Failed despite a token refresh attempt");
+        var details = getErrorsFromResponse(error.response!);
+        throw BaseException(details);
       }
     }
 
-    if (isValidResponse(response)) {
-      var data = jsonDecode(response.body);
-      return fromJson(data);
-    }
-
-    throw Exception("Unknown error");
+    return fromJson(response.data);
   }
 
   /// Makes a multipart HTTP POST request
@@ -210,30 +216,27 @@ abstract class BaseProvider<T> extends AuthProvider {
       throw Exception(error);
     }
 
-    var request = http.MultipartRequest('POST', uri);
-
-    if (bearerToken.isNotEmpty) {
-      request.headers["Authorization"] = "Bearer $bearerToken";
-    }
+    var formData = FormData();
 
     if (fields != null) {
       fields.forEach((key, value) {
         if (value is String) {
-          request.fields[key] = value;
+          formData.fields.add(MapEntry(key, value));
         } else if (value is List) {
           for (var listItem in value) {
-            request.files
-                .add(http.MultipartFile.fromString(key, listItem.toString()));
+            formData.files.add(
+                MapEntry(key, MultipartFile.fromString(listItem.toString())));
           }
         } else {
-          request.files
-              .add(http.MultipartFile.fromString(key, value.toString()));
+          formData.files.add(MapEntry(key, MultipartFile.fromString(value)));
         }
       });
     }
 
     if (files != null) {
-      files.forEach((fieldName, transferFile) async {
+      for (var entry in files.entries) {
+        var fieldName = entry.key;
+        var transferFile = entry.value;
         MediaType mimeType;
 
         try {
@@ -243,57 +246,73 @@ abstract class BaseProvider<T> extends AuthProvider {
           mimeType = MediaType.parse("application/octet-stream");
         }
 
-        request.files.add(http.MultipartFile(
-          fieldName,
-          http.ByteStream(transferFile.file.openRead()),
-          await transferFile.file.length(),
-          filename: transferFile.name,
-          contentType: mimeType,
-        ));
-      });
-    }
-
-    var response = await request.send();
-
-    // If retrying is enabled and status 401 is returned, attempt to refresh the access token and send the request again
-    if (retryForRefresh == true && response.statusCode == 401) {
-      var success = await attemptTokenRefresh();
-
-      if (success == true) {
-        bearerToken = await SecureStore.getValue("access_token") ?? "";
-        response = await request.send();
-      } else {
-        throw UnauthorizedException("Failed despite a token refresh attempt");
+        var multipartFile = MultipartFile.fromBytes(
+            await transferFile.file.readAsBytes(),
+            contentType: mimeType);
+        formData.files.add(MapEntry(fieldName, multipartFile));
       }
     }
 
-    var responseBody = await isValidStreamedResponse(response);
+    var headers = {"Authorization": "Bearer $bearerToken"};
+    late Response response;
 
-    if (responseBody != null) {
-      var data = jsonDecode(responseBody);
-      return fromJson(data);
+    try {
+      response = await dio.postUri(uri,
+          data: formData, options: Options(headers: headers));
+    } on DioException catch (error) {
+      if (error.response!.statusCode == 401 && retryForRefresh == true) {
+        response = await handleRetry(
+            method: "POST", data: formData.clone(), uri: uri, headers: headers);
+      } else {
+        var details = getErrorsFromResponse(error.response!);
+        throw BaseException(details);
+      }
     }
 
-    throw Exception("Unknown error");
+    return fromJson(response.data);
   }
 
   T fromJson(dynamic data) {
     throw UnimplementedError();
   }
 
-  /// Checks what status the Response returned
-  ///
-  /// If the response is >=299, an exception is thrown depending on the status which should be handled externally
-  bool isValidResponse(http.Response response) {
+  String getErrorsFromResponse(Response response) {
     String? details;
 
-    if (response.body.isNotEmpty && response.statusCode >= 299) {
-      details = jsonDecode(response.body)["detail"];
+    if (response.data.isNotEmpty && response.statusCode! >= 299) {
+      details = response.data["detail"];
 
       // Need to parse validation errors
       if (details == null) {
         details = "";
-        var errorBody = jsonDecode(response.body);
+        Map<String, dynamic> validationErrors = response.data['errors'];
+
+        validationErrors.forEach((property, errorMessage) {
+          details = details! + errorMessage[0];
+          _logger
+              .severe("Validation error for property $property: $errorMessage");
+        });
+      }
+    } else {
+      details = response.statusMessage!;
+    }
+
+    return details!;
+  }
+
+  /// Checks what status the Response returned
+  ///
+  /// If the response is >=299, an exception is thrown depending on the status which should be handled externally
+  bool isValidResponse(Response response) {
+    String? details;
+
+    if (response.data.isNotEmpty && response.statusCode! >= 299) {
+      details = jsonDecode(response.data)["detail"];
+
+      // Need to parse validation errors
+      if (details == null) {
+        details = "";
+        var errorBody = jsonDecode(response.data);
         Map<String, dynamic> validationErrors = errorBody['errors'];
 
         validationErrors.forEach((property, errorMessage) {
@@ -303,10 +322,10 @@ abstract class BaseProvider<T> extends AuthProvider {
         });
       }
     } else {
-      details = response.reasonPhrase;
+      details = response.statusMessage;
     }
 
-    if (response.statusCode < 299) {
+    if (response.statusCode! < 299) {
       return true;
     } else if (response.statusCode == 400) {
       throw BaseException("Bad request: $details");
@@ -315,52 +334,52 @@ abstract class BaseProvider<T> extends AuthProvider {
     } else if (response.statusCode == 403) {
       throw ForbiddenException("$details");
     } else {
-      _logger.severe(response.body);
+      _logger.severe(response.data);
       throw BaseException("Something bad happened");
     }
   }
 
-  /// Checks what status the StreamedResponse returned
-  ///
-  /// If the response is >=299, an exception is thrown depending on the status which should be handled externally
-  Future<String?> isValidStreamedResponse(
-      http.StreamedResponse response) async {
-    String? details;
+  // /// Checks what status the StreamedResponse returned
+  // ///
+  // /// If the response is >=299, an exception is thrown depending on the status which should be handled externally
+  // Future<String?> isValidStreamedResponse(
+  //     ) async {
+  //   String? details;
 
-    String responseBody = await response.stream.bytesToString();
+  //   String responseBody = await response.stream.bytesToString();
 
-    if (responseBody.isNotEmpty && response.statusCode >= 299) {
-      details = jsonDecode(responseBody)["detail"];
+  //   if (responseBody.isNotEmpty && response.statusCode >= 299) {
+  //     details = jsonDecode(responseBody)["detail"];
 
-      // Need to parse validation errors
-      if (details == null) {
-        details = "";
-        var errorBody = jsonDecode(responseBody);
-        Map<String, dynamic> validationErrors = errorBody['errors'];
+  //     // Need to parse validation errors
+  //     if (details == null) {
+  //       details = "";
+  //       var errorBody = jsonDecode(responseBody);
+  //       Map<String, dynamic> validationErrors = errorBody['errors'];
 
-        validationErrors.forEach((property, errorMessage) {
-          details = details! + errorMessage[0];
-          _logger
-              .severe("Validation error for property $property: $errorMessage");
-        });
-      }
-    } else {
-      details = response.reasonPhrase;
-    }
+  //       validationErrors.forEach((property, errorMessage) {
+  //         details = details! + errorMessage[0];
+  //         _logger
+  //             .severe("Validation error for property $property: $errorMessage");
+  //       });
+  //     }
+  //   } else {
+  //     details = response.reasonPhrase;
+  //   }
 
-    if (response.statusCode < 299) {
-      return responseBody;
-    } else if (response.statusCode == 400) {
-      throw BaseException("Bad request: $details");
-    } else if (response.statusCode == 401) {
-      throw UnauthorizedException("$details");
-    } else if (response.statusCode == 403) {
-      throw ForbiddenException("$details");
-    } else {
-      _logger.severe(responseBody);
-      throw BaseException("Something bad happened");
-    }
-  }
+  //   if (response.statusCode < 299) {
+  //     return responseBody;
+  //   } else if (response.statusCode == 400) {
+  //     throw BaseException("Bad request: $details");
+  //   } else if (response.statusCode == 401) {
+  //     throw UnauthorizedException("$details");
+  //   } else if (response.statusCode == 403) {
+  //     throw ForbiddenException("$details");
+  //   } else {
+  //     _logger.severe(responseBody);
+  //     throw BaseException("Something bad happened");
+  //   }
+  // }
 
   /// Attempts to retrieve a new access token using the stored refresh token
   ///
@@ -369,37 +388,37 @@ abstract class BaseProvider<T> extends AuthProvider {
   /// If the token cannot be refreshed, all stored credentials are deleted and the login session is considered terminated
   Future<bool> attemptTokenRefresh() async {
     var refreshToken = await SecureStore.getValue("refresh_token");
-    Map<String, String> query = {
-      "id": await SecureStore.getValue("user_ref_id") ?? ""
-    };
+    var userRefId = await SecureStore.getValue("user_ref_id");
 
-    var headers = createHeaders(bearerToken: refreshToken ?? "");
+    if (refreshToken == null || userRefId == null) {
+      throw BaseException("No refresh token found!");
+    }
+
+    Map<String, String> query = {"id": userRefId};
+
     var queryString = getQueryString(query);
     var url = Uri.parse("${_apiUrl}users/login/refresh?$queryString");
 
-    var refreshResponse = await http.get(url, headers: headers);
-    var refreshResult = QueryResult<UserLogin>();
-
     try {
-      if (isValidResponse(refreshResponse)) {
-        var data = jsonDecode(refreshResponse.body);
+      var refreshResponse = await dio.getUri(url,
+          options: Options(headers: {"Authorization": refreshToken}));
+      var refreshResult = QueryResult<UserLogin>();
 
-        refreshResult.page = data["page"];
-        refreshResult.totalCount = data["totalCount"];
-        refreshResult.totalPages = data["totalPages"];
+      refreshResult.page = refreshResponse.data["page"];
+      refreshResult.totalCount = refreshResponse.data["totalCount"];
+      refreshResult.totalPages = refreshResponse.data["totalPages"];
 
-        for (var item in data["result"]) {
-          refreshResult.result.add(UserLogin.fromJson(item));
-        }
-
-        if (refreshResult.result[0].accessToken != null) {
-          await storeLogin(
-              loginCreds: refreshResult.result[0], shouldNotify: false);
-          return true;
-        }
+      for (var item in refreshResponse.data["result"]) {
+        refreshResult.result.add(UserLogin.fromJson(item));
       }
-    } on BaseException {
-      _logger.info("Could not refresh token");
+
+      if (refreshResult.result[0].accessToken != null) {
+        await storeLogin(
+            loginCreds: refreshResult.result[0], shouldNotify: false);
+        return true;
+      }
+    } on DioException {
+      _logger.info("Could not refresh token!");
       await eraseLogin();
       return false;
     } on Exception catch (error) {
@@ -468,5 +487,66 @@ abstract class BaseProvider<T> extends AuthProvider {
     });
 
     return query;
+  }
+
+  /// Returns a copy of the passed request
+  ///
+  /// Parameters:
+  /// - [request]: The request that should be copied
+  http.BaseRequest _copyRequest(http.BaseRequest request) {
+    http.BaseRequest requestCopy;
+
+    if (request is http.Request) {
+      requestCopy = http.Request(request.method, request.url)
+        ..encoding = request.encoding
+        ..bodyBytes = request.bodyBytes;
+    } else if (request is http.MultipartRequest) {
+      requestCopy = http.MultipartRequest(request.method, request.url)
+        ..fields.addAll(request.fields)
+        ..files.addAll(request.files);
+    } else {
+      throw Exception("Request type is unknown for copying!");
+    }
+
+    requestCopy
+      ..persistentConnection = request.persistentConnection
+      ..followRedirects = request.followRedirects
+      ..maxRedirects = request.maxRedirects
+      ..headers.addAll(request.headers);
+
+    return requestCopy;
+  }
+
+  Future<Response> handleRetry(
+      {required Uri uri,
+      required String method,
+      required Map<String, String> headers,
+      dynamic data}) async {
+    late Response response;
+    var success = await attemptTokenRefresh();
+
+    if (success == true) {
+      try {
+        var accessToken = await SecureStore.getValue("access_token");
+
+        headers["Authorization"] = accessToken ?? "";
+        response = await dio.requestUri(uri,
+            data: data, options: Options(headers: headers, method: method));
+      } on DioException catch (error) {
+        if (error.response!.statusCode == 401) {
+          throw UnauthorizedException("Failed despite a token refresh attempt");
+        } else {
+          throw BaseException(error.message!);
+        }
+      }
+    }
+
+    return response;
+  }
+
+  static void configureInterceptors() {
+    dio.interceptors.addAll([
+      ErrorInterceptor(),
+    ]);
   }
 }
