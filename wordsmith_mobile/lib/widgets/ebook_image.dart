@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:wordsmith_utils/logger.dart';
 import 'package:wordsmith_utils/size_config.dart';
@@ -36,6 +37,7 @@ class _EBookImageWidgetState extends State<EBookImageWidget> {
 
   @override
   Widget build(BuildContext context) {
+    var adaptiveTheme = AdaptiveTheme.of(context);
     Uint8List? coverArtBytes;
 
     try {
@@ -54,13 +56,25 @@ class _EBookImageWidgetState extends State<EBookImageWidget> {
     return Stack(
       alignment: Alignment.center,
       children: <Widget>[
-        ConstrainedBox(
-          constraints: BoxConstraints(
-            maxWidth: widget.maxWidth ?? _defaultMaxWidth,
-          ),
-          child: Image(
-            image: imageProvider,
-            fit: widget.fit ?? BoxFit.contain,
+        Container(
+          decoration: BoxDecoration(boxShadow: [
+            BoxShadow(
+              color: adaptiveTheme.mode == AdaptiveThemeMode.dark
+                  ? Colors.black.withOpacity(0.2)
+                  : Colors.grey.withOpacity(0.6),
+              spreadRadius: 4.0,
+              blurRadius: 8.0,
+              offset: const Offset(0.0, 3.0),
+            )
+          ]),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: widget.maxWidth ?? _defaultMaxWidth,
+            ),
+            child: Image(
+              image: imageProvider,
+              fit: widget.fit ?? BoxFit.contain,
+            ),
           ),
         ),
       ],

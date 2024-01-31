@@ -47,7 +47,7 @@ class _NavigationBarWidgetState extends State<NavigationBarWidget> {
       case 1:
         return "Profile";
       default:
-        return "Wordsmith";
+        return "";
     }
   }
 

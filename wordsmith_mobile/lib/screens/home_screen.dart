@@ -36,28 +36,32 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
   Widget build(BuildContext context) {
     _eBookProvider = context.read<EBookProvider>();
 
-    return Column(
-      children: <Widget>[
-        FutureBuilder(
-          future: _getNewlyAddedEBooks(),
-          builder: (context, AsyncSnapshot<QueryResult<EBook>> snapshot) {
-            if (snapshot.connectionState != ConnectionState.done) {
-              return const CircularProgressIndicator();
-            }
+    return Padding(
+      padding: const EdgeInsets.only(left: 14.0, right: 14.0),
+      child: Column(
+        children: <Widget>[
+          FutureBuilder(
+            future: _getNewlyAddedEBooks(),
+            builder: (context, AsyncSnapshot<QueryResult<EBook>> snapshot) {
+              if (snapshot.connectionState != ConnectionState.done) {
+                return const CircularProgressIndicator();
+              }
 
-            if (snapshot.hasError) {
-              return const Text("Could not load!");
-            }
+              if (snapshot.hasError) {
+                return const Text("Could not load!");
+              }
 
-            var ebooks = snapshot.data!.result;
+              var ebooks = snapshot.data!.result;
 
-            return HomeEBookDisplayWidget(
-              title: "Newly added",
-              ebooks: ebooks,
-            );
-          },
-        ),
-      ],
+              return HomeEBookDisplayWidget(
+                title: "New",
+                ebooks: ebooks,
+              );
+            },
+          ),
+          const Divider(),
+        ],
+      ),
     );
   }
 }

@@ -22,46 +22,45 @@ class HomeEBookDisplayWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
+          padding: const EdgeInsets.only(bottom: 0.0),
           child: Text(
             title,
-            style: theme.textTheme.headlineSmall,
-          ),
-        ),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(14.0),
-            child: CarouselSlider.builder(
-              options: CarouselOptions(
-                aspectRatio: 1.5,
-                viewportFraction: 0.55,
-                pageSnapping: false,
-              ),
-              itemCount: ebooks.length,
-              itemBuilder:
-                  (BuildContext context, int itemIndex, int pageViewIndex) {
-                if (ebooks.isEmpty) {
-                  return Container();
-                }
-
-                return Container(
-                  width: MediaQuery.of(context).size.width,
-                  margin: const EdgeInsets.symmetric(horizontal: 20.0),
-                  child: GestureDetector(
-                    onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            EBookScreenWidget(ebook: ebooks[itemIndex]),
-                      ),
-                    ),
-                    child: EBookImageWidget(
-                      coverArtUrl: ebooks[itemIndex].coverArt.imagePath,
-                    ),
-                  ),
-                );
-              },
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 32.0,
             ),
           ),
+        ),
+        CarouselSlider.builder(
+          options: CarouselOptions(
+            aspectRatio: 1.5,
+            viewportFraction: 0.50,
+            pageSnapping: true,
+            enlargeCenterPage: true,
+          ),
+          itemCount: ebooks.length,
+          itemBuilder:
+              (BuildContext context, int itemIndex, int pageViewIndex) {
+            if (ebooks.isEmpty) {
+              return Container();
+            }
+
+            return Container(
+              width: MediaQuery.of(context).size.width,
+              margin: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: GestureDetector(
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        EBookScreenWidget(ebook: ebooks[itemIndex]),
+                  ),
+                ),
+                child: EBookImageWidget(
+                  coverArtUrl: ebooks[itemIndex].coverArt.imagePath,
+                ),
+              ),
+            );
+          },
         ),
       ],
     );
