@@ -9,6 +9,7 @@ class EBookImageWidget extends StatefulWidget {
   final String? coverArtUrl;
   final double? maxWidth;
   final double? scale;
+  final BoxFit? fit;
 
   const EBookImageWidget({
     super.key,
@@ -16,6 +17,7 @@ class EBookImageWidget extends StatefulWidget {
     this.coverArtUrl,
     this.maxWidth,
     this.scale,
+    this.fit,
   });
 
   @override
@@ -49,21 +51,19 @@ class _EBookImageWidgetState extends State<EBookImageWidget> {
             : NetworkImage("$_apiUrl${widget.coverArtUrl}"))
         as ImageProvider<Object>;
 
-    return GestureDetector(
-      onTap: null,
-      child: Stack(
-        alignment: Alignment.center,
-        children: <Widget>[
-          ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: widget.maxWidth ?? _defaultMaxWidth,
-            ),
-            child: Image(
-              image: imageProvider,
-            ),
+    return Stack(
+      alignment: Alignment.center,
+      children: <Widget>[
+        ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: widget.maxWidth ?? _defaultMaxWidth,
           ),
-        ],
-      ),
+          child: Image(
+            image: imageProvider,
+            fit: widget.fit ?? BoxFit.contain,
+          ),
+        ),
+      ],
     );
   }
 }

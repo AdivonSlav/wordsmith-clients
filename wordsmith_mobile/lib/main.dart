@@ -86,9 +86,6 @@ class Application extends StatelessWidget {
         useMaterial3: true,
         fontFamily: "Inter",
         textTheme: const TextTheme(
-          headlineSmall: TextStyle(
-            fontWeight: FontWeight.normal,
-          ),
           bodyMedium: TextStyle(
             fontWeight: FontWeight.normal,
           ),
@@ -102,9 +99,6 @@ class Application extends StatelessWidget {
         useMaterial3: true,
         fontFamily: "Inter",
         textTheme: const TextTheme(
-          headlineSmall: TextStyle(
-            fontWeight: FontWeight.normal,
-          ),
           bodyMedium: TextStyle(
             fontWeight: FontWeight.normal,
           ),
