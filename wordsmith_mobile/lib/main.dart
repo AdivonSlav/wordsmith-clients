@@ -11,6 +11,7 @@ import 'package:wordsmith_utils/providers/ebook_parse_provider.dart';
 import 'package:wordsmith_utils/providers/ebook_provider.dart';
 import 'package:wordsmith_utils/providers/genre_provider.dart';
 import 'package:wordsmith_utils/providers/maturity_ratings_provider.dart';
+import 'package:wordsmith_utils/providers/user_library_provider.dart';
 import 'package:wordsmith_utils/providers/user_login_provider.dart';
 import 'package:wordsmith_utils/providers/user_provider.dart';
 import 'package:wordsmith_utils/size_config.dart';
@@ -31,12 +32,6 @@ void main() {
     LogManager.init(LogLevel.INFO);
   }
 
-  final mainLogger = LogManager.getLogger("Main");
-
-  FlutterError.onError = (FlutterErrorDetails details) {
-    mainLogger.severe(details.exception);
-  };
-
   // Disables X509 certificate verification in order for self-signed backend certificates to work
   HttpOverrides.global = MyHttpOverrides();
 
@@ -44,27 +39,14 @@ void main() {
 
   runApp(MultiProvider(
     providers: [
-      ChangeNotifierProvider(
-        create: (_) => AuthProvider(),
-      ),
-      ChangeNotifierProvider(
-        create: (_) => UserLoginProvider(),
-      ),
-      ChangeNotifierProvider(
-        create: (_) => UserProvider(),
-      ),
-      ChangeNotifierProvider(
-        create: (_) => EBookParseProvider(),
-      ),
-      ChangeNotifierProvider(
-        create: (_) => GenreProvider(),
-      ),
-      ChangeNotifierProvider(
-        create: (_) => MaturityRatingsProvider(),
-      ),
-      ChangeNotifierProvider(
-        create: (_) => EBookProvider(),
-      )
+      ChangeNotifierProvider(create: (_) => AuthProvider()),
+      ChangeNotifierProvider(create: (_) => UserLoginProvider()),
+      ChangeNotifierProvider(create: (_) => UserProvider()),
+      ChangeNotifierProvider(create: (_) => EBookParseProvider()),
+      ChangeNotifierProvider(create: (_) => GenreProvider()),
+      ChangeNotifierProvider(create: (_) => MaturityRatingsProvider()),
+      ChangeNotifierProvider(create: (_) => EBookProvider()),
+      ChangeNotifierProvider(create: (_) => UserLibraryProvider())
     ],
     child: const Application(),
   ));

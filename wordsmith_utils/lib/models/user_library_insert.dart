@@ -5,9 +5,8 @@ part "user_library_insert.g.dart";
 @JsonSerializable()
 class UserLibraryInsert {
   final int eBookId;
-  final int userId;
 
-  UserLibraryInsert(this.eBookId, this.userId);
+  UserLibraryInsert(this.eBookId);
 
   factory UserLibraryInsert.fromJson(Map<String, dynamic> json) =>
       _$UserLibraryInsertFromJson(json);

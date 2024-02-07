@@ -7,23 +7,26 @@ import 'package:wordsmith_utils/secure_store.dart';
 class UserLibraryProvider extends BaseProvider<UserLibrary> {
   UserLibraryProvider() : super("user-libraries");
 
-  Future<UserLibrary> addToUserLibrary(UserLibraryInsert insert) async {
+  Future<UserLibrary> addToUserLibrary(int eBookId) async {
     var accessToken = await SecureStore.getValue("access_token");
+    var insert = UserLibraryInsert(eBookId);
 
-    return await post(
+    return post(
         request: insert, bearerToken: accessToken ?? "", retryForRefresh: true);
   }
 
-  Future<QueryResult<UserLibrary>> getUserLibrary(
-      {required int page, required int pageSize}) async {
+  Future<QueryResult<UserLibrary>> getLibraryEntry(
+      {required int eBookId}) async {
     var accessToken = await SecureStore.getValue("access_token");
 
-    Map<String, String> queries = {
-      "page": page.toString(),
-      "pageSize": pageSize.toString(),
-    };
+    return get(
+        bearerToken: accessToken ?? "",
+        retryForRefresh: true,
+        additionalRoute: "/$eBookId");
+  }
 
-    return await get(
-        filter: queries, bearerToken: accessToken ?? "", retryForRefresh: true);
+  @override
+  UserLibrary fromJson(data) {
+    return UserLibrary.fromJson(data);
   }
 }
