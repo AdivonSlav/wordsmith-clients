@@ -14,12 +14,16 @@ UserLibrary _$UserLibraryFromJson(Map<String, dynamic> json) => UserLibrary(
       json['readProgress'] as String?,
       json['lastChapterId'] as int,
       json['lastPage'] as int,
+      json['eBook'] == null
+          ? null
+          : EBook.fromJson(json['eBook'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$UserLibraryToJson(UserLibrary instance) =>
     <String, dynamic>{
       'eBookId': instance.eBookId,
       'userId': instance.userId,
+      'eBook': instance.eBook,
       'syncDate': instance.syncDate.toIso8601String(),
       'isRead': instance.isRead,
       'readProgress': instance.readProgress,

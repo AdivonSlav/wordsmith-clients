@@ -48,10 +48,17 @@ class _EBookImageWidgetState extends State<EBookImageWidget> {
       _logger.severe("Could not decode ebook cover art $error");
     }
 
-    var imageProvider = (coverArtBytes != null
-            ? MemoryImage(coverArtBytes)
-            : NetworkImage("$_apiUrl${widget.coverArtUrl}"))
-        as ImageProvider<Object>;
+    late ImageProvider<Object> imageProvider;
+
+    if (coverArtBytes != null || widget.coverArtUrl != null) {
+      imageProvider = (coverArtBytes != null
+              ? MemoryImage(coverArtBytes)
+              : NetworkImage("$_apiUrl${widget.coverArtUrl}"))
+          as ImageProvider<Object>;
+    } else {
+      imageProvider =
+          const AssetImage("assets/images/no_image_placeholder.png");
+    }
 
     return Stack(
       alignment: Alignment.center,

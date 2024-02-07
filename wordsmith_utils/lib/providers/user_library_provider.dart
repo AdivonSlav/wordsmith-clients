@@ -25,6 +25,30 @@ class UserLibraryProvider extends BaseProvider<UserLibrary> {
         additionalRoute: "/$eBookId");
   }
 
+  Future<QueryResult<UserLibrary>> getLibraryEntries(
+      {int? maturityRatingId,
+      bool? isRead,
+      required int page,
+      required int pageSize}) async {
+    var accessToken = await SecureStore.getValue("access_token");
+
+    Map<String, String> query = {
+      "page": page.toString(),
+      "pageSize": pageSize.toString(),
+    };
+
+    if (maturityRatingId != null) {
+      query["maturityRatingId"] = maturityRatingId.toString();
+    }
+    if (isRead != null) query["isRead"] = isRead.toString();
+
+    return get(
+      filter: query,
+      bearerToken: accessToken ?? "",
+      retryForRefresh: true,
+    );
+  }
+
   @override
   UserLibrary fromJson(data) {
     return UserLibrary.fromJson(data);
