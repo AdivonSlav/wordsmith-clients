@@ -136,7 +136,7 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
               _refreshWithFilters(values);
               Navigator.of(context).pop();
             },
-          );
+        );
         });
   }
 

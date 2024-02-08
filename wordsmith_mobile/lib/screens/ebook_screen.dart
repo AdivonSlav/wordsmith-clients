@@ -76,7 +76,9 @@ class _EBookScreenWidget extends State<EBookScreenWidget> {
 
   Future<QueryResult<UserLibrary>> _getLibraryEntry() async {
     try {
-      return _userLibraryProvider.getLibraryEntry(eBookId: widget.ebook.id);
+      // return _userLibraryProvider.getLibraryEntry(eBookId: widget.ebook.id);
+      return _userLibraryProvider.getLibraryEntries(
+          eBookId: widget.ebook.id, page: 1, pageSize: 1);
     } on Exception catch (error) {
       return Future.error(error);
     }

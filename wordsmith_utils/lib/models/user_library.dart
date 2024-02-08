@@ -5,6 +5,7 @@ part "user_library.g.dart";
 
 @JsonSerializable()
 class UserLibrary {
+  final int id;
   final int eBookId;
   final int userId;
   final EBook? eBook;
@@ -14,8 +15,17 @@ class UserLibrary {
   final int lastChapterId;
   final int lastPage;
 
-  UserLibrary(this.eBookId, this.userId, this.syncDate, this.isRead,
-      this.readProgress, this.lastChapterId, this.lastPage, this.eBook);
+  UserLibrary(
+    this.id,
+    this.eBookId,
+    this.userId,
+    this.syncDate,
+    this.isRead,
+    this.readProgress,
+    this.lastChapterId,
+    this.lastPage,
+    this.eBook,
+  );
 
   factory UserLibrary.fromJson(Map<String, dynamic> json) =>
       _$UserLibraryFromJson(json);

@@ -29,6 +29,7 @@ class UserLibraryProvider extends BaseProvider<UserLibrary> {
       {int? maturityRatingId,
       bool? isRead,
       String? orderBy,
+      int? eBookId,
       required int page,
       required int pageSize}) async {
     var accessToken = await SecureStore.getValue("access_token");
@@ -43,6 +44,7 @@ class UserLibraryProvider extends BaseProvider<UserLibrary> {
     }
     if (isRead != null) query["isRead"] = isRead.toString();
     if (orderBy != null) query["orderBy"] = orderBy;
+    if (eBookId != null) query["eBookId"] = eBookId.toString();
 
     return get(
       filter: query,
@@ -50,6 +52,10 @@ class UserLibraryProvider extends BaseProvider<UserLibrary> {
       retryForRefresh: true,
     );
   }
+
+  // Future<QueryResult<string>> deleteLibraryEntry(
+  //   {}
+  // )
 
   @override
   UserLibrary fromJson(data) {

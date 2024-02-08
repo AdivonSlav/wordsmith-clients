@@ -7,6 +7,7 @@ part of 'user_library.dart';
 // **************************************************************************
 
 UserLibrary _$UserLibraryFromJson(Map<String, dynamic> json) => UserLibrary(
+      json['id'] as int,
       json['eBookId'] as int,
       json['userId'] as int,
       DateTime.parse(json['syncDate'] as String),
@@ -21,6 +22,7 @@ UserLibrary _$UserLibraryFromJson(Map<String, dynamic> json) => UserLibrary(
 
 Map<String, dynamic> _$UserLibraryToJson(UserLibrary instance) =>
     <String, dynamic>{
+      'id': instance.id,
       'eBookId': instance.eBookId,
       'userId': instance.userId,
       'eBook': instance.eBook,

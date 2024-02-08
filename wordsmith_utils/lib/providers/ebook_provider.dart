@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:wordsmith_utils/models/ebook.dart';
 import 'package:wordsmith_utils/models/ebook_insert.dart';
 import 'package:wordsmith_utils/models/query_result.dart';
@@ -31,7 +29,7 @@ class EBookProvider extends BaseProvider<EBook> {
       "title": insert.title,
       "description": insert.description,
       "encodedCoverArt": insert.encodedCoverArt,
-      "chapters": jsonEncode(insert.chapters),
+      "chapters": insert.chapters,
       "authorId": insert.authorId.toString(),
       "genreIds": insert.genreIds,
       "maturityRatingId": insert.maturityRatingId.toString(),
