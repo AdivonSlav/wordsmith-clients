@@ -28,6 +28,7 @@ class UserLibraryProvider extends BaseProvider<UserLibrary> {
   Future<QueryResult<UserLibrary>> getLibraryEntries(
       {int? maturityRatingId,
       bool? isRead,
+      String? orderBy,
       required int page,
       required int pageSize}) async {
     var accessToken = await SecureStore.getValue("access_token");
@@ -41,6 +42,7 @@ class UserLibraryProvider extends BaseProvider<UserLibrary> {
       query["maturityRatingId"] = maturityRatingId.toString();
     }
     if (isRead != null) query["isRead"] = isRead.toString();
+    if (orderBy != null) query["orderBy"] = orderBy;
 
     return get(
       filter: query,

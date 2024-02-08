@@ -3,9 +3,9 @@ import 'package:provider/provider.dart';
 import 'package:wordsmith_mobile/utils/library_filter_values.dart';
 import 'package:wordsmith_mobile/widgets/ebook_image.dart';
 import 'package:wordsmith_mobile/widgets/library_filters.dart';
+import 'package:wordsmith_mobile/widgets/library_view.dart';
 import 'package:wordsmith_utils/dialogs.dart';
 import 'package:wordsmith_utils/logger.dart';
-import 'package:wordsmith_utils/models/maturity_rating.dart';
 import 'package:wordsmith_utils/models/user_library.dart';
 import 'package:wordsmith_utils/providers/maturity_ratings_provider.dart';
 import 'package:wordsmith_utils/providers/user_library_provider.dart';
@@ -38,6 +38,9 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
       var libraryResult = await _userLibraryProvider.getLibraryEntries(
         maturityRatingId: _filterValues?.selectedMaturityRating,
         isRead: _filterValues?.isRead,
+        orderBy: _filterValues != null
+            ? "${_filterValues!.sortByProperty}:${_filterValues!.sortByDirection}"
+            : "EBook.Title:asc",
         page: _page,
         pageSize: _pageSize,
       );
@@ -66,8 +69,11 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
       var ratingResult = await _maturityRatingsProvider.getMaturityRatings();
 
       setState(() {
-        _filterValues =
-            LibraryFilterValues(maturityRatings: ratingResult.result);
+        _filterValues = LibraryFilterValues(
+          maturityRatings: ratingResult.result,
+          sortByProperty: "EBook.Title",
+          sortByDirection: "asc",
+        );
       });
     } on Exception catch (error) {
       if (context.mounted) {
@@ -115,7 +121,24 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
         });
   }
 
-  void _openSorts() {}
+  void _openSorts() {
+    showModalBottomSheet(
+        context: context,
+        builder: (BuildContext context) {
+          if (_filterValues == null) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+          return LibraryViewWidget(
+            filterValues: _filterValues!,
+            onSelect: (values) {
+              _refreshWithFilters(values);
+              Navigator.of(context).pop();
+            },
+          );
+        });
+  }
 
   @override
   void initState() {
@@ -123,8 +146,8 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
     _maturityRatingsProvider = context.read<MaturityRatingsProvider>();
     super.initState();
 
-    _getLibraryBooks();
     _buildFilterValues();
+    _getLibraryBooks();
 
     _scrollController.addListener(() {
       if (_scrollController.position.maxScrollExtent ==
