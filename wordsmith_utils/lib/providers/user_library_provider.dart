@@ -30,6 +30,7 @@ class UserLibraryProvider extends BaseProvider<UserLibrary> {
       bool? isRead,
       String? orderBy,
       int? eBookId,
+      int? libraryCategoryId,
       required int page,
       required int pageSize}) async {
     var accessToken = await SecureStore.getValue("access_token");
@@ -45,6 +46,9 @@ class UserLibraryProvider extends BaseProvider<UserLibrary> {
     if (isRead != null) query["isRead"] = isRead.toString();
     if (orderBy != null) query["orderBy"] = orderBy;
     if (eBookId != null) query["eBookId"] = eBookId.toString();
+    if (libraryCategoryId != null) {
+      query["userLibraryCategoryId"] = libraryCategoryId.toString();
+    }
 
     return get(
       filter: query,

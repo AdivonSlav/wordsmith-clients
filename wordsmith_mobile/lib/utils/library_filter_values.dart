@@ -1,4 +1,5 @@
 import 'package:wordsmith_utils/models/maturity_rating/maturity_rating.dart';
+import 'package:wordsmith_utils/models/user_library_category/user_library_category.dart';
 
 class LibraryFilterValues {
   final List<MaturityRating> maturityRatings;
@@ -6,6 +7,7 @@ class LibraryFilterValues {
   String sortByDirection;
   int? selectedMaturityRating;
   bool? isRead;
+  UserLibraryCategory? selectedCategory;
 
   LibraryFilterValues({
     required this.maturityRatings,

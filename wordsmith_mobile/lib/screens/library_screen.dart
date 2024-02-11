@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wordsmith_mobile/utils/library_filter_values.dart';
 import 'package:wordsmith_mobile/widgets/ebook_image.dart';
+import 'package:wordsmith_mobile/widgets/library_categories.dart';
 import 'package:wordsmith_mobile/widgets/library_filters.dart';
 import 'package:wordsmith_mobile/widgets/library_view.dart';
 import 'package:wordsmith_utils/dialogs.dart';
+import 'package:wordsmith_utils/exceptions/unauthorized_exception.dart';
 import 'package:wordsmith_utils/logger.dart';
 import 'package:wordsmith_utils/models/user_library/user_library.dart';
 import 'package:wordsmith_utils/providers/maturity_ratings_provider.dart';
@@ -41,6 +43,7 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
         orderBy: _filterValues != null
             ? "${_filterValues!.sortByProperty}:${_filterValues!.sortByDirection}"
             : "EBook.Title:asc",
+        libraryCategoryId: _filterValues?.selectedCategory?.id,
         page: _page,
         pageSize: _pageSize,
       );
@@ -75,6 +78,8 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
           sortByDirection: "asc",
         );
       });
+    } on UnauthorizedException catch (error) {
+      _logger.info(error);
     } on Exception catch (error) {
       if (context.mounted) {
         await showErrorDialog(
@@ -100,6 +105,36 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
       _filterValues = values;
       _refresh();
     });
+  }
+
+  Widget _buildCategoryIndicator() {
+    if (_filterValues?.selectedCategory != null) {
+      return Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Flexible(
+                child: Text(
+                  "Showing category: ${_filterValues!.selectedCategory!.name}",
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              IconButton(
+                onPressed: () {
+                  _filterValues?.selectedCategory = null;
+                  _refresh();
+                },
+                icon: const Icon(Icons.remove_circle),
+              ),
+            ],
+          ),
+        ],
+      );
+    }
+
+    return const SizedBox(height: 15.0);
   }
 
   void _openFilters() {
@@ -140,6 +175,27 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
         });
   }
 
+  void _openCategories() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        if (_filterValues == null) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+
+        return LibraryCategoriesWidget(
+          filterValues: _filterValues!,
+          onSelect: (values) {
+            _refreshWithFilters(values);
+            Navigator.of(context).pop();
+          },
+        );
+      },
+    );
+  }
+
   @override
   void initState() {
     _userLibraryProvider = context.read<UserLibraryProvider>();
@@ -176,15 +232,18 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               IconButton(onPressed: _openFilters, icon: const Icon(Icons.tune)),
+              const Spacer(),
+              TextButton(
+                onPressed: _openCategories,
+                child: const Text("Categories"),
+              ),
               IconButton(onPressed: _openSorts, icon: const Icon(Icons.sort)),
             ],
           ),
           const Divider(
             height: 1.0,
           ),
-          const SizedBox(
-            height: 15.0,
-          ),
+          Builder(builder: (context) => _buildCategoryIndicator()),
           SizedBox(
             height: size.height * 0.5,
             child: RefreshIndicator(
