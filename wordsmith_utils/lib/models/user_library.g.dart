@@ -13,6 +13,7 @@ UserLibrary _$UserLibraryFromJson(Map<String, dynamic> json) => UserLibrary(
       DateTime.parse(json['syncDate'] as String),
       json['isRead'] as bool,
       json['readProgress'] as String?,
+      json['userLibraryCategoryId'] as int?,
       json['lastChapterId'] as int,
       json['lastPage'] as int,
       json['eBook'] == null
@@ -29,6 +30,7 @@ Map<String, dynamic> _$UserLibraryToJson(UserLibrary instance) =>
       'syncDate': instance.syncDate.toIso8601String(),
       'isRead': instance.isRead,
       'readProgress': instance.readProgress,
+      'userLibraryCategoryId': instance.userLibraryCategoryId,
       'lastChapterId': instance.lastChapterId,
       'lastPage': instance.lastPage,
     };
