@@ -8,7 +8,7 @@ import "package:wordsmith_utils/dialogs.dart";
 import "package:wordsmith_utils/exceptions/base_exception.dart";
 import "package:wordsmith_utils/image_helper.dart";
 import "package:wordsmith_utils/logger.dart";
-import "package:wordsmith_utils/models/user_update.dart";
+import "package:wordsmith_utils/models/user/user_update.dart";
 import "package:wordsmith_utils/providers/auth_provider.dart";
 import "package:wordsmith_utils/providers/user_provider.dart";
 import "package:wordsmith_utils/size_config.dart";

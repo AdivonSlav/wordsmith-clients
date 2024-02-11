@@ -1,4 +1,4 @@
-import 'package:wordsmith_utils/models/maturity_rating.dart';
+import 'package:wordsmith_utils/models/maturity_rating/maturity_rating.dart';
 
 class LibraryFilterValues {
   final List<MaturityRating> maturityRatings;

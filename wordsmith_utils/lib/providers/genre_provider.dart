@@ -1,4 +1,4 @@
-import 'package:wordsmith_utils/models/genre.dart';
+import 'package:wordsmith_utils/models/genre/genre.dart';
 import 'package:wordsmith_utils/models/query_result.dart';
 import 'package:wordsmith_utils/providers/base_provider.dart';
 

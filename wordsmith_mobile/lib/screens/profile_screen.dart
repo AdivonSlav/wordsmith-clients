@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wordsmith_mobile/widgets/profile_image.dart';
 import 'package:wordsmith_utils/datetime_formatter.dart';
-import 'package:wordsmith_utils/models/user.dart';
+import 'package:wordsmith_utils/models/user/user.dart';
 import 'package:wordsmith_utils/size_config.dart';
 
 class ProfileScreenWidget extends StatefulWidget {

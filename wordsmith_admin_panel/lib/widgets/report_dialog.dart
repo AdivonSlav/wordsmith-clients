@@ -4,8 +4,8 @@ import "package:wordsmith_admin_panel/widgets/text_field.dart";
 import "package:wordsmith_utils/datetime_formatter.dart";
 import "package:wordsmith_utils/dialogs.dart";
 import "package:wordsmith_utils/logger.dart";
-import "package:wordsmith_utils/models/ebook_report.dart";
-import "package:wordsmith_utils/models/user_report.dart";
+import "package:wordsmith_utils/models/ebook_report/ebook_report.dart";
+import "package:wordsmith_utils/models/user_report/user_report.dart";
 import "package:wordsmith_utils/size_config.dart";
 
 Future<dynamic> showReportDialog(

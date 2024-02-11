@@ -1,5 +1,5 @@
 import "package:json_annotation/json_annotation.dart";
-import "package:wordsmith_utils/models/image.dart";
+import "package:wordsmith_utils/models/image/image.dart";
 
 part "user.g.dart";
 

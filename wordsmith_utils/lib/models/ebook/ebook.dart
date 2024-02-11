@@ -1,7 +1,7 @@
 import "package:json_annotation/json_annotation.dart";
-import "package:wordsmith_utils/models/image.dart";
-import "package:wordsmith_utils/models/maturity_rating.dart";
-import "package:wordsmith_utils/models/user.dart";
+import "package:wordsmith_utils/models/image/image.dart";
+import "package:wordsmith_utils/models/maturity_rating/maturity_rating.dart";
+import "package:wordsmith_utils/models/user/user.dart";
 
 part "ebook.g.dart";
 

@@ -1,4 +1,4 @@
-import "package:wordsmith_utils/models/ebook_parse.dart";
+import "package:wordsmith_utils/models/ebook/ebook_parse.dart";
 import "package:wordsmith_utils/models/transfer_file.dart";
 import "package:wordsmith_utils/providers/base_provider.dart";
 import "package:wordsmith_utils/secure_store.dart";

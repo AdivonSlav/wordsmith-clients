@@ -5,9 +5,9 @@ import 'package:wordsmith_mobile/widgets/ebook_rating_stars.dart';
 import 'package:wordsmith_utils/datetime_formatter.dart';
 import 'package:wordsmith_utils/dialogs.dart';
 import 'package:wordsmith_utils/logger.dart';
-import 'package:wordsmith_utils/models/ebook.dart';
+import 'package:wordsmith_utils/models/ebook/ebook.dart';
 import 'package:wordsmith_utils/models/query_result.dart';
-import 'package:wordsmith_utils/models/user_library.dart';
+import 'package:wordsmith_utils/models/user_library/user_library.dart';
 import 'package:wordsmith_utils/providers/user_library_provider.dart';
 
 class EBookScreenWidget extends StatefulWidget {

@@ -1,6 +1,6 @@
-import "package:wordsmith_utils/models/user.dart";
-import "package:wordsmith_utils/models/user_insert.dart";
-import "package:wordsmith_utils/models/user_update.dart";
+import "package:wordsmith_utils/models/user/user.dart";
+import "package:wordsmith_utils/models/user/user_insert.dart";
+import "package:wordsmith_utils/models/user/user_update.dart";
 import "package:wordsmith_utils/providers/base_provider.dart";
 import "package:wordsmith_utils/secure_store.dart";
 

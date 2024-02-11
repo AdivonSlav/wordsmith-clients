@@ -7,7 +7,7 @@ import "package:wordsmith_utils/models/query_result.dart";
 import "package:http/http.dart" as http;
 import "package:http_parser/http_parser.dart";
 import "package:wordsmith_utils/models/transfer_file.dart";
-import "package:wordsmith_utils/models/user_login.dart";
+import "package:wordsmith_utils/models/user/user_login.dart";
 import "package:wordsmith_utils/providers/auth_provider.dart";
 import "package:wordsmith_utils/secure_store.dart";
 

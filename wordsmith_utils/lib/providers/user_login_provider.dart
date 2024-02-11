@@ -1,4 +1,4 @@
-import "package:wordsmith_utils/models/user_login.dart";
+import "package:wordsmith_utils/models/user/user_login.dart";
 import "package:wordsmith_utils/providers/base_provider.dart";
 
 class UserLoginProvider extends BaseProvider<UserLogin> {

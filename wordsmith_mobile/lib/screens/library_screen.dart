@@ -6,7 +6,7 @@ import 'package:wordsmith_mobile/widgets/library_filters.dart';
 import 'package:wordsmith_mobile/widgets/library_view.dart';
 import 'package:wordsmith_utils/dialogs.dart';
 import 'package:wordsmith_utils/logger.dart';
-import 'package:wordsmith_utils/models/user_library.dart';
+import 'package:wordsmith_utils/models/user_library/user_library.dart';
 import 'package:wordsmith_utils/providers/maturity_ratings_provider.dart';
 import 'package:wordsmith_utils/providers/user_library_provider.dart';
 
@@ -136,7 +136,7 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
               _refreshWithFilters(values);
               Navigator.of(context).pop();
             },
-        );
+          );
         });
   }
 

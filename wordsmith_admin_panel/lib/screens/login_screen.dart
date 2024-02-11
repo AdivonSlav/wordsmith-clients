@@ -1,13 +1,13 @@
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:provider/provider.dart";
+import "package:wordsmith_utils/models/user/user_login.dart";
 import "package:wordsmith_utils/providers/auth_provider.dart";
 import "package:wordsmith_utils/size_config.dart";
 import "package:wordsmith_admin_panel/widgets/input_field.dart";
 import "package:wordsmith_utils/dialogs.dart";
 import "package:wordsmith_utils/exceptions/base_exception.dart";
 import "package:wordsmith_utils/logger.dart";
-import "package:wordsmith_utils/models/user_login.dart";
 import "package:wordsmith_utils/providers/user_login_provider.dart";
 import "package:wordsmith_utils/validators.dart";
 

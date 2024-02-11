@@ -1,5 +1,5 @@
-import 'package:wordsmith_utils/models/ebook.dart';
-import 'package:wordsmith_utils/models/ebook_insert.dart';
+import 'package:wordsmith_utils/models/ebook/ebook.dart';
+import 'package:wordsmith_utils/models/ebook/ebook_insert.dart';
 import 'package:wordsmith_utils/models/query_result.dart';
 import 'package:wordsmith_utils/models/transfer_file.dart';
 import 'package:wordsmith_utils/providers/base_provider.dart';

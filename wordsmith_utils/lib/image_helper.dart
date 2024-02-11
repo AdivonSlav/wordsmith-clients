@@ -3,7 +3,7 @@ import "dart:io";
 import "dart:typed_data";
 import "package:file_selector/file_selector.dart";
 import "package:mime/mime.dart";
-import "package:wordsmith_utils/models/image_insert.dart";
+import "package:wordsmith_utils/models/image/image_insert.dart";
 
 abstract class ImageHelper {
   // Allowed file formats are done on a per-platform basis

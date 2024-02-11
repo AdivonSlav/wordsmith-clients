@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:wordsmith_mobile/screens/ebook_screen.dart';
 import 'package:wordsmith_mobile/widgets/ebook_image.dart';
 import 'package:wordsmith_utils/logger.dart';
-import 'package:wordsmith_utils/models/ebook.dart';
+import 'package:wordsmith_utils/models/ebook/ebook.dart';
 
 class HomeEBookDisplayWidget extends StatelessWidget {
   final String title;

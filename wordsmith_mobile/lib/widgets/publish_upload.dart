@@ -4,7 +4,7 @@ import 'package:wordsmith_utils/dialogs.dart';
 import 'package:wordsmith_utils/epub_helper.dart';
 import 'package:wordsmith_utils/exceptions/base_exception.dart';
 import 'package:wordsmith_utils/logger.dart';
-import 'package:wordsmith_utils/models/ebook_parse.dart';
+import 'package:wordsmith_utils/models/ebook/ebook_parse.dart';
 import 'package:wordsmith_utils/models/transfer_file.dart';
 import 'package:wordsmith_utils/providers/ebook_parse_provider.dart';
 import 'package:wordsmith_utils/size_config.dart';

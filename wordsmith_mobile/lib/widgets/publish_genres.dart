@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:wordsmith_mobile/widgets/multiselect_dialog.dart';
 import 'package:wordsmith_utils/exceptions/base_exception.dart';
 import 'package:wordsmith_utils/logger.dart';
-import 'package:wordsmith_utils/models/genre.dart';
+import 'package:wordsmith_utils/models/genre/genre.dart';
 import 'package:wordsmith_utils/models/query_result.dart';
 import 'package:wordsmith_utils/providers/genre_provider.dart';
 

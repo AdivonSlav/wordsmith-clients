@@ -1,6 +1,6 @@
 import "package:json_annotation/json_annotation.dart";
-import "package:wordsmith_utils/models/report_details.dart";
-import "package:wordsmith_utils/models/user.dart";
+import "package:wordsmith_utils/models/report/report_details.dart";
+import "package:wordsmith_utils/models/user/user.dart";
 
 part "user_report.g.dart";
 

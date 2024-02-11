@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:wordsmith_mobile/widgets/home_ebook_display.dart';
 import 'package:wordsmith_utils/exceptions/base_exception.dart';
 import 'package:wordsmith_utils/logger.dart';
-import 'package:wordsmith_utils/models/ebook.dart';
+import 'package:wordsmith_utils/models/ebook/ebook.dart';
 import 'package:wordsmith_utils/models/query_result.dart';
 import 'package:wordsmith_utils/providers/ebook_provider.dart';
 

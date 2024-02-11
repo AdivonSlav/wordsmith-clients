@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:wordsmith_utils/models/user.dart';
-import 'package:wordsmith_utils/models/user_login.dart';
+import 'package:wordsmith_utils/models/user/user.dart';
+import 'package:wordsmith_utils/models/user/user_login.dart';
 import 'package:wordsmith_utils/secure_store.dart';
 
 class AuthProvider with ChangeNotifier {

@@ -5,8 +5,8 @@ import 'package:wordsmith_mobile/widgets/publish_upload.dart';
 import 'package:wordsmith_utils/dialogs.dart';
 import 'package:wordsmith_utils/exceptions/base_exception.dart';
 import 'package:wordsmith_utils/logger.dart';
-import 'package:wordsmith_utils/models/ebook_insert.dart';
-import 'package:wordsmith_utils/models/ebook_parse.dart';
+import 'package:wordsmith_utils/models/ebook/ebook_insert.dart';
+import 'package:wordsmith_utils/models/ebook/ebook_parse.dart';
 import 'package:wordsmith_utils/models/transfer_file.dart';
 import 'package:wordsmith_utils/providers/ebook_provider.dart';
 

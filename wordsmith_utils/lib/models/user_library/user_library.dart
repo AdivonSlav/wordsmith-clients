@@ -1,5 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:wordsmith_utils/models/ebook.dart';
+import 'package:wordsmith_utils/models/ebook/ebook.dart';
 
 part "user_library.g.dart";
 

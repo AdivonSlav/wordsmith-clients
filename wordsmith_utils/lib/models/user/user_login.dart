@@ -1,5 +1,5 @@
 import "package:json_annotation/json_annotation.dart";
-import "package:wordsmith_utils/models/user.dart";
+import "package:wordsmith_utils/models/user/user.dart";
 
 part "user_login.g.dart";
 
