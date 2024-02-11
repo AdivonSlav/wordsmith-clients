@@ -6,7 +6,6 @@ import 'package:wordsmith_mobile/widgets/library_categories.dart';
 import 'package:wordsmith_mobile/widgets/library_filters.dart';
 import 'package:wordsmith_mobile/widgets/library_view.dart';
 import 'package:wordsmith_utils/dialogs.dart';
-import 'package:wordsmith_utils/exceptions/unauthorized_exception.dart';
 import 'package:wordsmith_utils/logger.dart';
 import 'package:wordsmith_utils/models/user_library/user_library.dart';
 import 'package:wordsmith_utils/providers/maturity_ratings_provider.dart';
@@ -22,7 +21,6 @@ class LibraryScreenWidget extends StatefulWidget {
 class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
   final _logger = LogManager.getLogger("LibraryScreen");
   late UserLibraryProvider _userLibraryProvider;
-  late MaturityRatingsProvider _maturityRatingsProvider;
   final _scrollController = ScrollController();
 
   final List<UserLibrary> _userLibraryList = [];
@@ -38,7 +36,7 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
 
     try {
       var libraryResult = await _userLibraryProvider.getLibraryEntries(
-        maturityRatingId: _filterValues?.selectedMaturityRating,
+        maturityRatingId: _filterValues?.selectedMaturityRatingId,
         isRead: _filterValues?.isRead,
         orderBy: _filterValues != null
             ? "${_filterValues!.sortByProperty}:${_filterValues!.sortByDirection}"
@@ -68,25 +66,12 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
   }
 
   Future _buildFilterValues() async {
-    try {
-      var ratingResult = await _maturityRatingsProvider.getMaturityRatings();
-
-      setState(() {
-        _filterValues = LibraryFilterValues(
-          maturityRatings: ratingResult.result,
-          sortByProperty: "EBook.Title",
-          sortByDirection: "asc",
-        );
-      });
-    } on UnauthorizedException catch (error) {
-      _logger.info(error);
-    } on Exception catch (error) {
-      if (context.mounted) {
-        await showErrorDialog(
-            context, const Text("Error"), Text(error.toString()));
-      }
-      _logger.severe(error);
-    }
+    setState(() {
+      _filterValues = LibraryFilterValues(
+        sortByProperty: "EBook.Title",
+        sortByDirection: "asc",
+      );
+    });
   }
 
   Future _refresh() async {
@@ -199,7 +184,6 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
   @override
   void initState() {
     _userLibraryProvider = context.read<UserLibraryProvider>();
-    _maturityRatingsProvider = context.read<MaturityRatingsProvider>();
     super.initState();
 
     _buildFilterValues();
