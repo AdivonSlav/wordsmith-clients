@@ -1,6 +1,6 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:wordsmith_mobile/widgets/settings_tile_button.dart';
+import 'package:wordsmith_mobile/widgets/settings/settings_tile_button.dart';
 
 class SettingsThemeWidget extends StatefulWidget {
   const SettingsThemeWidget({super.key});

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:wordsmith_mobile/widgets/ebook_image.dart';
+import 'package:wordsmith_mobile/widgets/ebook/ebook_image.dart';
 import 'package:wordsmith_mobile/widgets/input_field.dart';
-import 'package:wordsmith_mobile/widgets/publish_chapters_view.dart';
-import 'package:wordsmith_mobile/widgets/publish_genres.dart';
-import 'package:wordsmith_mobile/widgets/publish_instructions.dart';
-import 'package:wordsmith_mobile/widgets/publish_maturity_ratings.dart';
+import 'package:wordsmith_mobile/widgets/publish/publish_chapters_view.dart';
+import 'package:wordsmith_mobile/widgets/publish/publish_genres.dart';
+import 'package:wordsmith_mobile/widgets/publish/publish_instructions.dart';
+import 'package:wordsmith_mobile/widgets/publish/publish_maturity_ratings.dart';
 import 'package:wordsmith_utils/dialogs.dart';
 import 'package:wordsmith_utils/logger.dart';
 import 'package:wordsmith_utils/models/ebook/ebook_insert.dart';

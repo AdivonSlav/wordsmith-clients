@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wordsmith_mobile/utils/library_filter_values.dart';
-import 'package:wordsmith_mobile/widgets/ebook_image.dart';
-import 'package:wordsmith_mobile/widgets/library_categories.dart';
-import 'package:wordsmith_mobile/widgets/library_filters.dart';
-import 'package:wordsmith_mobile/widgets/library_view.dart';
+import 'package:wordsmith_mobile/widgets/ebook/ebook_image.dart';
+import 'package:wordsmith_mobile/widgets/library/library_categories.dart';
+import 'package:wordsmith_mobile/widgets/library/library_filters.dart';
+import 'package:wordsmith_mobile/widgets/library/library_view.dart';
 import 'package:wordsmith_utils/dialogs.dart';
 import 'package:wordsmith_utils/logger.dart';
 import 'package:wordsmith_utils/models/user_library/user_library.dart';
-import 'package:wordsmith_utils/providers/maturity_ratings_provider.dart';
 import 'package:wordsmith_utils/providers/user_library_provider.dart';
 
 class LibraryScreenWidget extends StatefulWidget {

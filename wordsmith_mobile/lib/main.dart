@@ -3,28 +3,12 @@ import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:wordsmith_mobile/widgets/navigation_bar.dart';
+import 'package:wordsmith_mobile/http_override.dart';
+import 'package:wordsmith_mobile/providers.dart';
+import 'package:wordsmith_mobile/widgets/navigation_bar/navigation_bar.dart';
 import 'package:wordsmith_utils/datetime_formatter.dart';
 import 'package:wordsmith_utils/logger.dart';
-import 'package:wordsmith_utils/providers/auth_provider.dart';
-import 'package:wordsmith_utils/providers/ebook_parse_provider.dart';
-import 'package:wordsmith_utils/providers/ebook_provider.dart';
-import 'package:wordsmith_utils/providers/genre_provider.dart';
-import 'package:wordsmith_utils/providers/maturity_ratings_provider.dart';
-import 'package:wordsmith_utils/providers/user_library_category_provider.dart';
-import 'package:wordsmith_utils/providers/user_library_provider.dart';
-import 'package:wordsmith_utils/providers/user_login_provider.dart';
-import 'package:wordsmith_utils/providers/user_provider.dart';
 import 'package:wordsmith_utils/size_config.dart';
-
-class MyHttpOverrides extends HttpOverrides {
-  @override
-  HttpClient createHttpClient(SecurityContext? context) {
-    return super.createHttpClient(context)
-      ..badCertificateCallback =
-          (X509Certificate cert, String host, int port) => true;
-  }
-}
 
 void main() {
   if (kReleaseMode) {
@@ -34,22 +18,12 @@ void main() {
   }
 
   // Disables X509 certificate verification in order for self-signed backend certificates to work
-  HttpOverrides.global = MyHttpOverrides();
+  HttpOverrides.global = X509Override();
 
   initializeDateFormattingForLocale();
 
   runApp(MultiProvider(
-    providers: [
-      ChangeNotifierProvider(create: (_) => AuthProvider()),
-      ChangeNotifierProvider(create: (_) => UserLoginProvider()),
-      ChangeNotifierProvider(create: (_) => UserProvider()),
-      ChangeNotifierProvider(create: (_) => EBookParseProvider()),
-      ChangeNotifierProvider(create: (_) => GenreProvider()),
-      ChangeNotifierProvider(create: (_) => MaturityRatingsProvider()),
-      ChangeNotifierProvider(create: (_) => EBookProvider()),
-      ChangeNotifierProvider(create: (_) => UserLibraryProvider()),
-      ChangeNotifierProvider(create: (_) => UserLibraryCategoryProvider()),
-    ],
+    providers: getProviders(),
     child: const Application(),
   ));
 }

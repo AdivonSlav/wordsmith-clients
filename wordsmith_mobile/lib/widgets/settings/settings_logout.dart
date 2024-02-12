@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:wordsmith_mobile/widgets/settings_tile_button.dart';
+import 'package:wordsmith_mobile/widgets/settings/settings_tile_button.dart';
 import 'package:wordsmith_utils/providers/auth_provider.dart';
 
 class SettingsLogoutWidget extends StatelessWidget {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:wordsmith_mobile/widgets/settings_logout.dart';
-import 'package:wordsmith_mobile/widgets/settings_theme.dart';
+import 'package:wordsmith_mobile/widgets/settings/settings_logout.dart';
+import 'package:wordsmith_mobile/widgets/settings/settings_theme.dart';
 
 class SettingsScreenWidget extends StatefulWidget {
   const SettingsScreenWidget({super.key});

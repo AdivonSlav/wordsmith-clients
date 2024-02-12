@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:wordsmith_mobile/widgets/ebook_image.dart';
-import 'package:wordsmith_mobile/widgets/ebook_rating_stars.dart';
+import 'package:wordsmith_mobile/widgets/ebook/ebook_image.dart';
+import 'package:wordsmith_mobile/widgets/ebook/ebook_rating_stars.dart';
 import 'package:wordsmith_utils/datetime_formatter.dart';
 import 'package:wordsmith_utils/dialogs.dart';
 import 'package:wordsmith_utils/logger.dart';
