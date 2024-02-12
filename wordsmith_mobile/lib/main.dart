@@ -3,11 +3,19 @@ import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:wordsmith_mobile/http_override.dart';
-import 'package:wordsmith_mobile/providers.dart';
+import 'package:wordsmith_mobile/x509_override.dart';
 import 'package:wordsmith_mobile/widgets/navigation_bar/navigation_bar.dart';
 import 'package:wordsmith_utils/datetime_formatter.dart';
 import 'package:wordsmith_utils/logger.dart';
+import 'package:wordsmith_utils/providers/auth_provider.dart';
+import 'package:wordsmith_utils/providers/ebook_parse_provider.dart';
+import 'package:wordsmith_utils/providers/ebook_provider.dart';
+import 'package:wordsmith_utils/providers/genre_provider.dart';
+import 'package:wordsmith_utils/providers/maturity_ratings_provider.dart';
+import 'package:wordsmith_utils/providers/user_library_category_provider.dart';
+import 'package:wordsmith_utils/providers/user_library_provider.dart';
+import 'package:wordsmith_utils/providers/user_login_provider.dart';
+import 'package:wordsmith_utils/providers/user_provider.dart';
 import 'package:wordsmith_utils/size_config.dart';
 
 void main() {
@@ -23,7 +31,17 @@ void main() {
   initializeDateFormattingForLocale();
 
   runApp(MultiProvider(
-    providers: getProviders(),
+    providers: [
+      ChangeNotifierProvider(create: (_) => AuthProvider()),
+      ChangeNotifierProvider(create: (_) => UserLoginProvider()),
+      ChangeNotifierProvider(create: (_) => UserProvider()),
+      ChangeNotifierProvider(create: (_) => EBookParseProvider()),
+      ChangeNotifierProvider(create: (_) => GenreProvider()),
+      ChangeNotifierProvider(create: (_) => MaturityRatingsProvider()),
+      ChangeNotifierProvider(create: (_) => EBookProvider()),
+      ChangeNotifierProvider(create: (_) => UserLibraryProvider()),
+      ChangeNotifierProvider(create: (_) => UserLibraryCategoryProvider()),
+    ],
     child: const Application(),
   ));
 }

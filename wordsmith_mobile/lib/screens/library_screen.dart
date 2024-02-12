@@ -1,3 +1,5 @@
+import 'dart:collection';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wordsmith_mobile/utils/library_filter_values.dart';
@@ -28,6 +30,9 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
   var _hasMore = true;
   var _isLoading = false;
   LibraryFilterValues? _filterValues;
+
+  var _isSelectingBooks = false;
+  final _selectedIndices = HashSet<int>();
 
   Future _getLibraryBooks() async {
     if (_isLoading) return;
@@ -180,6 +185,52 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
     );
   }
 
+  void _addBookToSelection(int index) {
+    setState(() {
+      if (_selectedIndices.isEmpty) {
+        _isSelectingBooks = true;
+        _logger.info("Started selecting books!");
+      }
+
+      _selectedIndices.add(index);
+      _logger.info(
+          "Selected book $index. Selection is now at ${_selectedIndices.length}");
+    });
+  }
+
+  void _removeBookFromSelection(int index) {
+    setState(() {
+      _selectedIndices.remove(index);
+      _logger.info(
+          "Removed book $index from selection. Selection is now at ${_selectedIndices.length}");
+
+      if (_selectedIndices.isEmpty) {
+        _isSelectingBooks = false;
+        _logger.info("Stopped selecting books");
+      }
+    });
+  }
+
+  bool _isBookSelected(int index) {
+    return _isSelectingBooks && _selectedIndices.contains(index);
+  }
+
+  void _onBookTap(int index) {
+    if (_isSelectingBooks) {
+      if (!_selectedIndices.contains(index)) {
+        _addBookToSelection(index);
+      } else {
+        _removeBookFromSelection(index);
+      }
+    }
+  }
+
+  void _onBookLongPress(int index) {
+    if (_isSelectingBooks) return;
+
+    _addBookToSelection(index);
+  }
+
   @override
   void initState() {
     _userLibraryProvider = context.read<UserLibraryProvider>();
@@ -206,6 +257,8 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
+    final imageWidth = size.width;
+    final imageHeight = size.height;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10.0),
@@ -228,27 +281,65 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
           ),
           Builder(builder: (context) => _buildCategoryIndicator()),
           SizedBox(
-            height: size.height * 0.5,
+            height: size.height * 0.70,
             child: RefreshIndicator(
               onRefresh: _refresh,
               child: GridView.builder(
                 physics: const AlwaysScrollableScrollPhysics(),
                 controller: _scrollController,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 3,
-                  crossAxisSpacing: 1.0,
+                  crossAxisSpacing: 15.0,
                   mainAxisSpacing: 15.0,
+                  childAspectRatio: size.width / (size.height * 0.75),
                 ),
                 itemCount: _userLibraryList.length + 1,
                 itemBuilder: (BuildContext context, int index) {
                   if (index < _userLibraryList.length) {
                     var ebook = _userLibraryList[index].eBook!;
+                    var isSelected = _isBookSelected(index);
 
                     return GridTile(
                       child: GestureDetector(
-                        onTap: null,
-                        child: EBookImageWidget(
-                          coverArtUrl: ebook.coverArt.imagePath,
+                        onTap: () => _onBookTap(index),
+                        onLongPress: () => _onBookLongPress(index),
+                        child: Stack(
+                          children: <Widget>[
+                            ImageFiltered(
+                              imageFilter: ImageFilter.blur(
+                                sigmaX: 1,
+                                sigmaY: 1,
+                              ),
+                              enabled: isSelected,
+                              child: EBookImageWidget(
+                                width: imageWidth,
+                                height: imageHeight,
+                                coverArtUrl: ebook.coverArt.imagePath,
+                                fit: BoxFit.fill,
+                              ),
+                            ),
+                            Align(
+                              alignment: Alignment.center,
+                              child: Visibility(
+                                visible: isSelected,
+                                child: LayoutBuilder(
+                                  builder: (context, constraints) {
+                                    return Icon(
+                                      Icons.check,
+                                      size: constraints.maxWidth * 0.4,
+                                      color: Colors.white,
+                                      shadows: const <Shadow>[
+                                        Shadow(
+                                          color: Colors.black,
+                                          blurRadius: 15.0,
+                                        )
+                                      ],
+                                    );
+                                  },
+                                ),
+                              ),
+                            )
+                          ],
                         ),
                       ),
                     );

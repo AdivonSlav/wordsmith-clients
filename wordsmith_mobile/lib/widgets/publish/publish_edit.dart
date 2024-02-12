@@ -110,6 +110,7 @@ class _PublishEditWidgetState extends State<PublishEditWidget> {
   @override
   Widget build(BuildContext context) {
     _logger.info("Loaded ebook ${widget.parsedEbook.title} for editing");
+    var size = MediaQuery.of(context).size;
 
     return SingleChildScrollView(
       child: Padding(
@@ -119,16 +120,20 @@ class _PublishEditWidgetState extends State<PublishEditWidget> {
           children: <Widget>[
             const PublishInstructionsWidget(),
             const SizedBox(
-              height: 32.0,
+              height: 8.0,
             ),
             Form(
               key: _formKey,
               child: Column(
                 children: [
                   EBookImageWidget(
-                      encodedCoverArt: widget.parsedEbook.encodedCoverArt),
+                    width: size.width * 0.75,
+                    height: size.height * 0.60,
+                    fit: BoxFit.fill,
+                    encodedCoverArt: widget.parsedEbook.encodedCoverArt,
+                  ),
                   const SizedBox(
-                    height: 20.0,
+                    height: 32.0,
                   ),
                   Column(
                     children: [

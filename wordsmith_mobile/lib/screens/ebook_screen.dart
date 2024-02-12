@@ -122,9 +122,11 @@ class _EBookScreenWidget extends State<EBookScreenWidget> {
                 Hero(
                   tag: widget.ebook.title,
                   child: EBookImageWidget(
+                    width: size.width,
+                    height: size.height * 0.75,
                     coverArtUrl: widget.ebook.coverArt.imagePath,
-                    maxWidth: size.width,
                     fit: BoxFit.fitWidth,
+                    imageAlignment: Alignment.topCenter,
                   ),
                 ),
                 Padding(
