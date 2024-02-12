@@ -59,6 +59,8 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
         }
 
         _userLibraryList.addAll(libraryResult.result);
+        _userLibraryList.addAll(libraryResult.result);
+        _userLibraryList.addAll(libraryResult.result);
       });
     } on Exception catch (error) {
       if (context.mounted) {
@@ -263,7 +265,7 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10.0),
       child: Column(
-        children: <Widget>[
+        children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -280,83 +282,86 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
             height: 1.0,
           ),
           Builder(builder: (context) => _buildCategoryIndicator()),
-          SizedBox(
-            height: size.height * 0.70,
+          Expanded(
             child: RefreshIndicator(
               onRefresh: _refresh,
-              child: GridView.builder(
-                physics: const AlwaysScrollableScrollPhysics(),
+              child: SingleChildScrollView(
                 controller: _scrollController,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  crossAxisSpacing: 15.0,
-                  mainAxisSpacing: 15.0,
-                  childAspectRatio: size.width / (size.height * 0.75),
-                ),
-                itemCount: _userLibraryList.length + 1,
-                itemBuilder: (BuildContext context, int index) {
-                  if (index < _userLibraryList.length) {
-                    var ebook = _userLibraryList[index].eBook!;
-                    var isSelected = _isBookSelected(index);
+                child: GridView.builder(
+                  shrinkWrap: true,
+                  primary: false,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    crossAxisSpacing: 15.0,
+                    mainAxisSpacing: 15.0,
+                    childAspectRatio: size.width / (size.height * 0.75),
+                  ),
+                  itemCount: _userLibraryList.length + 1,
+                  itemBuilder: (BuildContext context, int index) {
+                    if (index < _userLibraryList.length) {
+                      var ebook = _userLibraryList[index].eBook!;
+                      var isSelected = _isBookSelected(index);
 
-                    return GridTile(
-                      child: GestureDetector(
-                        onTap: () => _onBookTap(index),
-                        onLongPress: () => _onBookLongPress(index),
-                        child: Stack(
-                          children: <Widget>[
-                            ImageFiltered(
-                              imageFilter: ImageFilter.blur(
-                                sigmaX: 1,
-                                sigmaY: 1,
-                              ),
-                              enabled: isSelected,
-                              child: EBookImageWidget(
-                                width: imageWidth,
-                                height: imageHeight,
-                                coverArtUrl: ebook.coverArt.imagePath,
-                                fit: BoxFit.fill,
-                              ),
-                            ),
-                            Align(
-                              alignment: Alignment.center,
-                              child: Visibility(
-                                visible: isSelected,
-                                child: LayoutBuilder(
-                                  builder: (context, constraints) {
-                                    return Icon(
-                                      Icons.check,
-                                      size: constraints.maxWidth * 0.4,
-                                      color: Colors.white,
-                                      shadows: const <Shadow>[
-                                        Shadow(
-                                          color: Colors.black,
-                                          blurRadius: 15.0,
-                                        )
-                                      ],
-                                    );
-                                  },
+                      return GridTile(
+                        child: GestureDetector(
+                          onTap: () => _onBookTap(index),
+                          onLongPress: () => _onBookLongPress(index),
+                          child: Stack(
+                            children: <Widget>[
+                              ImageFiltered(
+                                imageFilter: ImageFilter.blur(
+                                  sigmaX: 1,
+                                  sigmaY: 1,
+                                ),
+                                enabled: isSelected,
+                                child: EBookImageWidget(
+                                  width: imageWidth,
+                                  height: imageHeight,
+                                  coverArtUrl: ebook.coverArt.imagePath,
+                                  fit: BoxFit.fill,
                                 ),
                               ),
-                            )
-                          ],
+                              Align(
+                                alignment: Alignment.center,
+                                child: Visibility(
+                                  visible: isSelected,
+                                  child: LayoutBuilder(
+                                    builder: (context, constraints) {
+                                      return Icon(
+                                        Icons.check,
+                                        size: constraints.maxWidth * 0.4,
+                                        color: Colors.white,
+                                        shadows: const <Shadow>[
+                                          Shadow(
+                                            color: Colors.black,
+                                            blurRadius: 15.0,
+                                          )
+                                        ],
+                                      );
+                                    },
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
                         ),
-                      ),
-                    );
-                  } else {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 32.0),
-                      child: Center(
-                        child: _hasMore
-                            ? const CircularProgressIndicator()
-                            : Container(),
-                      ),
-                    );
-                  }
-                },
+                      );
+                    } else {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 32.0),
+                        child: Center(
+                          child: _hasMore
+                              ? const CircularProgressIndicator()
+                              : Container(),
+                        ),
+                      );
+                    }
+                  },
+                ),
               ),
             ),
-          )
+          ),
         ],
       ),
     );
