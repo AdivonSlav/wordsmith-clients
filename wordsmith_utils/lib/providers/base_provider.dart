@@ -61,27 +61,17 @@ abstract class BaseProvider<T> extends AuthProvider {
 
       if (success == true) {
         bearerToken = await SecureStore.getValue("access_token") ?? "";
-        response = await http.get(uri, headers: headers);
+        headers =
+            _createHeaders(contentType: contentType, bearerToken: bearerToken);
+        var refreshedResponse = await http.get(uri, headers: headers);
+
+        return await _handleGetResponse(refreshedResponse);
       } else {
         throw UnauthorizedException("Failed despite a token refresh attempt");
       }
     }
 
-    var queryResult = QueryResult<T>();
-
-    if (_isValidResponse(response)) {
-      var data = jsonDecode(response.body);
-
-      queryResult.page = data["page"];
-      queryResult.totalCount = data["totalCount"];
-      queryResult.totalPages = data["totalPages"];
-
-      for (var item in data["result"]) {
-        queryResult.result.add(fromJson(item));
-      }
-    }
-
-    return queryResult;
+    return await _handleGetResponse(response);
   }
 
   /// Makes an HTTP PUT request
@@ -123,18 +113,18 @@ abstract class BaseProvider<T> extends AuthProvider {
 
       if (success == true) {
         bearerToken = await SecureStore.getValue("access_token") ?? "";
-        response = await http.put(uri, body: jsonRequest, headers: headers);
+        headers =
+            _createHeaders(contentType: contentType, bearerToken: bearerToken);
+        var refreshedResponse =
+            await http.put(uri, body: jsonRequest, headers: headers);
+
+        return await _handleResponse(refreshedResponse);
       } else {
         throw UnauthorizedException("Failed despite a token refresh attempt");
       }
     }
 
-    if (_isValidResponse(response)) {
-      var data = jsonDecode(response.body);
-      return fromJson(data);
-    }
-
-    throw Exception("Unknown error");
+    return await _handleResponse(response);
   }
 
   /// Makes an HTTP POST request
@@ -172,18 +162,18 @@ abstract class BaseProvider<T> extends AuthProvider {
 
       if (success == true) {
         bearerToken = await SecureStore.getValue("access_token") ?? "";
-        response = await http.post(uri, body: jsonRequest, headers: headers);
+        headers =
+            _createHeaders(contentType: contentType, bearerToken: bearerToken);
+        var refreshedResponse =
+            await http.post(uri, body: jsonRequest, headers: headers);
+
+        return await _handleResponse(refreshedResponse);
       } else {
         throw UnauthorizedException("Failed despite a token refresh attempt");
       }
     }
 
-    if (_isValidResponse(response)) {
-      var data = jsonDecode(response.body);
-      return fromJson(data);
-    }
-
-    throw Exception("Unknown error");
+    return await _handleResponse(response);
   }
 
   /// Makes a multipart HTTP POST request
@@ -523,5 +513,32 @@ abstract class BaseProvider<T> extends AuthProvider {
       ..headers.addAll(request.headers);
 
     return requestCopy;
+  }
+
+  Future<QueryResult<T>> _handleGetResponse(http.Response response) async {
+    var queryResult = QueryResult<T>();
+
+    if (_isValidResponse(response)) {
+      var data = jsonDecode(response.body);
+
+      queryResult.page = data["page"];
+      queryResult.totalCount = data["totalCount"];
+      queryResult.totalPages = data["totalPages"];
+
+      for (var item in data["result"]) {
+        queryResult.result.add(fromJson(item));
+      }
+    }
+
+    return queryResult;
+  }
+
+  Future<T> _handleResponse(http.Response response) async {
+    if (_isValidResponse(response)) {
+      var data = jsonDecode(response.body);
+      return fromJson(data);
+    }
+
+    throw Exception("Unknown error");
   }
 }
