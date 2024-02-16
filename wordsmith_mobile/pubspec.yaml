@@ -35,6 +35,7 @@ dependencies:
   logging: ^1.2.0
   adaptive_theme: ^3.5.0
   carousel_slider: ^4.2.1
+  flutter_animate: ^4.5.0
   wordsmith_utils:
     path: ../wordsmith_utils
 

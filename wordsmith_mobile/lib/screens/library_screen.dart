@@ -1,11 +1,10 @@
 import 'dart:collection';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wordsmith_mobile/utils/library_filter_values.dart';
-import 'package:wordsmith_mobile/widgets/ebook/ebook_image.dart';
 import 'package:wordsmith_mobile/widgets/library/library_categories.dart';
 import 'package:wordsmith_mobile/widgets/library/library_filters.dart';
+import 'package:wordsmith_mobile/widgets/library/library_grid_tile.dart';
 import 'package:wordsmith_mobile/widgets/library/library_view.dart';
 import 'package:wordsmith_utils/dialogs.dart';
 import 'package:wordsmith_utils/logger.dart';
@@ -58,8 +57,6 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
           _hasMore = false;
         }
 
-        _userLibraryList.addAll(libraryResult.result);
-        _userLibraryList.addAll(libraryResult.result);
         _userLibraryList.addAll(libraryResult.result);
       });
     } on Exception catch (error) {
@@ -259,8 +256,6 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
-    final imageWidth = size.width;
-    final imageHeight = size.height;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10.0),
@@ -287,6 +282,7 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
               onRefresh: _refresh,
               child: SingleChildScrollView(
                 controller: _scrollController,
+                physics: const AlwaysScrollableScrollPhysics(),
                 child: GridView.builder(
                   shrinkWrap: true,
                   primary: false,
@@ -303,49 +299,13 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
                       var ebook = _userLibraryList[index].eBook!;
                       var isSelected = _isBookSelected(index);
 
-                      return GridTile(
-                        child: GestureDetector(
-                          onTap: () => _onBookTap(index),
-                          onLongPress: () => _onBookLongPress(index),
-                          child: Stack(
-                            children: <Widget>[
-                              ImageFiltered(
-                                imageFilter: ImageFilter.blur(
-                                  sigmaX: 1,
-                                  sigmaY: 1,
-                                ),
-                                enabled: isSelected,
-                                child: EBookImageWidget(
-                                  width: imageWidth,
-                                  height: imageHeight,
-                                  coverArtUrl: ebook.coverArt.imagePath,
-                                  fit: BoxFit.fill,
-                                ),
-                              ),
-                              Align(
-                                alignment: Alignment.center,
-                                child: Visibility(
-                                  visible: isSelected,
-                                  child: LayoutBuilder(
-                                    builder: (context, constraints) {
-                                      return Icon(
-                                        Icons.check,
-                                        size: constraints.maxWidth * 0.4,
-                                        color: Colors.white,
-                                        shadows: const <Shadow>[
-                                          Shadow(
-                                            color: Colors.black,
-                                            blurRadius: 15.0,
-                                          )
-                                        ],
-                                      );
-                                    },
-                                  ),
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
+                      return LibraryGridTileWidget(
+                        ebook: ebook,
+                        tileIndex: index,
+                        isSelected: isSelected,
+                        isSelectingBooks: _isSelectingBooks,
+                        onBookTap: _onBookTap,
+                        onBookLongPress: _onBookLongPress,
                       );
                     } else {
                       return Padding(
