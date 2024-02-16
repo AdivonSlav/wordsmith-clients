@@ -3,6 +3,7 @@ import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:wordsmith_mobile/utils/themes.dart';
 import 'package:wordsmith_mobile/x509_override.dart';
 import 'package:wordsmith_mobile/widgets/navigation_bar/navigation_bar.dart';
 import 'package:wordsmith_utils/datetime_formatter.dart';
@@ -54,40 +55,8 @@ class Application extends StatelessWidget {
     SizeConfig.init(context);
 
     return AdaptiveTheme(
-      light: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blue,
-          brightness: Brightness.light,
-        ),
-        useMaterial3: true,
-        listTileTheme: ListTileThemeData(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-        ),
-        fontFamily: "Inter",
-        textTheme: const TextTheme(
-          bodyMedium: TextStyle(
-            fontWeight: FontWeight.normal,
-          ),
-        ),
-      ),
-      dark: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blue,
-          brightness: Brightness.dark,
-        ),
-        useMaterial3: true,
-        listTileTheme: ListTileThemeData(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-        ),
-        fontFamily: "Inter",
-        textTheme: const TextTheme(
-          bodyMedium: TextStyle(
-            fontWeight: FontWeight.normal,
-          ),
-        ),
-      ),
+      light: ThemeManager.generateLightTheme(),
+      dark: ThemeManager.generateDarkTheme(),
       initial: AdaptiveThemeMode.dark,
       builder: (theme, darkTheme) => MaterialApp(
         title: "Wordsmith Mobile Client",
