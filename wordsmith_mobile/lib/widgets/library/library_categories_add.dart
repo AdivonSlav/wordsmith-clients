@@ -1,30 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:wordsmith_mobile/utils/library_filter_values.dart';
+import 'package:wordsmith_mobile/widgets/library/library_categories_create.dart';
 import 'package:wordsmith_utils/dialogs/progress_line_dialog.dart';
 import 'package:wordsmith_utils/logger.dart';
 import 'package:wordsmith_utils/models/query_result.dart';
+import 'package:wordsmith_utils/models/user_library/user_library_category_add.dart';
 import 'package:wordsmith_utils/models/user_library_category/user_library_category.dart';
 import 'package:wordsmith_utils/providers/user_library_category_provider.dart';
 
-class LibraryCategoriesWidget extends StatefulWidget {
-  final LibraryFilterValues filterValues;
-  final void Function(LibraryFilterValues values) onSelect;
+class LibraryCategoriesAddWidget extends StatefulWidget {
+  final List<int> selectedEntryIds;
+  final void Function() onAdd;
 
-  const LibraryCategoriesWidget({
+  const LibraryCategoriesAddWidget({
     super.key,
-    required this.filterValues,
-    required this.onSelect,
+    required this.selectedEntryIds,
+    required this.onAdd,
   });
 
   @override
-  State<StatefulWidget> createState() => _LibraryCategoriesWidgetState();
+  State<LibraryCategoriesAddWidget> createState() =>
+      _LibraryCategoriesAddWidgetState();
 }
 
-class _LibraryCategoriesWidgetState extends State<LibraryCategoriesWidget> {
-  final _logger = LogManager.getLogger("LibraryCategories");
+class _LibraryCategoriesAddWidgetState
+    extends State<LibraryCategoriesAddWidget> {
+  final _logger = LogManager.getLogger("LibraryCategoriesAdd");
   late UserLibraryCategoryProvider _userLibraryCategoryProvider;
   late Future<QueryResult<UserLibraryCategory>> _libraryCategoriesFuture;
+
+  final _dialogKey = GlobalKey<ProgressLineDialogState>();
+  var _addingToCategory = false;
 
   Future<QueryResult<UserLibraryCategory>> _getLibraryCategories() async {
     try {
@@ -35,9 +41,65 @@ class _LibraryCategoriesWidgetState extends State<LibraryCategoriesWidget> {
     }
   }
 
-  void _selectCategory(UserLibraryCategory category) {
-    widget.filterValues.selectedCategory = category;
-    widget.onSelect(widget.filterValues);
+  void _toggleInProgress() {
+    setState(() {
+      _addingToCategory = !_addingToCategory;
+      _dialogKey.currentState!.toggleProgressLine();
+    });
+  }
+
+  Future _addEntriesToCategory(int categoryId) async {
+    if (_addingToCategory) return;
+
+    try {
+      _toggleInProgress();
+      var add =
+          UserLibraryCategoryAdd(widget.selectedEntryIds, categoryId, null);
+
+      await _userLibraryCategoryProvider.addEntriesToCategory(add);
+
+      _toggleInProgress();
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).clearSnackBars();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            behavior: SnackBarBehavior.floating,
+            content: Text("Added to category!"),
+          ),
+        );
+
+        // Indicate to the library screen that it should rebuild
+        widget.onAdd();
+        Navigator.of(context).pop();
+      }
+    } on Exception catch (error) {
+      _toggleInProgress();
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              error.toString(),
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  void _openNewCategoryDialog(BuildContext context) async {
+    var result = await showDialog(
+        context: context,
+        builder: (context) {
+          return LibraryCategoriesCreateWidget(
+            selectedEntryIds: widget.selectedEntryIds,
+          );
+        });
+
+    if (result == true) {
+      widget.onAdd();
+    }
   }
 
   @override
@@ -53,7 +115,8 @@ class _LibraryCategoriesWidgetState extends State<LibraryCategoriesWidget> {
     var size = MediaQuery.of(context).size;
 
     return ProgressLineDialog(
-      title: const Text("Your categories"),
+      key: _dialogKey,
+      title: const Text("Add to a category"),
       content: SizedBox(
         height: size.height * 0.4,
         child: Padding(
@@ -71,19 +134,6 @@ class _LibraryCategoriesWidgetState extends State<LibraryCategoriesWidget> {
               }
 
               var libraryCategories = snapshot.data!.result;
-
-              if (libraryCategories.isEmpty) {
-                return const Center(
-                  child: Text(
-                    "You have no categories currently.\nLong-tap on a library entry to start creating one!",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 16.0,
-                    ),
-                  ),
-                );
-              }
-
               return SizedBox(
                 width: double.maxFinite,
                 child: ListView.separated(
@@ -93,16 +143,8 @@ class _LibraryCategoriesWidgetState extends State<LibraryCategoriesWidget> {
 
                     return Card(
                       child: ListTile(
-                        leading: widget.filterValues.selectedCategory?.id ==
-                                category.id
-                            ? const Icon(Icons.check_circle)
-                            : null,
                         title: Text(category.name),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.delete),
-                          onPressed: () {},
-                        ),
-                        onTap: () => _selectCategory(category),
+                        onTap: () => _addEntriesToCategory(category.id),
                       ),
                     );
                   },
@@ -117,9 +159,16 @@ class _LibraryCategoriesWidgetState extends State<LibraryCategoriesWidget> {
       ),
       actions: <Widget>[
         TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+            _openNewCategoryDialog(context);
+          },
+          child: const Text("Create new category"),
+        ),
+        TextButton(
           onPressed: () => Navigator.of(context).pop(),
           child: const Text("Cancel"),
-        )
+        ),
       ],
     );
   }

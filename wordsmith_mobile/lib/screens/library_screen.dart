@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wordsmith_mobile/utils/library_filter_values.dart';
 import 'package:wordsmith_mobile/widgets/library/library_categories.dart';
+import 'package:wordsmith_mobile/widgets/library/library_categories_add.dart';
 import 'package:wordsmith_mobile/widgets/library/library_filters.dart';
 import 'package:wordsmith_mobile/widgets/library/library_grid_tile.dart';
 import 'package:wordsmith_mobile/widgets/library/library_view.dart';
-import 'package:wordsmith_utils/dialogs.dart';
+import 'package:wordsmith_utils/dialogs/show_error_dialog.dart';
 import 'package:wordsmith_utils/logger.dart';
 import 'package:wordsmith_utils/models/user_library/user_library.dart';
 import 'package:wordsmith_utils/providers/user_library_provider.dart';
@@ -31,7 +32,9 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
   LibraryFilterValues? _filterValues;
 
   var _isSelectingBooks = false;
-  final _selectedIndices = HashSet<int>();
+
+  // Keys are indices within the grid, while the values are the IDs of the library entries themselves
+  final _selectedBooks = HashMap<int, int>();
 
   Future _getLibraryBooks() async {
     if (_isLoading) return;
@@ -83,6 +86,7 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
       _hasMore = true;
       _page = 1;
       _userLibraryList.clear();
+      _removeAllBooksFromSelection();
     });
 
     _getLibraryBooks();
@@ -123,6 +127,53 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
     }
 
     return const SizedBox(height: 15.0);
+  }
+
+  Widget _buildBanner() {
+    if (_isSelectingBooks) {
+      return MaterialBanner(
+        content: Text("${_selectedBooks.length}/20"),
+        actions: [
+          TextButton(
+            onPressed: () {
+              if (_selectedBooks.isEmpty) {
+                ScaffoldMessenger.of(context).clearSnackBars();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    behavior: SnackBarBehavior.floating,
+                    content: Text("Select at least one book!"),
+                  ),
+                );
+              } else if (_selectedBooks.isNotEmpty) {
+                _openCategoriesAdd();
+              }
+            },
+            child: const Text("Add to category"),
+          ),
+          IconButton(
+            onPressed: () {},
+            icon: const Icon(Icons.delete_forever),
+          ),
+          IconButton(
+            onPressed: () => _removeAllBooksFromSelection(),
+            icon: const Icon(Icons.close),
+          ),
+        ],
+      );
+    }
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        IconButton(onPressed: _openFilters, icon: const Icon(Icons.tune)),
+        const Spacer(),
+        TextButton(
+          onPressed: _openCategories,
+          child: const Text("Categories"),
+        ),
+        IconButton(onPressed: _openSorts, icon: const Icon(Icons.sort)),
+      ],
+    );
   }
 
   void _openFilters() {
@@ -184,50 +235,70 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
     );
   }
 
-  void _addBookToSelection(int index) {
+  void _openCategoriesAdd() async {
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return LibraryCategoriesAddWidget(
+          selectedEntryIds: _selectedBooks.values.toList(),
+          onAdd: _refresh,
+        );
+      },
+    );
+  }
+
+  void _addBookToSelection(int index, int entryId) {
     setState(() {
-      if (_selectedIndices.isEmpty) {
+      if (_selectedBooks.isEmpty) {
         _isSelectingBooks = true;
         _logger.info("Started selecting books!");
       }
 
-      _selectedIndices.add(index);
+      _selectedBooks[index] = entryId;
       _logger.info(
-          "Selected book $index. Selection is now at ${_selectedIndices.length}");
+          "Selected book $index. Selection is now at ${_selectedBooks.length}");
     });
   }
 
   void _removeBookFromSelection(int index) {
     setState(() {
-      _selectedIndices.remove(index);
+      _selectedBooks.remove(index);
       _logger.info(
-          "Removed book $index from selection. Selection is now at ${_selectedIndices.length}");
+          "Removed book $index from selection. Selection is now at ${_selectedBooks.length}");
 
-      if (_selectedIndices.isEmpty) {
+      if (_selectedBooks.isEmpty) {
         _isSelectingBooks = false;
         _logger.info("Stopped selecting books");
       }
     });
   }
 
-  bool _isBookSelected(int index) {
-    return _isSelectingBooks && _selectedIndices.contains(index);
+  void _removeAllBooksFromSelection() {
+    setState(() {
+      _isSelectingBooks = false;
+      _selectedBooks.clear();
+      _logger.info("Stopped selecting books");
+    });
   }
 
-  void _onBookTap(int index) {
+  bool _isBookSelected(int index) {
+    return _isSelectingBooks && _selectedBooks.containsKey(index);
+  }
+
+  void _onBookTap(int index, int entryId) {
     if (_isSelectingBooks) {
-      if (!_selectedIndices.contains(index)) {
-        _addBookToSelection(index);
+      if (!_selectedBooks.containsKey(index)) {
+        _addBookToSelection(index, entryId);
       } else {
         _removeBookFromSelection(index);
       }
     }
   }
 
-  void _onBookLongPress(int index) {
+  void _onBookLongPress(int index, int entryId) {
     if (_isSelectingBooks) return;
 
-    _addBookToSelection(index);
+    _addBookToSelection(index, entryId);
   }
 
   @override
@@ -255,71 +326,94 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
 
   @override
   Widget build(BuildContext context) {
+    var theme = Theme.of(context);
     var size = MediaQuery.of(context).size;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10.0),
       child: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              IconButton(onPressed: _openFilters, icon: const Icon(Icons.tune)),
-              const Spacer(),
-              TextButton(
-                onPressed: _openCategories,
-                child: const Text("Categories"),
-              ),
-              IconButton(onPressed: _openSorts, icon: const Icon(Icons.sort)),
-            ],
-          ),
+          Builder(builder: (context) => _buildBanner()),
           const Divider(
             height: 1.0,
           ),
           Builder(builder: (context) => _buildCategoryIndicator()),
           Expanded(
-            child: RefreshIndicator(
-              onRefresh: _refresh,
-              child: SingleChildScrollView(
-                controller: _scrollController,
-                physics: const AlwaysScrollableScrollPhysics(),
-                child: GridView.builder(
-                  shrinkWrap: true,
-                  primary: false,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    crossAxisSpacing: 15.0,
-                    mainAxisSpacing: 15.0,
-                    childAspectRatio: size.width / (size.height * 0.75),
-                  ),
-                  itemCount: _userLibraryList.length + 1,
-                  itemBuilder: (BuildContext context, int index) {
-                    if (index < _userLibraryList.length) {
-                      var ebook = _userLibraryList[index].eBook!;
-                      var isSelected = _isBookSelected(index);
+            child: Stack(
+              children: [
+                RefreshIndicator(
+                  onRefresh: _refresh,
+                  child: SingleChildScrollView(
+                    controller: _scrollController,
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: GridView.builder(
+                      shrinkWrap: true,
+                      primary: false,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3,
+                        crossAxisSpacing: 15.0,
+                        mainAxisSpacing: 15.0,
+                        childAspectRatio: size.width / (size.height * 0.75),
+                      ),
+                      itemCount: _userLibraryList.length + 1,
+                      itemBuilder: (BuildContext context, int index) {
+                        if (index < _userLibraryList.length) {
+                          var libraryEntry = _userLibraryList[index];
+                          var isSelected = _isBookSelected(index);
 
-                      return LibraryGridTileWidget(
-                        ebook: ebook,
-                        tileIndex: index,
-                        isSelected: isSelected,
-                        isSelectingBooks: _isSelectingBooks,
-                        onBookTap: _onBookTap,
-                        onBookLongPress: _onBookLongPress,
-                      );
-                    } else {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 32.0),
-                        child: Center(
-                          child: _hasMore
-                              ? const CircularProgressIndicator()
-                              : Container(),
-                        ),
-                      );
-                    }
-                  },
+                          return LibraryGridTileWidget(
+                            libraryEntry: libraryEntry,
+                            tileIndex: index,
+                            isSelected: isSelected,
+                            isSelectingBooks: _isSelectingBooks,
+                            onBookTap: _onBookTap,
+                            onBookLongPress: _onBookLongPress,
+                          );
+                        } else {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 32.0),
+                            child: Center(
+                              child: _hasMore
+                                  ? const CircularProgressIndicator()
+                                  : Container(),
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                  ),
                 ),
-              ),
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 10.0, bottom: 20.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: theme.colorScheme.onBackground,
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Colors.black,
+                              blurRadius: 1.0,
+                              spreadRadius: 1.0,
+                            ),
+                          ]),
+                      child: Visibility(
+                          visible: !_isSelectingBooks,
+                          child: IconButton(
+                            onPressed: () {
+                              setState(() {
+                                _isSelectingBooks = true;
+                              });
+                            },
+                            icon: const Icon(Icons.edit),
+                            color: theme.colorScheme.onPrimary,
+                          )),
+                    ),
+                  ),
+                )
+              ],
             ),
           ),
         ],

@@ -2,19 +2,19 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:wordsmith_mobile/widgets/ebook/ebook_image.dart';
-import 'package:wordsmith_utils/models/ebook/ebook.dart';
+import 'package:wordsmith_utils/models/user_library/user_library.dart';
 
 class LibraryGridTileWidget extends StatefulWidget {
-  final EBook ebook;
+  final UserLibrary libraryEntry;
   final int tileIndex;
   final bool isSelected;
   final bool isSelectingBooks;
-  final void Function(int index) onBookTap;
-  final void Function(int index) onBookLongPress;
+  final void Function(int index, int ebookId) onBookTap;
+  final void Function(int index, int ebookId) onBookLongPress;
 
   const LibraryGridTileWidget({
     super.key,
-    required this.ebook,
+    required this.libraryEntry,
     required this.tileIndex,
     required this.isSelected,
     required this.isSelectingBooks,
@@ -41,14 +41,14 @@ class _LibraryGridTileWidgetState extends State<LibraryGridTileWidget>
   }
 
   void _onBookTap() {
-    widget.onBookTap(widget.tileIndex);
+    widget.onBookTap(widget.tileIndex, widget.libraryEntry.id);
     if (widget.isSelectingBooks) {
       _animateTile();
     }
   }
 
   void _onBookLongPress() {
-    widget.onBookLongPress(widget.tileIndex);
+    widget.onBookLongPress(widget.tileIndex, widget.libraryEntry.id);
     if (!widget.isSelectingBooks) {
       _animateTile();
     }
@@ -76,6 +76,10 @@ class _LibraryGridTileWidgetState extends State<LibraryGridTileWidget>
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
 
+    if (!widget.isSelectingBooks) {
+      _animationController.reverse();
+    }
+
     return GridTile(
       child: GestureDetector(
         onTap: () => _onBookTap(),
@@ -93,7 +97,7 @@ class _LibraryGridTileWidgetState extends State<LibraryGridTileWidget>
                   child: EBookImageWidget(
                     width: size.width,
                     height: size.height,
-                    coverArtUrl: widget.ebook.coverArt.imagePath,
+                    coverArtUrl: widget.libraryEntry.eBook!.coverArt.imagePath,
                     fit: BoxFit.fill,
                   ),
                 );

@@ -60,6 +60,10 @@ class Application extends StatelessWidget {
           brightness: Brightness.light,
         ),
         useMaterial3: true,
+        listTileTheme: ListTileThemeData(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+        ),
         fontFamily: "Inter",
         textTheme: const TextTheme(
           bodyMedium: TextStyle(
@@ -73,6 +77,10 @@ class Application extends StatelessWidget {
           brightness: Brightness.dark,
         ),
         useMaterial3: true,
+        listTileTheme: ListTileThemeData(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+        ),
         fontFamily: "Inter",
         textTheme: const TextTheme(
           bodyMedium: TextStyle(

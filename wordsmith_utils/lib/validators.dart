@@ -77,3 +77,15 @@ String? validateRequired(String? value) {
 
   return null;
 }
+
+String? validateCategoryName(String? value) {
+  if (value == null || value.isEmpty) {
+    return "You must provide a category name";
+  }
+
+  if (value.length > 255) {
+    return "Category name must not exceed 255 characters";
+  }
+
+  return null;
+}

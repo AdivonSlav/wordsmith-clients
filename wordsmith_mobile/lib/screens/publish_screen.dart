@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wordsmith_mobile/widgets/publish/publish_edit.dart';
 import 'package:wordsmith_mobile/widgets/publish/publish_upload.dart';
-import 'package:wordsmith_utils/dialogs.dart';
+import 'package:wordsmith_utils/dialogs/show_error_dialog.dart';
 import 'package:wordsmith_utils/exceptions/base_exception.dart';
 import 'package:wordsmith_utils/logger.dart';
 import 'package:wordsmith_utils/models/ebook/ebook_insert.dart';

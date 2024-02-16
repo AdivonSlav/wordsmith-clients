@@ -57,10 +57,6 @@ class UserLibraryProvider extends BaseProvider<UserLibrary> {
     );
   }
 
-  // Future<QueryResult<string>> deleteLibraryEntry(
-  //   {}
-  // )
-
   @override
   UserLibrary fromJson(data) {
     return UserLibrary.fromJson(data);

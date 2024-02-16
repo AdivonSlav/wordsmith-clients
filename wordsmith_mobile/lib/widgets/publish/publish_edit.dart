@@ -5,7 +5,7 @@ import 'package:wordsmith_mobile/widgets/publish/publish_chapters_view.dart';
 import 'package:wordsmith_mobile/widgets/publish/publish_genres.dart';
 import 'package:wordsmith_mobile/widgets/publish/publish_instructions.dart';
 import 'package:wordsmith_mobile/widgets/publish/publish_maturity_ratings.dart';
-import 'package:wordsmith_utils/dialogs.dart';
+import 'package:wordsmith_utils/dialogs/show_error_dialog.dart';
 import 'package:wordsmith_utils/logger.dart';
 import 'package:wordsmith_utils/models/ebook/ebook_insert.dart';
 import 'package:wordsmith_utils/models/ebook/ebook_parse.dart';
