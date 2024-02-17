@@ -70,10 +70,12 @@ class _RegistrationScreenWidgetState extends State<RegistrationScreenWidget> {
       UserLogin? loginResult = await Future.delayed(
         const Duration(milliseconds: 500),
         () async {
-          return await _userLoginProvider.getUserLogin(
-            registerResult.username,
+          var getResult = await _userLoginProvider.getUserLogin(
+            registerResult.result!.username,
             userInsert.password,
           );
+
+          return getResult.result;
         },
       );
 

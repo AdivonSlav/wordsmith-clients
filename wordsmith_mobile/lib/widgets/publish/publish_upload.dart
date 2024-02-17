@@ -50,12 +50,24 @@ class PublishUploadWidget extends StatelessWidget {
                         }
                       } else {
                         try {
-                          var parsedEpub =
+                          var parseResult =
                               await eBookParseProvider.getParsed(transferFile);
 
-                          logger.info("Got parsed ebook ${parsedEpub.title}");
+                          if (parseResult.result == null) {
+                            if (context.mounted) {
+                              await showErrorDialog(
+                                context,
+                                const Text("Failure"),
+                                const Text("Could not parse"),
+                              );
+                            }
+                            return;
+                          }
 
-                          onUploadCallback(parsedEpub, transferFile);
+                          logger.info(
+                              "Got parsed ebook ${parseResult.result?.title}");
+
+                          onUploadCallback(parseResult.result!, transferFile);
                         } on BaseException catch (error) {
                           if (context.mounted) {
                             await showErrorDialog(

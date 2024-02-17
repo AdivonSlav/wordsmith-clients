@@ -3,6 +3,7 @@ import "package:wordsmith_utils/exceptions/base_exception.dart";
 import "package:wordsmith_utils/exceptions/forbidden_exception.dart";
 import "package:wordsmith_utils/exceptions/unauthorized_exception.dart";
 import "package:wordsmith_utils/logger.dart";
+import "package:wordsmith_utils/models/entity_result.dart";
 import "package:wordsmith_utils/models/query_result.dart";
 import "package:http/http.dart" as http;
 import "package:http_parser/http_parser.dart";
@@ -83,7 +84,7 @@ abstract class BaseProvider<T> extends AuthProvider {
   /// - [contentType]: Content type of the request. Defaults to application/json
   /// - [bearerToken]: Bearer token if the request needs to be authorized
   /// - [retryForRefresh]: If set to true and status 401 is the initial response, the provider will attempt to refresh the access token and attempt the request again
-  Future<T> put(
+  Future<EntityResult<T>> put(
       {int? id,
       dynamic request,
       String additionalRoute = "",
@@ -135,7 +136,7 @@ abstract class BaseProvider<T> extends AuthProvider {
   /// - [contentType]: Content type of the request. Defaults to application/json
   /// - [bearerToken]: Bearer token if the request needs to be authorized
   /// - [retryForRefresh]: If set to true and status 401 is the initial response, the provider will attempt to refresh the access token and attempt the request again
-  Future<T> post(
+  Future<EntityResult<T>> post(
       {dynamic request,
       String additionalRoute = "",
       String contentType = "",
@@ -184,7 +185,7 @@ abstract class BaseProvider<T> extends AuthProvider {
   /// - [additionalRoute]: A route to append to the endpoint configured for the provider
   /// - [bearerToken]: Bearer token if the request needs to be authorized
   /// - [retryForRefresh]: If set to true and status 401 is the initial response, the provider will attempt to refresh the access token and attempt the request again
-  Future<T> postMultipart(
+  Future<EntityResult<T>> postMultipart(
       {Map<String, dynamic>? fields,
       Map<String, TransferFile>? files,
       String additionalRoute = "",
@@ -209,9 +210,6 @@ abstract class BaseProvider<T> extends AuthProvider {
       request.headers["Authorization"] = "Bearer $bearerToken";
     }
 
-    http.MultipartRequest? retryRequest =
-        _copyRequest(request) as http.MultipartRequest;
-    http.StreamedResponse? retryResponse;
     var response = await request.send();
 
     // If retrying is enabled and status 401 is returned, attempt to refresh the access token and send the request again
@@ -219,25 +217,22 @@ abstract class BaseProvider<T> extends AuthProvider {
       var success = await _attemptTokenRefresh();
 
       if (success == true) {
+        http.MultipartRequest? retryRequest =
+            _copyRequest(request) as http.MultipartRequest;
         bearerToken = await SecureStore.getValue("access_token") ?? "";
         retryRequest.headers["Authorization"] = "Bearer $bearerToken";
         retryRequest = _setMultipartPayload(
             request: retryRequest, fields: fields, files: files);
-        retryResponse = await retryRequest.send();
+
+        var retryResponse = await retryRequest.send();
+
+        return await _handleMultipartResponse(retryResponse);
       } else {
         throw UnauthorizedException("Failed despite a token refresh attempt");
       }
     }
 
-    var responseBody =
-        await _isValidStreamedResponse(retryResponse ?? response);
-
-    if (responseBody != null) {
-      var data = jsonDecode(responseBody);
-      return fromJson(data);
-    }
-
-    throw Exception("Unknown error");
+    return await _handleMultipartResponse(response);
   }
 
   T fromJson(dynamic data) {
@@ -533,10 +528,35 @@ abstract class BaseProvider<T> extends AuthProvider {
     return queryResult;
   }
 
-  Future<T> _handleResponse(http.Response response) async {
+  Future<EntityResult<T>> _handleMultipartResponse(
+      http.StreamedResponse response) async {
+    var entityResult = EntityResult<T>();
+    var responseBody = await _isValidStreamedResponse(response);
+
+    if (responseBody != null) {
+      var data = jsonDecode(responseBody);
+
+      entityResult.message = data["message"];
+      entityResult.result =
+          data["result"] == null ? null : fromJson(data["result"]);
+
+      return entityResult;
+    }
+
+    throw Exception("Unknown error");
+  }
+
+  Future<EntityResult<T>> _handleResponse(http.Response response) async {
+    var entityResult = EntityResult<T>();
+
     if (_isValidResponse(response)) {
       var data = jsonDecode(response.body);
-      return fromJson(data);
+
+      entityResult.message = data["message"];
+      entityResult.result =
+          data["result"] == null ? null : fromJson(data["result"]);
+
+      return entityResult;
     }
 
     throw Exception("Unknown error");

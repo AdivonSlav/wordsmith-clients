@@ -38,9 +38,9 @@ class _ProfileScreenWidgetState extends State<ProfileScreenWidget> {
     );
 
     try {
-      var result = await _userProvider.updateLoggeduser(payload);
+      var updateResult = await _userProvider.updateLoggeduser(payload);
 
-      await _authProvider.storeLogin(user: result);
+      await _authProvider.storeLogin(user: updateResult.result);
     } on BaseException catch (error) {
       if (context.mounted) {
         await showErrorDialog(

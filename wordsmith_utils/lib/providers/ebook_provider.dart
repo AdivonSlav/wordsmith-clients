@@ -1,5 +1,6 @@
 import 'package:wordsmith_utils/models/ebook/ebook.dart';
 import 'package:wordsmith_utils/models/ebook/ebook_insert.dart';
+import 'package:wordsmith_utils/models/entity_result.dart';
 import 'package:wordsmith_utils/models/query_result.dart';
 import 'package:wordsmith_utils/models/transfer_file.dart';
 import 'package:wordsmith_utils/providers/base_provider.dart';
@@ -22,7 +23,8 @@ class EBookProvider extends BaseProvider<EBook> {
         filter: query, bearerToken: accessToken ?? "", retryForRefresh: true);
   }
 
-  Future<EBook> postEBook(EBookInsert insert, TransferFile file) async {
+  Future<EntityResult<EBook>> postEBook(
+      EBookInsert insert, TransferFile file) async {
     var accessToken = await SecureStore.getValue("access_token");
 
     Map<String, dynamic> fields = {

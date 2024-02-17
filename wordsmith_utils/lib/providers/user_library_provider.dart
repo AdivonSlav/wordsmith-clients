@@ -1,3 +1,4 @@
+import 'package:wordsmith_utils/models/entity_result.dart';
 import 'package:wordsmith_utils/models/query_result.dart';
 import 'package:wordsmith_utils/models/user_library/user_library.dart';
 import 'package:wordsmith_utils/models/user_library/user_library_insert.dart';
@@ -7,7 +8,7 @@ import 'package:wordsmith_utils/secure_store.dart';
 class UserLibraryProvider extends BaseProvider<UserLibrary> {
   UserLibraryProvider() : super("user-libraries");
 
-  Future<UserLibrary> addToUserLibrary(int eBookId) async {
+  Future<EntityResult<UserLibrary>> addToUserLibrary(int eBookId) async {
     var accessToken = await SecureStore.getValue("access_token");
     var insert = UserLibraryInsert(eBookId);
 

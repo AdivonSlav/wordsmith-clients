@@ -63,11 +63,12 @@ class _EBookScreenWidget extends State<EBookScreenWidget> {
       var userLibrary =
           await _userLibraryProvider.addToUserLibrary(widget.ebook.id);
       setState(() {
-        _userLibrary = userLibrary;
+        _userLibrary = userLibrary.result;
       });
     } on Exception catch (error) {
       if (context.mounted) {
         ProgressIndicatorDialog().dismiss();
+        // ignore: use_build_context_synchronously
         showErrorDialog(context, const Text("Error"), Text(error.toString()));
       }
     }

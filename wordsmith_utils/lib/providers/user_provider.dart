@@ -1,3 +1,4 @@
+import "package:wordsmith_utils/models/entity_result.dart";
 import "package:wordsmith_utils/models/user/user.dart";
 import "package:wordsmith_utils/models/user/user_insert.dart";
 import "package:wordsmith_utils/models/user/user_update.dart";
@@ -7,7 +8,7 @@ import "package:wordsmith_utils/secure_store.dart";
 class UserProvider extends BaseProvider<User> {
   UserProvider() : super("users");
 
-  Future<User> postNewUser(UserInsert userInsert) async {
+  Future<EntityResult<User>> postNewUser(UserInsert userInsert) async {
     var result = await post(additionalRoute: "/register", request: userInsert);
 
     return result;
@@ -25,7 +26,7 @@ class UserProvider extends BaseProvider<User> {
     return result.result[0];
   }
 
-  Future<User> updateLoggeduser(UserUpdate update) async {
+  Future<EntityResult<User>> updateLoggeduser(UserUpdate update) async {
     String? accessToken = await SecureStore.getValue("access_token");
 
     var result = await put(

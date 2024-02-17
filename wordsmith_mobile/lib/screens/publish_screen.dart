@@ -34,10 +34,10 @@ class _PublishScreenWidgetState extends State<PublishScreenWidget> {
 
   void _submitEditedEBook(EBookInsert ebook) async {
     try {
-      var result = await _ebookProvider.postEBook(ebook, _epubFile);
+      var postResult = await _ebookProvider.postEBook(ebook, _epubFile);
 
       if (context.mounted) {
-        _logger.info("Succesfully published ebook ${result.title}");
+        _logger.info("Succesfully published ebook ${postResult.result?.title}");
         Navigator.of(context).pop(true);
       }
     } on BaseException catch (error) {

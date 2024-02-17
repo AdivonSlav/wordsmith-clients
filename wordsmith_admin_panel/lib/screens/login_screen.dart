@@ -53,13 +53,13 @@ class _LoginScreenWidgetState extends State<LoginScreenWidget> {
     _logger.info("Attempting login with $username:$password");
 
     try {
-      var result = await _userLoginProvider.getUserLogin(username, password);
+      var getResult = await _userLoginProvider.getUserLogin(username, password);
 
-      if (result == null) {
+      if (getResult.result == null) {
         throw BaseException("Could not login");
       }
 
-      return result;
+      return getResult.result;
     } on BaseException catch (error) {
       _toggleLoginInProgress();
 

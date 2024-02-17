@@ -1,3 +1,4 @@
+import 'package:wordsmith_utils/models/entity_result.dart';
 import 'package:wordsmith_utils/models/query_result.dart';
 import 'package:wordsmith_utils/models/user_library/user_library_category_add.dart';
 import 'package:wordsmith_utils/models/user_library_category/user_library_category.dart';
@@ -13,7 +14,7 @@ class UserLibraryCategoryProvider extends BaseProvider<UserLibraryCategory> {
     return await get(bearerToken: accessToken ?? "", retryForRefresh: true);
   }
 
-  Future<UserLibraryCategory> addEntriesToCategory(
+  Future<EntityResult<UserLibraryCategory>> addEntriesToCategory(
       UserLibraryCategoryAdd add) async {
     var accessToken = await SecureStore.getValue("access_token");
 
