@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wordsmith_mobile/widgets/input_field.dart';
 import 'package:wordsmith_utils/dialogs/progress_line_dialog.dart';
-import 'package:wordsmith_utils/models/user_library/user_library_category_add.dart';
+import 'package:wordsmith_utils/models/user_library_category/user_library_category_add.dart';
 import 'package:wordsmith_utils/providers/user_library_category_provider.dart';
+import 'package:wordsmith_utils/show_snackbar.dart';
 import 'package:wordsmith_utils/validators.dart';
 
 class LibraryCategoriesCreateWidget extends StatefulWidget {
@@ -37,40 +38,20 @@ class _LibraryCategoriesCreateWidgetState
   Future _createCategoryForEntries() async {
     if (_addingToCategory) return;
 
-    try {
+    _toggleInProgress();
+    var newCategoryName = _categoryNameController.text;
+    var add =
+        UserLibraryCategoryAdd(widget.selectedEntryIds, null, newCategoryName);
+
+    await _userLibraryCategoryProvider.addEntriesToCategory(add).then((result) {
+      showSnackbar(context: context, content: result.message ?? "Success");
+
+      // Indicate to the library screen that it should rebuild
+      Navigator.of(context).pop(true);
+    }, onError: (error) {
+      showSnackbar(context: context, content: error.toString());
       _toggleInProgress();
-      var newCategoryName = _categoryNameController.text;
-      var add = UserLibraryCategoryAdd(
-          widget.selectedEntryIds, null, newCategoryName);
-
-      await _userLibraryCategoryProvider.addEntriesToCategory(add);
-
-      _toggleInProgress();
-
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).clearSnackBars();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            behavior: SnackBarBehavior.floating,
-            content: Text("Succesfully created and added to category!"),
-          ),
-        );
-        // Indicate to the library screen that it should rebuild
-        Navigator.of(context).pop(true);
-      }
-    } on Exception catch (error) {
-      _toggleInProgress();
-
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              error.toString(),
-            ),
-          ),
-        );
-      }
-    }
+    });
   }
 
   @override

@@ -4,11 +4,13 @@ import 'package:provider/provider.dart';
 import 'package:wordsmith_mobile/utils/library_filter_values.dart';
 import 'package:wordsmith_mobile/widgets/library/library_categories.dart';
 import 'package:wordsmith_mobile/widgets/library/library_categories_add.dart';
+import 'package:wordsmith_mobile/widgets/library/library_categories_remove.dart';
 import 'package:wordsmith_mobile/widgets/library/library_filters.dart';
 import 'package:wordsmith_mobile/widgets/library/library_grid_tile.dart';
 import 'package:wordsmith_mobile/widgets/library/library_view.dart';
 import 'package:wordsmith_utils/dialogs/show_error_dialog.dart';
 import 'package:wordsmith_utils/logger.dart';
+import 'package:wordsmith_utils/models/query_result.dart';
 import 'package:wordsmith_utils/models/user_library/user_library.dart';
 import 'package:wordsmith_utils/providers/user_library_provider.dart';
 
@@ -40,35 +42,32 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
     if (_isLoading) return;
     _isLoading = true;
 
-    try {
-      var libraryResult = await _userLibraryProvider.getLibraryEntries(
-        maturityRatingId: _filterValues?.selectedMaturityRatingId,
-        isRead: _filterValues?.isRead,
-        orderBy: _filterValues != null
-            ? "${_filterValues!.sortByProperty}:${_filterValues!.sortByDirection}"
-            : "EBook.Title:asc",
-        libraryCategoryId: _filterValues?.selectedCategory?.id,
-        page: _page,
-        pageSize: _pageSize,
-      );
+    var libraryResult = await _userLibraryProvider
+        .getLibraryEntries(
+      maturityRatingId: _filterValues?.selectedMaturityRatingId,
+      isRead: _filterValues?.isRead,
+      orderBy: _filterValues != null
+          ? "${_filterValues!.sortByProperty}:${_filterValues!.sortByDirection}"
+          : "EBook.Title:asc",
+      libraryCategoryId: _filterValues?.selectedCategory?.id,
+      page: _page,
+      pageSize: _pageSize,
+    )
+        .catchError((error) {
+      showErrorDialog(context, const Text("Error"), Text(error.toString()));
+      return QueryResult<UserLibrary>();
+    });
 
-      setState(() {
-        _page++;
-        _isLoading = false;
+    setState(() {
+      _page++;
+      _isLoading = false;
 
-        if (libraryResult.result.length < _pageSize) {
-          _hasMore = false;
-        }
-
-        _userLibraryList.addAll(libraryResult.result);
-      });
-    } on Exception catch (error) {
-      if (context.mounted) {
-        await showErrorDialog(
-            context, const Text("Error"), Text(error.toString()));
+      if (libraryResult.result.length < _pageSize) {
+        _hasMore = false;
       }
-      _logger.severe(error);
-    }
+
+      _userLibraryList.addAll(libraryResult.result);
+    });
   }
 
   Future _buildFilterValues() async {
@@ -144,11 +143,18 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
                     content: Text("Select at least one book!"),
                   ),
                 );
-              } else if (_selectedBooks.isNotEmpty) {
+              } else if (_selectedBooks.isNotEmpty &&
+                  _filterValues?.selectedCategory == null) {
                 _openCategoriesAdd();
+              } else if (_selectedBooks.isNotEmpty &&
+                  _filterValues?.selectedCategory != null) {
+                _openCategoriesRemove();
               }
             },
-            child: const Text("Add to category"),
+            child: Text(_selectedBooks.isNotEmpty &&
+                    _filterValues?.selectedCategory == null
+                ? "Add to category"
+                : "Remove from category"),
           ),
           IconButton(
             onPressed: () {},
@@ -245,6 +251,20 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
         );
       },
     );
+  }
+
+  void _openCategoriesRemove() async {
+    await showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return LibraryCategoriesRemoveWidget(
+            selectedEntryIds: _selectedBooks.values.toList(),
+            onRemove: () {
+              _filterValues?.selectedCategory = null;
+              _refresh();
+            },
+          );
+        });
   }
 
   void _addBookToSelection(int index, int entryId) {

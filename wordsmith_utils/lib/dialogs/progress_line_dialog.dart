@@ -33,7 +33,10 @@ class ProgressLineDialogState extends State<ProgressLineDialog> {
       actionsPadding: const EdgeInsets.only(bottom: 15.0, right: 10.0),
       title: Column(
         children: [
-          widget.title,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 25.0),
+            child: widget.title,
+          ),
           const SizedBox(height: 20.0),
           if (_showProgressLine) const LinearProgressIndicator(),
           const Divider(height: 0.0),
