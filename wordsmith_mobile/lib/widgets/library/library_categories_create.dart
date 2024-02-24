@@ -80,18 +80,21 @@ class _LibraryCategoriesCreateWidgetState
     return ProgressLineDialog(
       key: _dialogKey,
       title: const Text("Add new category"),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          InputField(
-            labelText: "Category name",
-            controller: _categoryNameController,
-            obscureText: false,
-            validator: validateCategoryName,
-            maxLength: 255,
-            enabled: !_addingToCategory,
-          ),
-        ],
+      content: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            InputField(
+              labelText: "Category name",
+              controller: _categoryNameController,
+              obscureText: false,
+              validator: validateCategoryName,
+              maxLength: 255,
+              enabled: !_addingToCategory,
+            ),
+          ],
+        ),
       ),
       actions: <Widget>[
         TextButton(
