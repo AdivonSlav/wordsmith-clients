@@ -5,10 +5,11 @@ class EBookRatingStarsWidget extends StatelessWidget {
 
   const EBookRatingStarsWidget({super.key, required this.rating});
 
+  @override
   Widget build(BuildContext context) {
-    const starColor = const Color(0xFFFF9529);
+    const starColor = Color(0xFFFF9529);
 
-    return Row(
+    return const Row(
       children: <Widget>[
         Icon(
           Icons.star_outline_outlined,
