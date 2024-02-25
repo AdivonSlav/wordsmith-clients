@@ -5,6 +5,7 @@ import 'package:wordsmith_mobile/widgets/publish/publish_chapters_view.dart';
 import 'package:wordsmith_mobile/widgets/publish/publish_genres.dart';
 import 'package:wordsmith_mobile/widgets/publish/publish_instructions.dart';
 import 'package:wordsmith_mobile/widgets/publish/publish_maturity_ratings.dart';
+import 'package:wordsmith_utils/dialogs/progress_indicator_dialog.dart';
 import 'package:wordsmith_utils/dialogs/show_error_dialog.dart';
 import 'package:wordsmith_utils/logger.dart';
 import 'package:wordsmith_utils/models/ebook/ebook_insert.dart';
@@ -57,17 +58,7 @@ class _PublishEditWidgetState extends State<PublishEditWidget> {
     _logger.info("Selected ${maturityRating?.name} maturity rating");
   }
 
-  void _toggleUploadInProgress() {
-    setState(() {
-      _uploadInProgress = !_uploadInProgress;
-    });
-  }
-
   void _onSubmit() async {
-    if (_uploadInProgress == true) {
-      return;
-    }
-
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -83,15 +74,14 @@ class _PublishEditWidgetState extends State<PublishEditWidget> {
 
     if (validationErrors.isNotEmpty) {
       await showErrorDialog(
-        context,
-        const Text("Error"),
-        Text(validationErrors),
+        context: context,
+        content: Text(validationErrors),
       );
       return;
     }
 
-    _toggleUploadInProgress();
-
+    ProgressIndicatorDialog().show(context);
+    
     var authorId = AuthProvider.loggedUser!.id;
     var genreIds = _selectedGenres.map((e) => e.id).toList();
     var insert = EBookInsert(

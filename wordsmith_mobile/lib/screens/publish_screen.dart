@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wordsmith_mobile/widgets/publish/publish_edit.dart';
 import 'package:wordsmith_mobile/widgets/publish/publish_upload.dart';
+import 'package:wordsmith_utils/dialogs/progress_indicator_dialog.dart';
 import 'package:wordsmith_utils/dialogs/show_error_dialog.dart';
-import 'package:wordsmith_utils/exceptions/base_exception.dart';
 import 'package:wordsmith_utils/logger.dart';
+import 'package:wordsmith_utils/models/ebook/ebook.dart';
 import 'package:wordsmith_utils/models/ebook/ebook_insert.dart';
 import 'package:wordsmith_utils/models/ebook/ebook_parse.dart';
+import 'package:wordsmith_utils/models/result.dart';
 import 'package:wordsmith_utils/models/transfer_file.dart';
 import 'package:wordsmith_utils/providers/ebook_provider.dart';
 
@@ -33,30 +35,28 @@ class _PublishScreenWidgetState extends State<PublishScreenWidget> {
   }
 
   void _submitEditedEBook(EBookInsert ebook) async {
-    try {
-      var postResult = await _ebookProvider.postEBook(ebook, _epubFile);
+    await _ebookProvider.postEBook(ebook, _epubFile).then((result) {
+      switch (result) {
+        case Success<EBook>():
+          _logger.info("Succesfully published ebook ${result.data.title}");
+          Navigator.of(context).pop(true);
+        case Failure<EBook>():
+          showErrorDialog(
+              context: context, content: Text(result.exception.toString()));
+      }
+    });
 
-      if (context.mounted) {
-        _logger.info("Succesfully published ebook ${postResult.result?.title}");
-        Navigator.of(context).pop(true);
-      }
-    } on BaseException catch (error) {
-      if (context.mounted) {
-        await showErrorDialog(
-          context,
-          const Text("Error"),
-          Text(error.toString()),
-        );
-      }
-      _logger.info(error);
-    } on Exception catch (error) {
-      _logger.severe(error);
-    }
+    ProgressIndicatorDialog().dismiss();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _ebookProvider = context.read<EBookProvider>();
   }
 
   @override
   Widget build(BuildContext context) {
-    _ebookProvider = context.read<EBookProvider>();
     var theme = Theme.of(context);
 
     return Scaffold(

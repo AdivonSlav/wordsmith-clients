@@ -47,9 +47,9 @@ class _LoginScreenWidgetState extends State<LoginScreenWidget> {
           ProgressIndicatorDialog().dismiss();
           await _authProvider.storeLogin(loginCreds: d);
           success = true;
-        case Failure<UserLogin>(errorMessage: final e):
+        case Failure<UserLogin>(exception: final e):
           ProgressIndicatorDialog().dismiss();
-          showErrorDialog(context, const Text("Error"), Text(e));
+          showErrorDialog(context: context, content: Text(e.toString()));
           success = false;
       }
     });

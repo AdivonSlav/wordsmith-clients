@@ -1,3 +1,4 @@
+import 'package:wordsmith_utils/exceptions/base_exception.dart';
 import 'package:wordsmith_utils/logger.dart';
 import 'package:wordsmith_utils/models/query_result.dart';
 import 'package:wordsmith_utils/models/result.dart';
@@ -8,12 +9,6 @@ import 'package:wordsmith_utils/secure_store.dart';
 
 class UserLibraryProvider extends BaseProvider<UserLibrary> {
   final _logger = LogManager.getLogger("UserLibraryProvider");
-
-  Result<UserLibrary>? _libraryEntry;
-  Result<UserLibrary>? get libraryEntry => _libraryEntry;
-
-  Result<QueryResult<UserLibrary>>? _libraryEntries;
-  Result<QueryResult<UserLibrary>>? get libraryEntries => _libraryEntries;
 
   UserLibraryProvider() : super("user-libraries");
 
@@ -29,14 +24,14 @@ class UserLibraryProvider extends BaseProvider<UserLibrary> {
       );
 
       return Success(result.result!);
-    } on Exception catch (error) {
+    } on BaseException catch (error) {
       _logger.severe(error);
-      return Failure(error.toString());
+      return Failure(error);
     }
   }
 
-  Future<void> getLibraryEntryByEBook({required int eBookId}) async {
-    isLoading = true;
+  Future<Result<UserLibrary>> getLibraryEntryByEBook(
+      {required int eBookId}) async {
     var accessToken = await SecureStore.getValue("access_token");
 
     try {
@@ -52,16 +47,14 @@ class UserLibraryProvider extends BaseProvider<UserLibrary> {
         retryForRefresh: true,
       );
 
-      _libraryEntry = Success(result.result[0]);
-      isLoading = false;
-    } on Exception catch (error) {
+      return Success(result.result[0]);
+    } on BaseException catch (error) {
       _logger.severe(error);
-      _libraryEntry = Failure(error.toString());
-      isLoading = false;
+      return Failure(error);
     }
   }
 
-  Future<void> getLibraryEntries(
+  Future<Result<QueryResult<UserLibrary>>> getLibraryEntries(
       {int? maturityRatingId,
       bool? isRead,
       String? orderBy,
@@ -69,7 +62,6 @@ class UserLibraryProvider extends BaseProvider<UserLibrary> {
       int? libraryCategoryId,
       required int page,
       required int pageSize}) async {
-    isLoading = true;
     var accessToken = await SecureStore.getValue("access_token");
 
     try {
@@ -94,12 +86,10 @@ class UserLibraryProvider extends BaseProvider<UserLibrary> {
         retryForRefresh: true,
       );
 
-      _libraryEntries = Success(result);
-      isLoading = false;
-    } on Exception catch (error) {
+      return Success(result);
+    } on BaseException catch (error) {
       _logger.severe(error);
-      _libraryEntries = Failure(error.toString());
-      isLoading = false;
+      return Failure(error);
     }
   }
 

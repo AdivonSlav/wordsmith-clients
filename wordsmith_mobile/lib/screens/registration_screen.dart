@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wordsmith_mobile/widgets/input_field.dart';
+import 'package:wordsmith_utils/dialogs/progress_indicator_dialog.dart';
 import 'package:wordsmith_utils/dialogs/show_error_dialog.dart';
-import 'package:wordsmith_utils/exceptions/base_exception.dart';
 import 'package:wordsmith_utils/logger.dart';
+import 'package:wordsmith_utils/models/result.dart';
+import 'package:wordsmith_utils/models/user/user.dart';
 import 'package:wordsmith_utils/models/user/user_insert.dart';
 import 'package:wordsmith_utils/models/user/user_login.dart';
 import 'package:wordsmith_utils/providers/auth_provider.dart';
@@ -46,59 +48,44 @@ class _RegistrationScreenWidgetState extends State<RegistrationScreenWidget> {
     return null;
   }
 
-  void _toggleRegistrationInProgress() {
-    setState(() {
-      _registrationInProgress = !_registrationInProgress;
-    });
-  }
-
-  Future<UserLogin?> _submitRegistration() async {
-    _toggleRegistrationInProgress();
+  Future<bool> _submitRegistration() async {
+    ProgressIndicatorDialog().show(context);
     _logger.info("Attempting registration for ${_usernameController.text}");
 
-    try {
-      var userInsert = UserInsert(
-          _usernameController.text,
-          _emailController.text,
-          _passwordController.text,
-          _confirmPasswordController.text,
-          null);
+    var userInsert = UserInsert(_usernameController.text, _emailController.text,
+        _passwordController.text, _confirmPasswordController.text, null);
 
-      var registerResult = await _userProvider.postNewUser(userInsert);
+    User? registerResult;
 
-      // Small delay to allow synchronization with the backend identity server
-      UserLogin? loginResult = await Future.delayed(
-        const Duration(milliseconds: 500),
-        () async {
-          var getResult = await _userLoginProvider.getUserLogin(
-            registerResult.result!.username,
-            userInsert.password,
-          );
-
-          // return getResult.result;
-        },
-      );
-
-      if (loginResult == null) {
-        throw BaseException("Could not login");
+    await _userProvider.postNewUser(userInsert).then((result) {
+      switch (result) {
+        case Success<User>(data: final d):
+          registerResult = d;
+        case Failure<User>(exception: final e):
+          showErrorDialog(context: context, content: Text(e.toString()));
       }
+    });
 
-      return loginResult;
-    } on BaseException catch (error) {
-      _toggleRegistrationInProgress();
+    if (registerResult != null) {
+      await Future.delayed(const Duration(milliseconds: 500), () async {
+        await _userLoginProvider
+            .getUserLogin(registerResult!.username, userInsert.password)
+            .then((result) async {
+          switch (result) {
+            case Success<UserLogin>(data: final d):
+              await _authProvider.storeLogin(loginCreds: d);
+            case Failure<UserLogin>(exception: final e):
+              showErrorDialog(context: context, content: Text(e.toString()));
+          }
+        });
+      });
 
-      if (context.mounted) {
-        await showErrorDialog(
-          context,
-          const Text("Error"),
-          Text(
-            error.toString(),
-          ),
-        );
-      }
-
-      return null;
+      ProgressIndicatorDialog().dismiss();
+      return true;
     }
+
+    ProgressIndicatorDialog().dismiss();
+    return false;
   }
 
   @override
@@ -188,24 +175,13 @@ class _RegistrationScreenWidgetState extends State<RegistrationScreenWidget> {
                             height: SizeConfig.safeBlockVertical * 6.0,
                             child: FilledButton(
                               onPressed: () async {
-                                _logger.info("Registration in progress...");
-
-                                if (_formKey.currentState!.validate() &&
-                                    !_registrationInProgress) {
-                                  var loginCreds = await _submitRegistration();
-
-                                  if (loginCreds != null) {
-                                    _logger.info(
-                                        "Registered and logged in with ${loginCreds.accessToken}");
-                                    _toggleRegistrationInProgress();
-
-                                    await _authProvider.storeLogin(
-                                        loginCreds: loginCreds);
-
-                                    if (context.mounted) {
+                                if (_formKey.currentState!.validate()) {
+                                  await _submitRegistration().then((success) {
+                                    if (success) {
+                                      _logger.info("Registered and logged in");
                                       Navigator.of(context).pop();
                                     }
-                                  }
+                                  });
                                 } else {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(

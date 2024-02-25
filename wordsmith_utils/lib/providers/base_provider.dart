@@ -1,8 +1,6 @@
 import "dart:convert";
-import "package:flutter/material.dart";
 import "package:wordsmith_utils/exceptions/base_exception.dart";
-import "package:wordsmith_utils/exceptions/forbidden_exception.dart";
-import "package:wordsmith_utils/exceptions/unauthorized_exception.dart";
+import "package:wordsmith_utils/exceptions/exception_types.dart";
 import "package:wordsmith_utils/logger.dart";
 import "package:wordsmith_utils/models/entity_result.dart";
 import "package:wordsmith_utils/models/query_result.dart";
@@ -15,17 +13,9 @@ import "package:wordsmith_utils/secure_store.dart";
 
 abstract class BaseProvider<T> extends AuthProvider {
   String _endpoint = "";
-  bool _isLoading = false;
 
   static final _logger = LogManager.getLogger("BaseProvider");
   static String? _apiUrl;
-
-  bool get isLoading => _isLoading;
-  @protected
-  set isLoading(bool value) {
-    _isLoading = value;
-    notifyListeners();
-  }
 
   BaseProvider(String endpoint) {
     _endpoint = endpoint;
@@ -46,7 +36,6 @@ abstract class BaseProvider<T> extends AuthProvider {
       String contentType = "",
       String bearerToken = "",
       bool retryForRefresh = false}) async {
-    _isLoading = true;
     var url = "$_apiUrl$_endpoint$additionalRoute";
 
     if (filter != null) {
@@ -60,12 +49,18 @@ abstract class BaseProvider<T> extends AuthProvider {
       uri = Uri.parse(url);
     } catch (error) {
       _logger.severe("Invalid URL: $url");
-      throw Exception(error);
+      throw BaseException("Something bad happened");
     }
 
     var headers =
         _createHeaders(contentType: contentType, bearerToken: bearerToken);
-    var response = await http.get(uri, headers: headers);
+    late http.Response response;
+
+    try {
+      response = await http.get(uri, headers: headers);
+    } catch (error) {
+      _handleInternalAppError(error);
+    }
 
     // If retrying is enabled and status 401 is returned, attempt to refresh the access token and send the request again
     if (retryForRefresh == true && response.statusCode == 401) {
@@ -75,11 +70,18 @@ abstract class BaseProvider<T> extends AuthProvider {
         bearerToken = await SecureStore.getValue("access_token") ?? "";
         headers =
             _createHeaders(contentType: contentType, bearerToken: bearerToken);
-        var refreshedResponse = await http.get(uri, headers: headers);
+        late http.Response refreshedResponse;
+
+        try {
+          refreshedResponse = await http.get(uri, headers: headers);
+        } catch (error) {
+          _handleInternalAppError(error);
+        }
 
         return await _handleGetResponse(refreshedResponse);
       } else {
-        throw UnauthorizedException("Failed despite a token refresh attempt");
+        throw BaseException("Session timed out",
+            type: ExceptionType.unauthorizedException);
       }
     }
 
@@ -111,13 +113,19 @@ abstract class BaseProvider<T> extends AuthProvider {
       uri = Uri.parse(url);
     } catch (error) {
       _logger.severe("Invalid URL: $url");
-      throw Exception(error);
+      throw BaseException("Something bad happened");
     }
 
     var headers =
         _createHeaders(contentType: contentType, bearerToken: bearerToken);
     var jsonRequest = jsonEncode(request);
-    var response = await http.put(uri, body: jsonRequest, headers: headers);
+    late http.Response response;
+
+    try {
+      response = await http.put(uri, body: jsonRequest, headers: headers);
+    } catch (error) {
+      _handleInternalAppError(error);
+    }
 
     // If retrying is enabled and status 401 is returned, attempt to refresh the access token and send the request again
     if (retryForRefresh == true && response.statusCode == 401) {
@@ -127,12 +135,19 @@ abstract class BaseProvider<T> extends AuthProvider {
         bearerToken = await SecureStore.getValue("access_token") ?? "";
         headers =
             _createHeaders(contentType: contentType, bearerToken: bearerToken);
-        var refreshedResponse =
-            await http.put(uri, body: jsonRequest, headers: headers);
+        late http.Response refreshedResponse;
+
+        try {
+          refreshedResponse =
+              await http.put(uri, body: jsonRequest, headers: headers);
+        } catch (error) {
+          _handleInternalAppError(error);
+        }
 
         return await _handleResponse(refreshedResponse);
       } else {
-        throw UnauthorizedException("Failed despite a token refresh attempt");
+        throw BaseException("Session timed out",
+            type: ExceptionType.unauthorizedException);
       }
     }
 
@@ -160,13 +175,19 @@ abstract class BaseProvider<T> extends AuthProvider {
       uri = Uri.parse(url);
     } catch (error) {
       _logger.severe("Invalid URL: $url");
-      throw Exception(error);
+      throw BaseException("Something bad happened");
     }
 
     var headers =
         _createHeaders(contentType: contentType, bearerToken: bearerToken);
     var jsonRequest = jsonEncode(request);
-    var response = await http.post(uri, body: jsonRequest, headers: headers);
+    late http.Response response;
+
+    try {
+      response = await http.post(uri, body: jsonRequest, headers: headers);
+    } catch (error) {
+      _handleInternalAppError(error);
+    }
 
     // If retrying is enabled and status 401 is returned, attempt to refresh the access token and send the request again
     if (retryForRefresh == true && response.statusCode == 401) {
@@ -176,12 +197,19 @@ abstract class BaseProvider<T> extends AuthProvider {
         bearerToken = await SecureStore.getValue("access_token") ?? "";
         headers =
             _createHeaders(contentType: contentType, bearerToken: bearerToken);
-        var refreshedResponse =
-            await http.post(uri, body: jsonRequest, headers: headers);
+        late http.Response refreshedResponse;
+
+        try {
+          refreshedResponse =
+              await http.post(uri, body: jsonRequest, headers: headers);
+        } catch (error) {
+          _handleInternalAppError(error);
+        }
 
         return await _handleResponse(refreshedResponse);
       } else {
-        throw UnauthorizedException("Failed despite a token refresh attempt");
+        throw BaseException("Session timed out",
+            type: ExceptionType.unauthorizedException);
       }
     }
 
@@ -209,7 +237,7 @@ abstract class BaseProvider<T> extends AuthProvider {
       uri = Uri.parse(url);
     } catch (error) {
       _logger.severe("Invalid URL: $url");
-      throw Exception(error);
+      throw BaseException("Something bad happened");
     }
 
     var request = http.MultipartRequest('POST', uri);
@@ -221,7 +249,13 @@ abstract class BaseProvider<T> extends AuthProvider {
       request.headers["Authorization"] = "Bearer $bearerToken";
     }
 
-    var response = await request.send();
+    late http.StreamedResponse response;
+
+    try {
+      response = await request.send();
+    } catch (error) {
+      _handleInternalAppError(error);
+    }
 
     // If retrying is enabled and status 401 is returned, attempt to refresh the access token and send the request again
     if (retryForRefresh == true && response.statusCode == 401) {
@@ -234,12 +268,18 @@ abstract class BaseProvider<T> extends AuthProvider {
         retryRequest.headers["Authorization"] = "Bearer $bearerToken";
         retryRequest = _setMultipartPayload(
             request: retryRequest, fields: fields, files: files);
+        late http.StreamedResponse retryResponse;
 
-        var retryResponse = await retryRequest.send();
+        try {
+          retryResponse = await retryRequest.send();
+        } catch (error) {
+          _handleInternalAppError(error);
+        }
 
         return await _handleMultipartResponse(retryResponse);
       } else {
-        throw UnauthorizedException("Failed despite a token refresh attempt");
+        throw BaseException("Session timed out",
+            type: ExceptionType.unauthorizedException);
       }
     }
 
@@ -278,11 +318,12 @@ abstract class BaseProvider<T> extends AuthProvider {
     if (response.statusCode < 299) {
       return true;
     } else if (response.statusCode == 400) {
-      throw BaseException("Bad request: $details");
+      throw BaseException("$details");
     } else if (response.statusCode == 401) {
-      throw UnauthorizedException("$details");
+      throw BaseException("$details",
+          type: ExceptionType.unauthorizedException);
     } else if (response.statusCode == 403) {
-      throw ForbiddenException("$details");
+      throw BaseException("$details", type: ExceptionType.forbiddenException);
     } else {
       _logger.severe(response.body);
       throw BaseException("Something bad happened");
@@ -320,11 +361,12 @@ abstract class BaseProvider<T> extends AuthProvider {
     if (response.statusCode < 299) {
       return responseBody;
     } else if (response.statusCode == 400) {
-      throw BaseException("Bad request: $details");
+      throw BaseException("$details");
     } else if (response.statusCode == 401) {
-      throw UnauthorizedException("$details");
+      throw BaseException("$details",
+          type: ExceptionType.unauthorizedException);
     } else if (response.statusCode == 403) {
-      throw ForbiddenException("$details");
+      throw BaseException("$details", type: ExceptionType.forbiddenException);
     } else {
       _logger.severe(responseBody);
       throw BaseException("Something bad happened");
@@ -507,9 +549,9 @@ abstract class BaseProvider<T> extends AuthProvider {
     } else if (request is http.MultipartRequest) {
       requestCopy = http.MultipartRequest(request.method, request.url);
     } else if (request is http.StreamedRequest) {
-      throw Exception('Copying streamed requests is not supported');
+      throw BaseException('Copying streamed requests is not supported');
     } else {
-      throw Exception('Request type is unknown, cannot copy');
+      throw BaseException('Request type is unknown, cannot copy');
     }
 
     requestCopy
@@ -554,7 +596,7 @@ abstract class BaseProvider<T> extends AuthProvider {
       return entityResult;
     }
 
-    throw Exception("Unknown error");
+    throw BaseException("Unknown error");
   }
 
   Future<EntityResult<T>> _handleResponse(http.Response response) async {
@@ -570,6 +612,13 @@ abstract class BaseProvider<T> extends AuthProvider {
       return entityResult;
     }
 
-    throw Exception("Unknown error");
+    throw BaseException("Unknown error");
+  }
+
+  void _handleInternalAppError(Object? error) {
+    _logger.severe(error);
+    throw BaseException(
+        "Internal app error. This could also be a server-side issue. Please check back again!",
+        type: ExceptionType.internalAppError);
   }
 }

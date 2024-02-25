@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wordsmith_mobile/widgets/home_ebook_display.dart';
-import 'package:wordsmith_utils/exceptions/base_exception.dart';
-import 'package:wordsmith_utils/logger.dart';
 import 'package:wordsmith_utils/models/ebook/ebook.dart';
 import 'package:wordsmith_utils/models/query_result.dart';
+import 'package:wordsmith_utils/models/result.dart';
 import 'package:wordsmith_utils/providers/ebook_provider.dart';
 
 class HomeScreenWidget extends StatefulWidget {
@@ -15,21 +14,19 @@ class HomeScreenWidget extends StatefulWidget {
 }
 
 class _HomeScreenWidgetState extends State<HomeScreenWidget> {
-  final _logger = LogManager.getLogger("HomeScreen");
   late EBookProvider _eBookProvider;
 
-  Future<QueryResult<EBook>> _getNewlyAddedEBooks() async {
-    try {
-      var ebooks = await _eBookProvider.getNewlyAdded(page: 1, pageSize: 15);
+  late Future<Result<QueryResult<EBook>>> _getNewlyAddedBooks;
 
-      return ebooks;
-    } on BaseException catch (error) {
-      _logger.info(error);
-      return Future.error(error);
-    } on Exception catch (error) {
-      _logger.severe(error);
-      return Future.error(error);
-    }
+  final _page = 1;
+  final _pageSize = 15;
+
+  @override
+  void initState() {
+    super.initState();
+    _eBookProvider = context.read<EBookProvider>();
+    _getNewlyAddedBooks =
+        _eBookProvider.getNewlyAdded(page: _page, pageSize: _pageSize);
   }
 
   @override
@@ -41,17 +38,20 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
       child: Column(
         children: <Widget>[
           FutureBuilder(
-            future: _getNewlyAddedEBooks(),
-            builder: (context, AsyncSnapshot<QueryResult<EBook>> snapshot) {
+            future: _getNewlyAddedBooks,
+            builder: (context, snapshot) {
               if (snapshot.connectionState != ConnectionState.done) {
-                return const CircularProgressIndicator();
+                return const Center(child: CircularProgressIndicator());
               }
 
-              if (snapshot.hasError) {
-                return const Text("Could not load!");
-              }
+              List<EBook> ebooks = [];
 
-              var ebooks = snapshot.data!.result;
+              switch (snapshot.data!) {
+                case Success(data: final d):
+                  ebooks = d.result;
+                case Failure(exception: final e):
+                  return Center(child: Text(e.toString()));
+              }
 
               return HomeEBookDisplayWidget(
                 title: "New",

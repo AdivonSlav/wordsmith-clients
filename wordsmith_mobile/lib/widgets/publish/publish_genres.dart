@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wordsmith_mobile/widgets/multiselect_dialog.dart';
-import 'package:wordsmith_utils/exceptions/base_exception.dart';
-import 'package:wordsmith_utils/logger.dart';
 import 'package:wordsmith_utils/models/genre/genre.dart';
 import 'package:wordsmith_utils/models/query_result.dart';
+import 'package:wordsmith_utils/models/result.dart';
 import 'package:wordsmith_utils/providers/genre_provider.dart';
 
 class PublishGenresWidget extends StatefulWidget {
@@ -20,26 +19,11 @@ class PublishGenresWidget extends StatefulWidget {
 }
 
 class _PublishGenresWidgetState extends State<PublishGenresWidget> {
-  final _logger = LogManager.getLogger("PublishGenresWidget");
+  List<Genre> _genres = [];
   List<String> _items = [];
   List<String> _selectedItems = [];
 
-  late GenreProvider _genreProvider;
-  late Future<QueryResult<Genre>> _getGenresFuture;
-
-  Future<QueryResult<Genre>> _loadGenres() async {
-    try {
-      var result = await _genreProvider.getGenres();
-
-      return result;
-    } on BaseException catch (error) {
-      _logger.info(error);
-      return Future.error(error);
-    } on Exception catch (error) {
-      _logger.severe(error);
-      return Future.error(error);
-    }
-  }
+  late Future<Result<QueryResult<Genre>>> _getGenres;
 
   List<String> _parseGenreNames(List<Genre> genres) {
     return genres.map((e) => e.name).toList();
@@ -61,9 +45,8 @@ class _PublishGenresWidgetState extends State<PublishGenresWidget> {
 
   @override
   void initState() {
-    _genreProvider = context.read<GenreProvider>();
-    _getGenresFuture = _loadGenres();
     super.initState();
+    _getGenres = context.read<GenreProvider>().getGenres();
   }
 
   @override
@@ -91,19 +74,20 @@ class _PublishGenresWidgetState extends State<PublishGenresWidget> {
               children: [
                 Expanded(
                   child: FutureBuilder(
-                    future: _getGenresFuture,
-                    builder:
-                        (context, AsyncSnapshot<QueryResult<Genre>> snapshot) {
+                    future: _getGenres,
+                    builder: (context, snapshot) {
                       if (snapshot.connectionState != ConnectionState.done) {
                         return const CircularProgressIndicator();
                       }
 
-                      if (snapshot.hasError || snapshot.data == null) {
-                        return Text(snapshot.error.toString());
+                      switch (snapshot.data!) {
+                        case Success(data: final d):
+                          _genres = d.result;
+                          _items = _parseGenreNames(d.result);
+                        case Failure(exception: final e):
+                          return Center(child: Text(e.toString()));
                       }
-
                       // snapshot.data will never be null here.
-                      _items = _parseGenreNames(snapshot.data!.result);
 
                       return Column(
                         children: [
@@ -114,8 +98,7 @@ class _PublishGenresWidgetState extends State<PublishGenresWidget> {
                               if (results != null) {
                                 setState(() {
                                   _selectedItems = results;
-                                  var selectedGenreObjects = snapshot
-                                      .data!.result
+                                  var selectedGenreObjects = _genres
                                       .where((e) =>
                                           _selectedItems.contains(e.name))
                                       .toList();

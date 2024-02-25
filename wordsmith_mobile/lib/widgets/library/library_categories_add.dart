@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wordsmith_mobile/widgets/library/library_categories_create.dart';
 import 'package:wordsmith_utils/dialogs/progress_line_dialog.dart';
+import 'package:wordsmith_utils/models/query_result.dart';
 import 'package:wordsmith_utils/models/result.dart';
 import 'package:wordsmith_utils/models/user_library_category/user_library_category.dart';
 import 'package:wordsmith_utils/models/user_library_category/user_library_category_add.dart';
@@ -25,6 +26,7 @@ class LibraryCategoriesAddWidget extends StatefulWidget {
 
 class _LibraryCategoriesAddWidgetState
     extends State<LibraryCategoriesAddWidget> {
+  late Future<Result<QueryResult<UserLibraryCategory>>> _getCategories;
   late UserLibraryCategoryProvider _userLibraryCategoryProvider;
 
   final _dialogKey = GlobalKey<ProgressLineDialogState>();
@@ -50,7 +52,7 @@ class _LibraryCategoriesAddWidgetState
           widget.onAdd();
           Navigator.of(context).pop();
         case Failure<String>():
-          showSnackbar(context: context, content: result.errorMessage);
+          showSnackbar(context: context, content: result.exception.toString());
       }
     });
 
@@ -75,7 +77,7 @@ class _LibraryCategoriesAddWidgetState
   void initState() {
     super.initState();
     _userLibraryCategoryProvider = context.read<UserLibraryCategoryProvider>();
-    Future.microtask(() => _userLibraryCategoryProvider.getLibraryCategories());
+    _getCategories = _userLibraryCategoryProvider.getLibraryCategories();
   }
 
   @override
@@ -89,9 +91,10 @@ class _LibraryCategoriesAddWidgetState
         height: size.height * 0.4,
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Consumer<UserLibraryCategoryProvider>(
-            builder: (context, provider, _) {
-              if (provider.isLoading || provider.libraryCategories == null) {
+          child: FutureBuilder(
+            future: _getCategories,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState != ConnectionState.done) {
                 return const Center(
                   child: CircularProgressIndicator(),
                 );
@@ -99,12 +102,12 @@ class _LibraryCategoriesAddWidgetState
 
               List<UserLibraryCategory> libraryCategories = [];
 
-              switch (provider.libraryCategories!) {
+              switch (snapshot.data!) {
                 case Success(data: final d):
                   libraryCategories = d.result;
-                case Failure(errorMessage: final e):
+                case Failure(exception: final e):
                   return Center(
-                    child: Text(e),
+                    child: Text(e.toString()),
                   );
               }
 

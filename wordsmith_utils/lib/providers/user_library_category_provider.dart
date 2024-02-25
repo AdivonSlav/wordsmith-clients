@@ -1,3 +1,4 @@
+import 'package:wordsmith_utils/exceptions/base_exception.dart';
 import 'package:wordsmith_utils/logger.dart';
 import 'package:wordsmith_utils/models/query_result.dart';
 import 'package:wordsmith_utils/models/result.dart';
@@ -10,26 +11,20 @@ import 'package:wordsmith_utils/secure_store.dart';
 class UserLibraryCategoryProvider extends BaseProvider<UserLibraryCategory> {
   final _logger = LogManager.getLogger("UserLibraryCategoryProvider");
 
-  Result<QueryResult<UserLibraryCategory>>? _libraryCategories;
-  Result<QueryResult<UserLibraryCategory>>? get libraryCategories =>
-      _libraryCategories;
-
   UserLibraryCategoryProvider() : super("user-library-categories");
 
-  Future<void> getLibraryCategories() async {
-    isLoading = true;
+  Future<Result<QueryResult<UserLibraryCategory>>>
+      getLibraryCategories() async {
     var accessToken = await SecureStore.getValue("access_token");
 
     try {
       var result =
           await get(bearerToken: accessToken ?? "", retryForRefresh: true);
 
-      _libraryCategories = Success(result);
-      isLoading = false;
-    } on Exception catch (error) {
-      _libraryCategories = Failure(error.toString());
-      isLoading = false;
+      return Success(result);
+    } on BaseException catch (error) {
       _logger.severe(error);
+      return Failure(error);
     }
   }
 
@@ -45,9 +40,9 @@ class UserLibraryCategoryProvider extends BaseProvider<UserLibraryCategory> {
       );
 
       return Success(result.message ?? "Success");
-    } on Exception catch (error) {
+    } on BaseException catch (error) {
       _logger.severe(error);
-      return Failure(error.toString());
+      return Failure(error);
     }
   }
 
@@ -63,9 +58,9 @@ class UserLibraryCategoryProvider extends BaseProvider<UserLibraryCategory> {
       );
 
       return Success(result.message ?? "Success");
-    } on Exception catch (error) {
+    } on BaseException catch (error) {
       _logger.severe(error);
-      return Failure(error.toString());
+      return Failure(error);
     }
   }
 

@@ -1,3 +1,4 @@
+import "package:wordsmith_utils/exceptions/base_exception.dart";
 import "package:wordsmith_utils/logger.dart";
 import "package:wordsmith_utils/models/result.dart";
 import "package:wordsmith_utils/models/user/user_login.dart";
@@ -22,11 +23,11 @@ class UserLoginProvider extends BaseProvider<UserLogin> {
           result.result?.refreshToken != null) {
         return Success(result.result!);
       } else {
-        return const Failure("Could not login");
+        return Failure(BaseException("Could not login"));
       }
-    } on Exception catch (error) {
+    } on BaseException catch (error) {
       _logger.severe(error);
-      return Failure(error.toString());
+      return Failure(error);
     }
   }
 

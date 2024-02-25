@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wordsmith_mobile/utils/library_filter_values.dart';
-import 'package:wordsmith_utils/logger.dart';
 import 'package:wordsmith_utils/models/maturity_rating/maturity_rating.dart';
 import 'package:wordsmith_utils/models/query_result.dart';
+import 'package:wordsmith_utils/models/result.dart';
 import 'package:wordsmith_utils/providers/maturity_ratings_provider.dart';
 
 class LibraryFiltersWidget extends StatefulWidget {
@@ -21,24 +21,13 @@ class LibraryFiltersWidget extends StatefulWidget {
 }
 
 class _LibraryFiltersWidgetState extends State<LibraryFiltersWidget> {
-  final _logger = LogManager.getLogger("LibraryFilters");
-  late MaturityRatingsProvider _maturityRatingsProvider;
-  late Future<QueryResult<MaturityRating>> _maturityRatingsFuture;
-
-  Future<QueryResult<MaturityRating>> _getMaturityRatings() async {
-    try {
-      return await _maturityRatingsProvider.getMaturityRatings();
-    } on Exception catch (error) {
-      _logger.severe(error);
-      return Future.error(error);
-    }
-  }
+  late Future<Result<QueryResult<MaturityRating>>> _getMaturityRatings;
 
   @override
   void initState() {
-    _maturityRatingsProvider = context.read<MaturityRatingsProvider>();
-    _maturityRatingsFuture = _getMaturityRatings();
     super.initState();
+    _getMaturityRatings =
+        context.read<MaturityRatingsProvider>().getMaturityRatings();
   }
 
   @override
@@ -46,17 +35,20 @@ class _LibraryFiltersWidgetState extends State<LibraryFiltersWidget> {
     return Padding(
       padding: const EdgeInsets.all(18.0),
       child: FutureBuilder(
-        future: _maturityRatingsFuture,
+        future: _getMaturityRatings,
         builder: (context, snapshot) {
           if (snapshot.connectionState != ConnectionState.done) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (snapshot.hasError) {
-            return Center(child: Text(snapshot.error.toString()));
-          }
+          List<MaturityRating> maturityRatings = [];
 
-          var maturityRatings = snapshot.data!.result;
+          switch (snapshot.data!) {
+            case Success(data: final d):
+              maturityRatings = d.result;
+            case Failure(exception: final e):
+              return Center(child: Text(e.toString()));
+          }
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,

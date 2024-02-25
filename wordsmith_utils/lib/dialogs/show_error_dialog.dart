@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 
 Future<dynamic> showErrorDialog(
-    BuildContext context, Widget title, Widget content) async {
+    {required BuildContext context,
+    Widget? title,
+    required Widget content}) async {
   if (!context.mounted) return;
 
   return await showDialog(
     context: context,
     builder: (BuildContext context) => AlertDialog(
-      title: title,
+      title: title ?? const Text("Error"),
       content: content,
       actions: <Widget>[
         TextButton(

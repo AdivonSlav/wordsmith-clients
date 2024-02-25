@@ -32,13 +32,15 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
   var _hasMore = true;
   LibraryFilterValues? _filterValues;
 
+  var _isLoading = false;
   var _isSelectingBooks = false;
 
   // Keys are indices within the grid, while the values are the IDs of the library entries themselves
   final _selectedBooks = HashMap<int, int>();
 
   Future _getLibraryBooks() async {
-    if (_userLibraryProvider.isLoading) return;
+    if (_isLoading) return;
+    _isLoading = true;
 
     List<UserLibrary> libraryResult = [];
 
@@ -53,17 +55,18 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
       page: _page,
       pageSize: _pageSize,
     )
-        .then((_) {
-      switch (_userLibraryProvider.libraryEntries!) {
+        .then((result) {
+      switch (result) {
         case Success(data: final d):
           libraryResult = d.result;
-        case Failure(errorMessage: final e):
-          showErrorDialog(context, const Text("Error"), Text(e));
+        case Failure(exception: final e):
+          showErrorDialog(context: context, content: Text(e.toString()));
       }
     });
 
     setState(() {
       _page++;
+      _isLoading = false;
 
       if (libraryResult.length < _pageSize) {
         _hasMore = false;
@@ -84,6 +87,7 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
 
   Future _refresh() async {
     setState(() {
+      _isLoading = false;
       _hasMore = true;
       _page = 1;
       _userLibraryList.clear();

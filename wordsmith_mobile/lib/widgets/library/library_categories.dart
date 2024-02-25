@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wordsmith_mobile/utils/library_filter_values.dart';
 import 'package:wordsmith_utils/dialogs/progress_line_dialog.dart';
+import 'package:wordsmith_utils/models/query_result.dart';
 import 'package:wordsmith_utils/models/result.dart';
 import 'package:wordsmith_utils/models/user_library_category/user_library_category.dart';
 import 'package:wordsmith_utils/providers/user_library_category_provider.dart';
@@ -21,7 +22,7 @@ class LibraryCategoriesWidget extends StatefulWidget {
 }
 
 class _LibraryCategoriesWidgetState extends State<LibraryCategoriesWidget> {
-  late Future getLibraryCategories;
+  late Future<Result<QueryResult<UserLibraryCategory>>> _getLibraryCategories;
 
   void _selectCategory(UserLibraryCategory category) {
     widget.filterValues.selectedCategory = category;
@@ -31,9 +32,8 @@ class _LibraryCategoriesWidgetState extends State<LibraryCategoriesWidget> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() {
-      context.read<UserLibraryCategoryProvider>().getLibraryCategories();
-    });
+    _getLibraryCategories =
+        context.read<UserLibraryCategoryProvider>().getLibraryCategories();
   }
 
   @override
@@ -46,9 +46,10 @@ class _LibraryCategoriesWidgetState extends State<LibraryCategoriesWidget> {
         height: size.height * 0.4,
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Consumer<UserLibraryCategoryProvider>(
-            builder: (context, provider, _) {
-              if (provider.isLoading || provider.libraryCategories == null) {
+          child: FutureBuilder(
+            future: _getLibraryCategories,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState != ConnectionState.done) {
                 return const Center(
                   child: CircularProgressIndicator(),
                 );
@@ -56,12 +57,12 @@ class _LibraryCategoriesWidgetState extends State<LibraryCategoriesWidget> {
 
               List<UserLibraryCategory> libraryCategories = [];
 
-              switch (provider.libraryCategories!) {
+              switch (snapshot.data!) {
                 case Success(data: final d):
                   libraryCategories = d.result;
-                case Failure(errorMessage: final e):
+                case Failure(exception: final e):
                   return Center(
-                    child: Text(e),
+                    child: Text(e.toString()),
                   );
               }
 

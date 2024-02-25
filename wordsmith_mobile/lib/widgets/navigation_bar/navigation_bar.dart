@@ -8,8 +8,9 @@ import 'package:wordsmith_mobile/widgets/navigation_bar/app_bar_settings_trailin
 import 'package:wordsmith_mobile/widgets/navigation_bar/navigation_bar_error.dart';
 import 'package:wordsmith_mobile/widgets/navigation_bar/navigation_bar_loading.dart';
 import 'package:wordsmith_mobile/widgets/navigation_bar/navigation_bar_publish.dart';
-import 'package:wordsmith_utils/exceptions/base_exception.dart';
-import 'package:wordsmith_utils/logger.dart';
+import 'package:wordsmith_utils/exceptions/exception_types.dart';
+import 'package:wordsmith_utils/models/result.dart';
+import 'package:wordsmith_utils/models/user/user.dart';
 import 'package:wordsmith_utils/providers/auth_provider.dart';
 import 'package:wordsmith_utils/providers/user_provider.dart';
 
@@ -21,9 +22,7 @@ class NavigationBarWidget extends StatefulWidget {
 }
 
 class _NavigationBarWidgetState extends State<NavigationBarWidget> {
-  final _logger = LogManager.getLogger("NavigationBar");
-
-  late Future<dynamic> _checkLoggedUserFuture;
+  late Future<void> _checkLoggedUserFuture;
   late UserProvider _userProvider;
   late AuthProvider _authProvider;
 
@@ -52,16 +51,17 @@ class _NavigationBarWidgetState extends State<NavigationBarWidget> {
     }
   }
 
-  Future<dynamic> _checkLoggedUser() async {
-    try {
-      var loggedUser = await _userProvider.getLoggedUser();
-      await _authProvider.storeLogin(user: loggedUser);
-    } on BaseException catch (error) {
-      _logger.info(error);
-    } on Exception catch (error) {
-      _logger.severe(error);
-      return Future.error(error);
-    }
+  Future<void> _checkLoggedUser() async {
+    await _userProvider.getLoggedUser().then((result) async {
+      switch (result) {
+        case Success<User>(data: final d):
+          await _authProvider.storeLogin(user: d);
+        case Failure<User>(exception: final e):
+          if (e.type == ExceptionType.internalAppError) {
+            return Future.error(e);
+          }
+      }
+    });
   }
 
   @override

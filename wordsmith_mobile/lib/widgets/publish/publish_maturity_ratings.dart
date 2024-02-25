@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:wordsmith_utils/exceptions/base_exception.dart';
-import 'package:wordsmith_utils/logger.dart';
 import 'package:wordsmith_utils/models/maturity_rating/maturity_rating.dart';
 import 'package:wordsmith_utils/models/query_result.dart';
+import 'package:wordsmith_utils/models/result.dart';
 import 'package:wordsmith_utils/providers/maturity_ratings_provider.dart';
 
 class PublishMaturityRatingsWidget extends StatefulWidget {
@@ -20,27 +19,10 @@ class PublishMaturityRatingsWidget extends StatefulWidget {
 
 class _PublishMaturityRatingsWidgetState
     extends State<PublishMaturityRatingsWidget> {
-  final _logger = LogManager.getLogger("PublishMaturityRatings");
-
-  late MaturityRatingsProvider _maturityRatingsProvider;
-  late Future<QueryResult<MaturityRating>> _getMaturityRatingsFuture;
+  late Future<Result<QueryResult<MaturityRating>>> _getMaturityRatings;
 
   List<MaturityRating> _maturityRatings = [];
   int? _selectedIndex;
-
-  Future<QueryResult<MaturityRating>> _loadMaturityRatings() async {
-    try {
-      var result = await _maturityRatingsProvider.getMaturityRatings();
-
-      return result;
-    } on BaseException catch (error) {
-      _logger.info(error);
-      return Future.error(error);
-    } on Exception catch (error) {
-      _logger.severe(error);
-      return Future.error(error);
-    }
-  }
 
   void _onSelected(bool selected, int index) {
     setState(() {
@@ -56,9 +38,9 @@ class _PublishMaturityRatingsWidgetState
 
   @override
   void initState() {
-    _maturityRatingsProvider = context.read<MaturityRatingsProvider>();
-    _getMaturityRatingsFuture = _loadMaturityRatings();
     super.initState();
+    _getMaturityRatings =
+        context.read<MaturityRatingsProvider>().getMaturityRatings();
   }
 
   @override
@@ -66,18 +48,18 @@ class _PublishMaturityRatingsWidgetState
     var theme = Theme.of(context);
 
     return FutureBuilder(
-        future: _getMaturityRatingsFuture,
-        builder:
-            (context, AsyncSnapshot<QueryResult<MaturityRating>> snapshot) {
+        future: _getMaturityRatings,
+        builder: (context, snapshot) {
           if (snapshot.connectionState != ConnectionState.done) {
             return const CircularProgressIndicator();
           }
 
-          if (snapshot.hasError || snapshot.data == null) {
-            return Text(snapshot.error.toString());
+          switch (snapshot.data!) {
+            case Success(data: final d):
+              _maturityRatings = d.result;
+            case Failure(exception: final e):
+              return Center(child: Text(e.toString()));
           }
-
-          _maturityRatings = snapshot.data!.result;
 
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,

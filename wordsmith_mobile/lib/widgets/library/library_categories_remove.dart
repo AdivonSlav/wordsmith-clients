@@ -52,7 +52,7 @@ class _LibraryCategoriesRemoveWidgetState
           widget.onRemove();
           Navigator.of(context).pop(true);
         case Failure<String>():
-          showSnackbar(context: context, content: result.errorMessage);
+          showSnackbar(context: context, content: result.exception.toString());
       }
     });
 
