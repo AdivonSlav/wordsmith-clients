@@ -1,4 +1,5 @@
 import "dart:convert";
+import "package:flutter/material.dart";
 import "package:wordsmith_utils/exceptions/base_exception.dart";
 import "package:wordsmith_utils/exceptions/forbidden_exception.dart";
 import "package:wordsmith_utils/exceptions/unauthorized_exception.dart";
@@ -13,9 +14,18 @@ import "package:wordsmith_utils/providers/auth_provider.dart";
 import "package:wordsmith_utils/secure_store.dart";
 
 abstract class BaseProvider<T> extends AuthProvider {
-  static final _logger = LogManager.getLogger("BaseProvider");
   String _endpoint = "";
+  bool _isLoading = false;
+
+  static final _logger = LogManager.getLogger("BaseProvider");
   static String? _apiUrl;
+
+  bool get isLoading => _isLoading;
+  @protected
+  set isLoading(bool value) {
+    _isLoading = value;
+    notifyListeners();
+  }
 
   BaseProvider(String endpoint) {
     _endpoint = endpoint;
@@ -36,6 +46,7 @@ abstract class BaseProvider<T> extends AuthProvider {
       String contentType = "",
       String bearerToken = "",
       bool retryForRefresh = false}) async {
+    _isLoading = true;
     var url = "$_apiUrl$_endpoint$additionalRoute";
 
     if (filter != null) {

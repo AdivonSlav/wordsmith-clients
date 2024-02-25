@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wordsmith_utils/dialogs/progress_line_dialog.dart';
+import 'package:wordsmith_utils/models/result.dart';
 import 'package:wordsmith_utils/models/user_library_category/user_library_category_remove.dart';
 import 'package:wordsmith_utils/providers/user_library_category_provider.dart';
+import 'package:wordsmith_utils/show_snackbar.dart';
 
 class LibraryCategoriesRemoveWidget extends StatefulWidget {
   final List<int> selectedEntryIds;
@@ -43,35 +45,28 @@ class _LibraryCategoriesRemoveWidgetState
     await _userLibraryCategoryProvider
         .removeCategoryFromEntries(removeModel)
         .then((result) {
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          behavior: SnackBarBehavior.floating,
-          content: Text(result.message ?? "Success"),
-        ),
-      );
-      // Indicate to the library screen that it should rebuild
-      widget.onRemove();
-      Navigator.of(context).pop(true);
-    }, onError: (error) {
-      _toggleInProgress();
-
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          behavior: SnackBarBehavior.floating,
-          content: Text(
-            error.toString(),
-          ),
-        ),
-      );
+      switch (result) {
+        case Success<String>():
+          showSnackbar(context: context, content: result.data);
+          // Indicate to the library screen that it should rebuild
+          widget.onRemove();
+          Navigator.of(context).pop(true);
+        case Failure<String>():
+          showSnackbar(context: context, content: result.errorMessage);
+      }
     });
+
+    _toggleInProgress();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _userLibraryCategoryProvider = context.read<UserLibraryCategoryProvider>();
   }
 
   @override
   Widget build(BuildContext context) {
-    _userLibraryCategoryProvider = context.read<UserLibraryCategoryProvider>();
-
     return ProgressLineDialog(
       key: _dialogKey,
       title: const Text("Remove category from entries"),

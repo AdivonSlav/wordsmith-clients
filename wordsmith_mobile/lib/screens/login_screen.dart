@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wordsmith_mobile/widgets/input_field.dart';
+import 'package:wordsmith_utils/dialogs/progress_indicator_dialog.dart';
 import 'package:wordsmith_utils/dialogs/show_error_dialog.dart';
-import 'package:wordsmith_utils/exceptions/base_exception.dart';
 import 'package:wordsmith_utils/logger.dart';
+import 'package:wordsmith_utils/models/result.dart';
 import 'package:wordsmith_utils/models/user/user_login.dart';
 import 'package:wordsmith_utils/providers/auth_provider.dart';
 import 'package:wordsmith_utils/providers/user_login_provider.dart';
@@ -27,45 +28,33 @@ class _LoginScreenWidgetState extends State<LoginScreenWidget> {
   late AuthProvider _authProvider;
 
   bool _obscuredPassword = true;
-  bool _loginInProgress = false;
 
-  void _toggleLoginInProgress() {
-    setState(() {
-      _loginInProgress = !_loginInProgress;
-    });
-  }
-
-  Future<UserLogin?> _submitLogin() async {
-    _toggleLoginInProgress();
+  Future<bool> _submitLogin() async {
+    ProgressIndicatorDialog().show(context);
 
     var username = _usernameController.text;
     var password = _passwordController.text;
 
     _logger.info("Attempting login with $username:$password");
 
-    try {
-      var getResult = await _userLoginProvider.getUserLogin(username, password);
+    bool success = false;
 
-      if (getResult.result == null) {
-        throw BaseException("Could not login");
+    await _userLoginProvider
+        .getUserLogin(username, password)
+        .then((result) async {
+      switch (result) {
+        case Success<UserLogin>(data: final d):
+          ProgressIndicatorDialog().dismiss();
+          await _authProvider.storeLogin(loginCreds: d);
+          success = true;
+        case Failure<UserLogin>(errorMessage: final e):
+          ProgressIndicatorDialog().dismiss();
+          showErrorDialog(context, const Text("Error"), Text(e));
+          success = false;
       }
+    });
 
-      return getResult.result;
-    } on BaseException catch (error) {
-      _toggleLoginInProgress();
-
-      if (context.mounted) {
-        await showErrorDialog(
-          context,
-          const Text("Error"),
-          Text(error.toString()),
-        );
-      }
-
-      _logger.severe(error);
-    }
-
-    return null;
+    return success;
   }
 
   @override
@@ -109,10 +98,6 @@ class _LoginScreenWidgetState extends State<LoginScreenWidget> {
                     validator: validateRequired,
                     suffixIcon: IconButton(
                       onPressed: () {
-                        if (_loginInProgress) {
-                          return;
-                        }
-
                         setState(() {
                           _obscuredPassword = !_obscuredPassword;
                         });
@@ -132,35 +117,16 @@ class _LoginScreenWidgetState extends State<LoginScreenWidget> {
                         width: SizeConfig.safeBlockHorizontal * 40.0,
                         height: SizeConfig.safeBlockVertical * 6.0,
                         child: FilledButton(
-                          onPressed: () async {
-                            if (_formKey.currentState!.validate() &&
-                                !_loginInProgress) {
-                              _logger.info("Login in progress...");
+                            onPressed: () async {
+                              if (_formKey.currentState!.validate()) {
+                                _logger.info("Login in progress...");
 
-                              var loginCreds = await _submitLogin();
-
-                              if (loginCreds != null) {
-                                _logger.info(
-                                    "Logged in with access token ${loginCreds.accessToken}");
-                                _toggleLoginInProgress();
-
-                                await _authProvider.storeLogin(
-                                    loginCreds: loginCreds);
-
-                                if (context.mounted) {
-                                  Navigator.of(context).pop();
-                                }
+                                await _submitLogin().then((success) {
+                                  if (success) Navigator.of(context).pop();
+                                });
                               }
-                            }
-                          },
-                          child: !_loginInProgress
-                              ? const Text("Login")
-                              : const SizedBox(
-                                  width: 20.0,
-                                  height: 20.0,
-                                  child: CircularProgressIndicator(),
-                                ),
-                        ),
+                            },
+                            child: const Text("Login")),
                       ),
                       SizedBox(
                         width: SizeConfig.safeBlockHorizontal * 6.0,

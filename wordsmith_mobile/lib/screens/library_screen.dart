@@ -10,7 +10,7 @@ import 'package:wordsmith_mobile/widgets/library/library_grid_tile.dart';
 import 'package:wordsmith_mobile/widgets/library/library_view.dart';
 import 'package:wordsmith_utils/dialogs/show_error_dialog.dart';
 import 'package:wordsmith_utils/logger.dart';
-import 'package:wordsmith_utils/models/query_result.dart';
+import 'package:wordsmith_utils/models/result.dart';
 import 'package:wordsmith_utils/models/user_library/user_library.dart';
 import 'package:wordsmith_utils/providers/user_library_provider.dart';
 
@@ -30,7 +30,6 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
   final _pageSize = 15;
   var _page = 1;
   var _hasMore = true;
-  var _isLoading = false;
   LibraryFilterValues? _filterValues;
 
   var _isSelectingBooks = false;
@@ -39,10 +38,11 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
   final _selectedBooks = HashMap<int, int>();
 
   Future _getLibraryBooks() async {
-    if (_isLoading) return;
-    _isLoading = true;
+    if (_userLibraryProvider.isLoading) return;
 
-    var libraryResult = await _userLibraryProvider
+    List<UserLibrary> libraryResult = [];
+
+    await _userLibraryProvider
         .getLibraryEntries(
       maturityRatingId: _filterValues?.selectedMaturityRatingId,
       isRead: _filterValues?.isRead,
@@ -53,20 +53,23 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
       page: _page,
       pageSize: _pageSize,
     )
-        .catchError((error) {
-      showErrorDialog(context, const Text("Error"), Text(error.toString()));
-      return QueryResult<UserLibrary>();
+        .then((_) {
+      switch (_userLibraryProvider.libraryEntries!) {
+        case Success(data: final d):
+          libraryResult = d.result;
+        case Failure(errorMessage: final e):
+          showErrorDialog(context, const Text("Error"), Text(e));
+      }
     });
 
     setState(() {
       _page++;
-      _isLoading = false;
 
-      if (libraryResult.result.length < _pageSize) {
+      if (libraryResult.length < _pageSize) {
         _hasMore = false;
       }
 
-      _userLibraryList.addAll(libraryResult.result);
+      _userLibraryList.addAll(libraryResult);
     });
   }
 
@@ -81,7 +84,6 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
 
   Future _refresh() async {
     setState(() {
-      _isLoading = false;
       _hasMore = true;
       _page = 1;
       _userLibraryList.clear();
@@ -326,8 +328,10 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
     _userLibraryProvider = context.read<UserLibraryProvider>();
     super.initState();
 
-    _buildFilterValues();
-    _getLibraryBooks();
+    Future.microtask(() {
+      _buildFilterValues();
+      _getLibraryBooks();
+    });
 
     _scrollController.addListener(() {
       if (_scrollController.position.maxScrollExtent ==

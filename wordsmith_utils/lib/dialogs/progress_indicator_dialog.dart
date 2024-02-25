@@ -4,7 +4,7 @@ class ProgressIndicatorDialog {
   static final ProgressIndicatorDialog _singleton =
       ProgressIndicatorDialog._internal();
 
-  late BuildContext _context;
+  BuildContext? _context;
   bool isDisplayed = false;
 
   factory ProgressIndicatorDialog() {
@@ -53,9 +53,10 @@ class ProgressIndicatorDialog {
   }
 
   dismiss() {
-    if (isDisplayed == true) {
-      Navigator.of(_context).pop();
+    if (isDisplayed == true && _context != null) {
+      Navigator.of(_context!).pop();
       isDisplayed = false;
+      _context = null;
     }
   }
 }

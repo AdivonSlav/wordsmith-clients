@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wordsmith_mobile/widgets/library/library_categories_create.dart';
 import 'package:wordsmith_utils/dialogs/progress_line_dialog.dart';
-import 'package:wordsmith_utils/logger.dart';
-import 'package:wordsmith_utils/models/query_result.dart';
+import 'package:wordsmith_utils/models/result.dart';
 import 'package:wordsmith_utils/models/user_library_category/user_library_category.dart';
 import 'package:wordsmith_utils/models/user_library_category/user_library_category_add.dart';
 import 'package:wordsmith_utils/providers/user_library_category_provider.dart';
@@ -26,21 +25,10 @@ class LibraryCategoriesAddWidget extends StatefulWidget {
 
 class _LibraryCategoriesAddWidgetState
     extends State<LibraryCategoriesAddWidget> {
-  final _logger = LogManager.getLogger("LibraryCategoriesAdd");
   late UserLibraryCategoryProvider _userLibraryCategoryProvider;
-  late Future<QueryResult<UserLibraryCategory>> _libraryCategoriesFuture;
 
   final _dialogKey = GlobalKey<ProgressLineDialogState>();
   var _addingToCategory = false;
-
-  Future<QueryResult<UserLibraryCategory>> _getLibraryCategories() async {
-    try {
-      return await _userLibraryCategoryProvider.getLibraryCategories();
-    } on Exception catch (error) {
-      _logger.severe(error);
-      return Future.error(error);
-    }
-  }
 
   void _toggleInProgress() {
     setState(() {
@@ -56,16 +44,17 @@ class _LibraryCategoriesAddWidgetState
     var add = UserLibraryCategoryAdd(widget.selectedEntryIds, categoryId, null);
 
     await _userLibraryCategoryProvider.addEntriesToCategory(add).then((result) {
-      showSnackbar(context: context, content: result.message ?? "Success");
-
-      // Indicate to the library screen that it should rebuild
-      widget.onAdd();
-      Navigator.of(context).pop();
-      _toggleInProgress();
-    }, onError: (error) {
-      showSnackbar(context: context, content: error.toString());
-      _toggleInProgress();
+      switch (result) {
+        case Success<String>():
+          showSnackbar(context: context, content: result.data);
+          widget.onAdd();
+          Navigator.of(context).pop();
+        case Failure<String>():
+          showSnackbar(context: context, content: result.errorMessage);
+      }
     });
+
+    _toggleInProgress();
   }
 
   void _openNewCategoryDialog(BuildContext context) async {
@@ -84,10 +73,9 @@ class _LibraryCategoriesAddWidgetState
 
   @override
   void initState() {
-    _userLibraryCategoryProvider = context.read<UserLibraryCategoryProvider>();
-    _libraryCategoriesFuture = _getLibraryCategories();
-
     super.initState();
+    _userLibraryCategoryProvider = context.read<UserLibraryCategoryProvider>();
+    Future.microtask(() => _userLibraryCategoryProvider.getLibraryCategories());
   }
 
   @override
@@ -101,19 +89,25 @@ class _LibraryCategoriesAddWidgetState
         height: size.height * 0.4,
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: FutureBuilder(
-            future: _libraryCategoriesFuture,
-            builder: (BuildContext context,
-                AsyncSnapshot<QueryResult<UserLibraryCategory>> snapshot) {
-              if (snapshot.connectionState != ConnectionState.done) {
-                return const Center(child: CircularProgressIndicator());
+          child: Consumer<UserLibraryCategoryProvider>(
+            builder: (context, provider, _) {
+              if (provider.isLoading || provider.libraryCategories == null) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
               }
 
-              if (snapshot.hasError) {
-                return Center(child: Text(snapshot.error.toString()));
+              List<UserLibraryCategory> libraryCategories = [];
+
+              switch (provider.libraryCategories!) {
+                case Success(data: final d):
+                  libraryCategories = d.result;
+                case Failure(errorMessage: final e):
+                  return Center(
+                    child: Text(e),
+                  );
               }
 
-              var libraryCategories = snapshot.data!.result;
               return SizedBox(
                 width: double.maxFinite,
                 child: ListView.separated(

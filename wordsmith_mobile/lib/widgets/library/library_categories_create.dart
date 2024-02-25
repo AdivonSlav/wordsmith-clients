@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wordsmith_mobile/widgets/input_field.dart';
 import 'package:wordsmith_utils/dialogs/progress_line_dialog.dart';
+import 'package:wordsmith_utils/models/result.dart';
 import 'package:wordsmith_utils/models/user_library_category/user_library_category_add.dart';
 import 'package:wordsmith_utils/providers/user_library_category_provider.dart';
 import 'package:wordsmith_utils/show_snackbar.dart';
@@ -44,14 +45,17 @@ class _LibraryCategoriesCreateWidgetState
         UserLibraryCategoryAdd(widget.selectedEntryIds, null, newCategoryName);
 
     await _userLibraryCategoryProvider.addEntriesToCategory(add).then((result) {
-      showSnackbar(context: context, content: result.message ?? "Success");
-
-      // Indicate to the library screen that it should rebuild
-      Navigator.of(context).pop(true);
-    }, onError: (error) {
-      showSnackbar(context: context, content: error.toString());
-      _toggleInProgress();
+      switch (result) {
+        case Success<String>():
+          showSnackbar(context: context, content: result.data);
+          // Indicate to the library screen that it should rebuild
+          Navigator.of(context).pop(true);
+        case Failure<String>():
+          showSnackbar(context: context, content: result.errorMessage);
+      }
     });
+
+    _toggleInProgress();
   }
 
   @override

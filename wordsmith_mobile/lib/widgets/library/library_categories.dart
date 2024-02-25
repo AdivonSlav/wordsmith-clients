@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wordsmith_mobile/utils/library_filter_values.dart';
 import 'package:wordsmith_utils/dialogs/progress_line_dialog.dart';
-import 'package:wordsmith_utils/logger.dart';
-import 'package:wordsmith_utils/models/query_result.dart';
+import 'package:wordsmith_utils/models/result.dart';
 import 'package:wordsmith_utils/models/user_library_category/user_library_category.dart';
 import 'package:wordsmith_utils/providers/user_library_category_provider.dart';
 
@@ -22,18 +21,7 @@ class LibraryCategoriesWidget extends StatefulWidget {
 }
 
 class _LibraryCategoriesWidgetState extends State<LibraryCategoriesWidget> {
-  final _logger = LogManager.getLogger("LibraryCategories");
-  late UserLibraryCategoryProvider _userLibraryCategoryProvider;
-  late Future<QueryResult<UserLibraryCategory>> _libraryCategoriesFuture;
-
-  Future<QueryResult<UserLibraryCategory>> _getLibraryCategories() async {
-    try {
-      return await _userLibraryCategoryProvider.getLibraryCategories();
-    } on Exception catch (error) {
-      _logger.severe(error);
-      return Future.error(error);
-    }
-  }
+  late Future getLibraryCategories;
 
   void _selectCategory(UserLibraryCategory category) {
     widget.filterValues.selectedCategory = category;
@@ -42,10 +30,10 @@ class _LibraryCategoriesWidgetState extends State<LibraryCategoriesWidget> {
 
   @override
   void initState() {
-    _userLibraryCategoryProvider = context.read<UserLibraryCategoryProvider>();
-    _libraryCategoriesFuture = _getLibraryCategories();
-
     super.initState();
+    Future.microtask(() {
+      context.read<UserLibraryCategoryProvider>().getLibraryCategories();
+    });
   }
 
   @override
@@ -58,19 +46,24 @@ class _LibraryCategoriesWidgetState extends State<LibraryCategoriesWidget> {
         height: size.height * 0.4,
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: FutureBuilder(
-            future: _libraryCategoriesFuture,
-            builder: (BuildContext context,
-                AsyncSnapshot<QueryResult<UserLibraryCategory>> snapshot) {
-              if (snapshot.connectionState != ConnectionState.done) {
-                return const Center(child: CircularProgressIndicator());
+          child: Consumer<UserLibraryCategoryProvider>(
+            builder: (context, provider, _) {
+              if (provider.isLoading || provider.libraryCategories == null) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
               }
 
-              if (snapshot.hasError) {
-                return Center(child: Text(snapshot.error.toString()));
-              }
+              List<UserLibraryCategory> libraryCategories = [];
 
-              var libraryCategories = snapshot.data!.result;
+              switch (provider.libraryCategories!) {
+                case Success(data: final d):
+                  libraryCategories = d.result;
+                case Failure(errorMessage: final e):
+                  return Center(
+                    child: Text(e),
+                  );
+              }
 
               if (libraryCategories.isEmpty) {
                 return const Center(

@@ -75,7 +75,7 @@ class _RegistrationScreenWidgetState extends State<RegistrationScreenWidget> {
             userInsert.password,
           );
 
-          return getResult.result;
+          // return getResult.result;
         },
       );
 
