@@ -6,30 +6,21 @@
       "cwd": "wordsmith_admin_panel",
       "request": "launch",
       "type": "dart",
-      "flutterMode": "debug",
-      "toolArgs": [
-        "--dart-define", "API_URL=https://localhost:6443/"
-      ]
+      "flutterMode": "debug"
     },
     {
       "name": "Admin Panel (Profile)",
       "cwd": "wordsmith_admin_panel",
       "request": "launch",
       "type": "dart",
-      "flutterMode": "profile",
-      "toolArgs": [
-        "--dart-define", "API_URL=https://localhost:6443/"
-      ]
+      "flutterMode": "profile"
     },
     {
       "name": "Admin Panel (Release)",
       "cwd": "wordsmith_admin_panel",
       "request": "launch",
       "type": "dart",
-      "flutterMode": "release",
-      "toolArgs": [
-        "--dart-define", "API_URL=https://localhost:6443/"
-      ]
-    },
+      "flutterMode": "release"
+    }
   ]
 }

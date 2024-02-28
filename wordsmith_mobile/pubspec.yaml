@@ -16,6 +16,7 @@ dependencies:
   adaptive_theme: ^3.5.0
   carousel_slider: ^4.2.1
   flutter_animate: ^4.5.0
+  flutter_dotenv: ^5.1.0
   wordsmith_utils:
     path: ../wordsmith_utils
 
@@ -32,6 +33,7 @@ flutter:
   assets:
     - assets/images/profile_image_placeholder.jpeg
     - assets/images/no_image_placeholder.png
+    - .env
 
   fonts:
     - family: Inter

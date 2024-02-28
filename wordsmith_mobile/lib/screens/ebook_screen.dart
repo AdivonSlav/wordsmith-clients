@@ -20,7 +20,7 @@ class EBookScreenWidget extends StatefulWidget {
 }
 
 class _EBookScreenWidget extends State<EBookScreenWidget> {
-  late Future<Result<UserLibrary>> _getLibraryEntry;
+  late Future<Result<UserLibrary?>> _getLibraryEntry;
   late UserLibraryProvider _userLibraryProvider;
   UserLibrary? _userLibrary;
 

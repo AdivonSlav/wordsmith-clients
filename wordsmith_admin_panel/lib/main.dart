@@ -1,10 +1,12 @@
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
+import "package:flutter_dotenv/flutter_dotenv.dart";
 import "package:provider/provider.dart";
 import "package:window_manager/window_manager.dart";
 import "package:wordsmith_admin_panel/widgets/dashboard.dart";
 import "package:wordsmith_utils/logger.dart";
 import "package:wordsmith_utils/providers/auth_provider.dart";
+import "package:wordsmith_utils/providers/base_provider.dart";
 import "package:wordsmith_utils/providers/ebook_reports_provider.dart";
 import "package:wordsmith_utils/providers/user_login_provider.dart";
 import "package:wordsmith_utils/providers/user_provider.dart";
@@ -24,6 +26,10 @@ void main() async {
     await windowManager.show();
     await windowManager.focus();
   });
+
+  await dotenv.load();
+  BaseProvider.apiUrl =
+      dotenv.get("API_URL", fallback: "https://localhost:6443/");
 
   if (kReleaseMode) {
     LogManager.init(LogLevel.WARNING);

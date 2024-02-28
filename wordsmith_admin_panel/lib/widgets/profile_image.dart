@@ -1,6 +1,7 @@
 import "package:file_selector/file_selector.dart";
 import "package:flutter/material.dart";
 import "package:wordsmith_utils/image_helper.dart";
+import "package:wordsmith_utils/providers/base_provider.dart";
 import "package:wordsmith_utils/size_config.dart";
 
 class ProfileImageWidget extends StatefulWidget {
@@ -26,13 +27,11 @@ class ProfileImageWidget extends StatefulWidget {
 }
 
 class _ProfileImageWidgetState extends State<ProfileImageWidget> {
-  late String _apiUrl;
+  final String _apiUrl = BaseProvider.apiUrl;
   bool _isHovered = false;
 
   @override
   Widget build(BuildContext context) {
-    _apiUrl = const String.fromEnvironment("API_URL");
-
     return GestureDetector(
       onTap: () async {
         var file = await ImageHelper.pickImage();

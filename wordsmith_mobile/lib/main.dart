@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:wordsmith_mobile/utils/themes.dart';
 import 'package:wordsmith_mobile/x509_override.dart';
@@ -9,6 +10,7 @@ import 'package:wordsmith_mobile/widgets/navigation_bar/navigation_bar.dart';
 import 'package:wordsmith_utils/datetime_formatter.dart';
 import 'package:wordsmith_utils/logger.dart';
 import 'package:wordsmith_utils/providers/auth_provider.dart';
+import 'package:wordsmith_utils/providers/base_provider.dart';
 import 'package:wordsmith_utils/providers/ebook_parse_provider.dart';
 import 'package:wordsmith_utils/providers/ebook_provider.dart';
 import 'package:wordsmith_utils/providers/genre_provider.dart';
@@ -19,12 +21,16 @@ import 'package:wordsmith_utils/providers/user_login_provider.dart';
 import 'package:wordsmith_utils/providers/user_provider.dart';
 import 'package:wordsmith_utils/size_config.dart';
 
-void main() {
+Future<void> main() async {
   if (kReleaseMode) {
     LogManager.init(LogLevel.WARNING);
   } else {
     LogManager.init(LogLevel.INFO);
   }
+
+  await dotenv.load();
+  BaseProvider.apiUrl =
+      dotenv.get("API_URL", fallback: "https://localhost:6443/");
 
   // Disables X509 certificate verification in order for self-signed backend certificates to work
   HttpOverrides.global = X509Override();

@@ -14,12 +14,11 @@ import "package:wordsmith_utils/secure_store.dart";
 abstract class BaseProvider<T> extends AuthProvider {
   String _endpoint = "";
 
+  static late String apiUrl;
   static final _logger = LogManager.getLogger("BaseProvider");
-  static String? _apiUrl;
 
   BaseProvider(String endpoint) {
     _endpoint = endpoint;
-    _apiUrl = const String.fromEnvironment("API_URL");
   }
 
   /// Makes an HTTP GET request
@@ -36,7 +35,7 @@ abstract class BaseProvider<T> extends AuthProvider {
       String contentType = "",
       String bearerToken = "",
       bool retryForRefresh = false}) async {
-    var url = "$_apiUrl$_endpoint$additionalRoute";
+    var url = "$apiUrl$_endpoint$additionalRoute";
 
     if (filter != null) {
       var queryString = _getQueryString(filter);
@@ -104,7 +103,7 @@ abstract class BaseProvider<T> extends AuthProvider {
       String contentType = "",
       String bearerToken = "",
       bool retryForRefresh = false}) async {
-    var url = "$_apiUrl$_endpoint$additionalRoute";
+    var url = "$apiUrl$_endpoint$additionalRoute";
     Uri uri;
 
     if (id != null) url += "/$id";
@@ -168,7 +167,7 @@ abstract class BaseProvider<T> extends AuthProvider {
       String contentType = "",
       String bearerToken = "",
       bool retryForRefresh = false}) async {
-    var url = "$_apiUrl$_endpoint$additionalRoute";
+    var url = "$apiUrl$_endpoint$additionalRoute";
     Uri uri;
 
     try {
@@ -230,7 +229,7 @@ abstract class BaseProvider<T> extends AuthProvider {
       String additionalRoute = "",
       String bearerToken = "",
       bool retryForRefresh = false}) async {
-    var url = "$_apiUrl$_endpoint$additionalRoute";
+    var url = "$apiUrl$_endpoint$additionalRoute";
     Uri uri;
 
     try {
@@ -386,7 +385,7 @@ abstract class BaseProvider<T> extends AuthProvider {
 
     var headers = _createHeaders(bearerToken: refreshToken ?? "");
     var queryString = _getQueryString(query);
-    var url = Uri.parse("${_apiUrl}users/login/refresh?$queryString");
+    var url = Uri.parse("${apiUrl}users/login/refresh?$queryString");
 
     var refreshResponse = await http.get(url, headers: headers);
     var refreshResult = QueryResult<UserLogin>();

@@ -2,6 +2,7 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:wordsmith_utils/image_helper.dart';
 import 'package:wordsmith_utils/logger.dart';
+import 'package:wordsmith_utils/providers/base_provider.dart';
 import 'package:wordsmith_utils/size_config.dart';
 
 class ProfileImageWidget extends StatefulWidget {
@@ -25,7 +26,7 @@ class ProfileImageWidget extends StatefulWidget {
 
 class _ProfileImageWidgetState extends State<ProfileImageWidget> {
   final _logger = LogManager.getLogger("ProfileImageWidget");
-  final String _apiUrl = const String.fromEnvironment("API_URL");
+  final String _apiUrl = BaseProvider.apiUrl;
 
   final _editableImageOpacity = 0.4;
   final _defaultImageOpacity = 0.0;

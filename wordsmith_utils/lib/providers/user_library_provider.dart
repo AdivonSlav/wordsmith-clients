@@ -30,7 +30,7 @@ class UserLibraryProvider extends BaseProvider<UserLibrary> {
     }
   }
 
-  Future<Result<UserLibrary>> getLibraryEntryByEBook(
+  Future<Result<UserLibrary?>> getLibraryEntryByEBook(
       {required int eBookId}) async {
     var accessToken = await SecureStore.getValue("access_token");
 
@@ -46,6 +46,10 @@ class UserLibraryProvider extends BaseProvider<UserLibrary> {
         bearerToken: accessToken ?? "",
         retryForRefresh: true,
       );
+
+      if (result.result.isEmpty) {
+        return const Success(null);
+      }
 
       return Success(result.result[0]);
     } on BaseException catch (error) {

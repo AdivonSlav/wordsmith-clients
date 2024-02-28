@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:wordsmith_utils/logger.dart';
+import 'package:wordsmith_utils/providers/base_provider.dart';
 import 'package:wordsmith_utils/size_config.dart';
 
 class EBookImageWidget extends StatefulWidget {
@@ -31,7 +32,7 @@ class EBookImageWidget extends StatefulWidget {
 
 class _EBookImageWidgetState extends State<EBookImageWidget> {
   final _logger = LogManager.getLogger("EBookImageWidget");
-  final String _apiUrl = const String.fromEnvironment("API_URL");
+  final String _apiUrl = BaseProvider.apiUrl;
 
   final _defaultWidth = double.maxFinite;
   final _defaultHeight = SizeConfig.safeBlockVertical * 40.0;

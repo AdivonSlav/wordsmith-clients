@@ -27,7 +27,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
   final bool _extended = false;
   final NavigationRailLabelType _labelType = NavigationRailLabelType.selected;
 
-  late Future<dynamic> _checkLoggedUserFuture;
+  late Future<void> _checkLoggedUserFuture;
   late UserProvider _userProvider;
   late AuthProvider _authProvider;
 
