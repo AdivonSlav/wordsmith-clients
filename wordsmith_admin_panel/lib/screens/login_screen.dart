@@ -2,11 +2,10 @@ import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:provider/provider.dart";
 import "package:wordsmith_utils/dialogs/show_error_dialog.dart";
-import "package:wordsmith_utils/models/user/user_login.dart";
+import "package:wordsmith_utils/models/result.dart";
 import "package:wordsmith_utils/providers/auth_provider.dart";
 import "package:wordsmith_utils/size_config.dart";
 import "package:wordsmith_admin_panel/widgets/input_field.dart";
-import "package:wordsmith_utils/exceptions/base_exception.dart";
 import "package:wordsmith_utils/logger.dart";
 import "package:wordsmith_utils/providers/user_login_provider.dart";
 import "package:wordsmith_utils/validators.dart";
@@ -44,7 +43,7 @@ class _LoginScreenWidgetState extends State<LoginScreenWidget> {
     });
   }
 
-  Future<UserLogin?> _submitLogin() async {
+  Future<void> _submitLogin() async {
     _toggleLoginInProgress();
 
     var username = _usernameController.text;
@@ -52,29 +51,19 @@ class _LoginScreenWidgetState extends State<LoginScreenWidget> {
 
     _logger.info("Attempting login with $username:$password");
 
-    try {
-      var getResult = await _userLoginProvider.getUserLogin(username, password);
-
-      if (getResult.result == null) {
-        throw BaseException("Could not login");
+    await _userLoginProvider
+        .getUserLogin(username, password)
+        .then((result) async {
+      switch (result) {
+        case Success(data: final d):
+          _logger.info("Logged in with access token ${d.accessToken}");
+          await _authProvider.storeLogin(loginCreds: d);
+        case Failure(exception: final e):
+          showErrorDialog(context: context, content: Text(e.toString()));
       }
+    });
 
-      return getResult.result;
-    } on BaseException catch (error) {
-      _toggleLoginInProgress();
-
-      if (context.mounted) {
-        await showErrorDialog(
-          context,
-          const Text("Error"),
-          Text(error.toString()),
-        );
-      }
-
-      _logger.severe(error);
-    }
-
-    return null;
+    _toggleLoginInProgress();
   }
 
   @override
@@ -130,17 +119,7 @@ class _LoginScreenWidgetState extends State<LoginScreenWidget> {
                             onPressed: () async {
                               if (_formKey.currentState!.validate() &&
                                   !_loginInProgress) {
-                                var loginCreds = await _submitLogin();
-
-                                if (loginCreds != null) {
-                                  _logger.info(
-                                      "Logged in with access token ${loginCreds.accessToken}");
-
-                                  _toggleLoginInProgress();
-
-                                  await _authProvider.storeLogin(
-                                      loginCreds: loginCreds);
-                                }
+                                await _submitLogin();
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(

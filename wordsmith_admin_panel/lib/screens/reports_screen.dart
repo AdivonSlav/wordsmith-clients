@@ -4,10 +4,10 @@ import "package:wordsmith_admin_panel/widgets/input_field.dart";
 import "package:wordsmith_admin_panel/widgets/loading.dart";
 import "package:wordsmith_admin_panel/widgets/pagination_nav.dart";
 import "package:wordsmith_admin_panel/widgets/reports_list.dart";
-import "package:wordsmith_utils/exceptions/base_exception.dart";
 import "package:wordsmith_utils/logger.dart";
 import "package:wordsmith_utils/models/ebook_report/ebook_report.dart";
 import "package:wordsmith_utils/models/query_result.dart";
+import "package:wordsmith_utils/models/result.dart";
 import "package:wordsmith_utils/models/user_report/user_report.dart";
 import "package:wordsmith_utils/providers/ebook_reports_provider.dart";
 import "package:wordsmith_utils/providers/user_reports_provider.dart";
@@ -31,52 +31,32 @@ class _ReportsScreenWidgetState extends State<ReportsScreenWidget> {
   int _currentPage = 1;
   int _totalPages = 0;
   final int _pageSize = 10;
-  late Future<QueryResult<UserReport>> _userReports;
-  late Future<QueryResult<EBookReport>> _eBookReports;
+  late Future<Result<QueryResult<UserReport>>> _userReports;
+  late Future<Result<QueryResult<EBookReport>>> _eBookReports;
 
-  @override
-  void initState() {
-    _userReportsProvider = context.read<UserReportsProvider>();
-    _eBookReportsProvider = context.read<EBookReportsProvider>();
-
-    try {
-      _userReports = getUserReports();
-    } on BaseException catch (error) {
-      _userReports = Future.error(error);
-    } on Exception catch (error) {
-      widget._logger.severe(error);
-      _userReports = Future.error(error);
-    }
-
-    try {
-      _eBookReports = getEBookReports();
-    } on BaseException catch (error) {
-      _eBookReports = Future.error(error);
-    } on Exception catch (error) {
-      widget._logger.severe(error);
-      _eBookReports = Future.error(error);
-    }
-
-    super.initState();
+  void getUserReports({String? reason, DateTime? reportDate}) async {
+    _userReports = _userReportsProvider.getUserReports(
+      page: _currentPage,
+      pageSize: _pageSize,
+      reason: reason,
+      reportDate: reportDate,
+    );
   }
 
-  Future<QueryResult<UserReport>> getUserReports(
-      {String? reason, DateTime? reportDate}) async {
-    return await _userReportsProvider.getUserReports(
-        page: _currentPage, pageSize: _pageSize);
-  }
-
-  Future<QueryResult<EBookReport>> getEBookReports(
-      {String? reason, DateTime? reportDate}) async {
-    return await _eBookReportsProvider.getEBookReports(
-        page: _currentPage, pageSize: _pageSize);
+  void getEBookReports({String? reason, DateTime? reportDate}) async {
+    _eBookReports = _eBookReportsProvider.getEBookReports(
+      page: _currentPage,
+      pageSize: _pageSize,
+      reason: reason,
+      reportDate: reportDate,
+    );
   }
 
   void forward() async {
     if (_currentPage < _totalPages) {
       setState(() {
         _currentPage++;
-        _userReports = getUserReports();
+        getUserReports();
       });
     }
   }
@@ -86,9 +66,9 @@ class _ReportsScreenWidgetState extends State<ReportsScreenWidget> {
       setState(() {
         _currentPage--;
         if (selectedView == 0) {
-          _userReports = getUserReports();
+          getUserReports();
         } else {
-          _eBookReports = getEBookReports();
+          getEBookReports();
         }
       });
     }
@@ -99,12 +79,12 @@ class _ReportsScreenWidgetState extends State<ReportsScreenWidget> {
 
     if (selectedView == 0) {
       setState(() {
-        _userReports = getUserReports(reason: filter);
+        getUserReports(reason: filter);
         widget._logger.info("Got new user reports from reason filtering!");
       });
     } else if (selectedView == 1) {
       setState(() {
-        _eBookReports = getEBookReports(reason: filter);
+        getEBookReports(reason: filter);
         widget._logger.info("Got new ebook reports from reason filtering!");
       });
     }
@@ -120,12 +100,12 @@ class _ReportsScreenWidgetState extends State<ReportsScreenWidget> {
     if (filter != null && filter != DateTime.now()) {
       if (selectedView == 0) {
         setState(() {
-          _userReports = getUserReports(reportDate: filter);
+          getUserReports(reportDate: filter);
           widget._logger.info("Got new user reports from date filtering!");
         });
       } else if (selectedView == 1) {
         setState(() {
-          _eBookReports = getEBookReports(reportDate: filter);
+          getEBookReports(reportDate: filter);
           widget._logger.info("Got new ebook reports from date filtering!");
         });
       }
@@ -138,16 +118,30 @@ class _ReportsScreenWidgetState extends State<ReportsScreenWidget> {
     setState(() {
       if (selectedView == 0) {
         setState(() {
-          _userReports = getUserReports();
+          _userReports = _userReportsProvider.getUserReports(
+              page: _currentPage, pageSize: _pageSize);
           widget._logger.info("Cleared all filters for user reports!");
         });
       } else if (selectedView == 1) {
         setState(() {
-          _eBookReports = getEBookReports();
+          _eBookReports = _eBookReportsProvider.getEBookReports(
+              page: _currentPage, pageSize: _pageSize);
           widget._logger.info("Cleared all filters for ebook reports!");
         });
       }
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _userReportsProvider = context.read<UserReportsProvider>();
+    _eBookReportsProvider = context.read<EBookReportsProvider>();
+
+    _userReports = _userReportsProvider.getUserReports(
+        page: _currentPage, pageSize: _pageSize);
+    _eBookReports = _eBookReportsProvider.getEBookReports(
+        page: _currentPage, pageSize: _pageSize);
   }
 
   @override
@@ -221,9 +215,31 @@ class _ReportsScreenWidgetState extends State<ReportsScreenWidget> {
                 reports: selectedView == 0 ? _userReports : _eBookReports),
             FutureBuilder(
               future: selectedView == 0 ? _userReports : _eBookReports,
-              builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+              builder: (BuildContext context, snapshot) {
                 if (snapshot.connectionState != ConnectionState.done) {
                   return const LoadingWidget();
+                }
+
+                if (selectedView == 0) {
+                  var snapshotData =
+                      snapshot.data as Result<QueryResult<UserReport>>;
+
+                  switch (snapshotData) {
+                    case Success(data: final d):
+                      _totalPages = d.totalPages!;
+                    case Failure(exception: final e):
+                      return Center(child: Text(e.toString()));
+                  }
+                } else if (selectedView == 1) {
+                  var snapshotData =
+                      snapshot.data as Result<QueryResult<EBookReport>>;
+
+                  switch (snapshotData) {
+                    case Success(data: final d):
+                      _totalPages = d.totalPages!;
+                    case Failure(exception: final e):
+                      return Center(child: Text(e.toString()));
+                  }
                 }
 
                 _totalPages = selectedView == 0

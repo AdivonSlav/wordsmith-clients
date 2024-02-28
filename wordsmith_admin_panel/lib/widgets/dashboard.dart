@@ -1,5 +1,4 @@
 import "package:flutter/material.dart";
-import "package:logging/logging.dart";
 import "package:provider/provider.dart";
 import "package:wordsmith_admin_panel/screens/login_screen.dart";
 import "package:wordsmith_admin_panel/screens/profile_screen.dart";
@@ -7,8 +6,9 @@ import "package:wordsmith_admin_panel/screens/reports_screen.dart";
 import "package:wordsmith_admin_panel/widgets/dashboard_error.dart";
 import "package:wordsmith_admin_panel/widgets/dashboard_loading.dart";
 import "package:wordsmith_admin_panel/widgets/dashboard_trailing.dart";
-import "package:wordsmith_utils/exceptions/base_exception.dart";
-import "package:wordsmith_utils/logger.dart";
+import "package:wordsmith_utils/exceptions/exception_types.dart";
+import "package:wordsmith_utils/models/result.dart";
+import "package:wordsmith_utils/models/user/user.dart";
 import "package:wordsmith_utils/providers/auth_provider.dart";
 import "package:wordsmith_utils/providers/user_provider.dart";
 
@@ -22,7 +22,6 @@ class DashboardWidget extends StatefulWidget {
 }
 
 class _DashboardWidgetState extends State<DashboardWidget> {
-  final Logger _logger = LogManager.getLogger("Dashboard");
   int _selectedIndex = 0;
   late Widget _page;
   final bool _extended = false;
@@ -43,16 +42,17 @@ class _DashboardWidgetState extends State<DashboardWidget> {
     ];
   }
 
-  Future<dynamic> _checkLoggedUser() async {
-    try {
-      var loggedUser = await _userProvider.getLoggedUser();
-      await _authProvider.storeLogin(user: loggedUser);
-    } on BaseException catch (error) {
-      _logger.info(error);
-    } on Exception catch (error) {
-      _logger.severe(error);
-      return Future.error(error);
-    }
+  Future<void> _checkLoggedUser() async {
+    await _userProvider.getLoggedUser().then((result) async {
+      switch (result) {
+        case Success<User>(data: final d):
+          await _authProvider.storeLogin(user: d);
+        case Failure<User>(exception: final e):
+          if (e.type == ExceptionType.internalAppError) {
+            return Future.error(e);
+          }
+      }
+    });
   }
 
   @override

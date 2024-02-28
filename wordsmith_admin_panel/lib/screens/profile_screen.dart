@@ -1,13 +1,11 @@
 import "package:file_selector/file_selector.dart";
 import "package:flutter/material.dart";
-import "package:logging/logging.dart";
 import "package:provider/provider.dart";
 import "package:wordsmith_admin_panel/widgets/profile_image.dart";
 import "package:wordsmith_admin_panel/widgets/profile_info_field.dart";
 import "package:wordsmith_utils/dialogs/show_error_dialog.dart";
-import "package:wordsmith_utils/exceptions/base_exception.dart";
-import "package:wordsmith_utils/image_helper.dart";
-import "package:wordsmith_utils/logger.dart";
+import "package:wordsmith_utils/models/result.dart";
+import "package:wordsmith_utils/models/user/user.dart";
 import "package:wordsmith_utils/models/user/user_update.dart";
 import "package:wordsmith_utils/providers/auth_provider.dart";
 import "package:wordsmith_utils/providers/user_provider.dart";
@@ -24,7 +22,6 @@ class ProfileScreenWidget extends StatefulWidget {
 }
 
 class _ProfileScreenWidgetState extends State<ProfileScreenWidget> {
-  final Logger _logger = LogManager.getLogger("ProfileScreen");
   late UserProvider _userProvider;
   late AuthProvider _authProvider;
 
@@ -37,71 +34,48 @@ class _ProfileScreenWidgetState extends State<ProfileScreenWidget> {
       email: newEmail.isEmpty ? null : newEmail,
     );
 
-    try {
-      var updateResult = await _userProvider.updateLoggeduser(payload);
-
-      await _authProvider.storeLogin(user: updateResult.result);
-    } on BaseException catch (error) {
-      if (context.mounted) {
-        await showErrorDialog(
-            context, const Text("Error"), Text(error.message));
+    await _userProvider.updateLoggeduser(payload).then((result) async {
+      switch (result) {
+        case Success<User>():
+          await _authProvider.storeLogin(user: result.data);
+        case Failure<User>():
+          showErrorDialog(
+              context: context, content: Text(result.exception.toString()));
       }
-    } on Exception catch (error) {
-      if (context.mounted) {
-        await showErrorDialog(
-            context, const Text("Error"), Text(error.toString()));
-      }
-
-      _logger.severe(error);
-    }
+    });
   }
 
+  // TODO: Pasha this one's for you
   Future _updateProfileImage(XFile file) async {
-    if (!await ImageHelper.verifySize(file)) {
-      if (context.mounted) {
-        await showErrorDialog(
-          context,
-          const Text("Error"),
-          const Text("The maximum image size allowed is 5MB"),
-        );
+    // if (!await ImageHelper.verifySize(file)) {
+    //   if (context.mounted) {
+    //     await showErrorDialog(
+    //       context,
+    //       const Text("Error"),
+    //       const Text("The maximum image size allowed is 5MB"),
+    //     );
 
-        return;
-      }
-    }
+    //     return;
+    //   }
+    // }
 
     //var imageInsert = await ImageHelper.toImageInsert(file);
     //var payload = UserUpdate(profileImage: imageInsert);
 
-    if (context.mounted) {
-      await showErrorDialog(
-          context, const Text("Error"), const Text("Not implemented yet"));
-    }
+    // if (context.mounted) {
+    //   await showErrorDialog(
+    //       context, const Text("Error"), const Text("Not implemented yet"));
+    // }
 
     // TODO: Ensure that the image can be updated through an API call
-
-    /*
-    try {
-      var result = await _userProvider.put(
-          additionalEndpoint: "/profile",
-          request: payload,
-          bearerToken: bearerToken);
-
-      await _userLoginProvider.storeLogin(user: result);
-    } on BaseException catch (error) {
-      if (context.mounted) {
-        await showErrorDialog(
-            context, const Text("Error"), Text(error.message));
-      }
-    }
-    */
   }
 
   @override
   Widget build(BuildContext context) {
     if (AuthProvider.loggedUser == null) return const Placeholder();
 
-    _userProvider = context.read<UserProvider>();
-    _authProvider = context.read<AuthProvider>();
+    _userProvider = Provider.of<UserProvider>(context);
+    _authProvider = Provider.of<AuthProvider>(context);
 
     return SingleChildScrollView(
       child: Padding(

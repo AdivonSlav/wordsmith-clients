@@ -13,8 +13,8 @@ Future<dynamic> showReportDialog(
     UserReport? userReport,
     EBookReport? eBookReport}) async {
   if (userReport == null && eBookReport == null) {
-    return showErrorDialog(context, const Text("Error opening report"),
-        const Text("The report could not be opened!"));
+    return showErrorDialog(
+        context: context, content: const Text("Error opening report"));
   }
 
   var logger = LogManager.getLogger("ReportDialog");
