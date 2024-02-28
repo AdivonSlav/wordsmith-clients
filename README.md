@@ -46,6 +46,8 @@ flutter pub get -C wordsmith_admin_panel
 flutter pub get -C wordsmith_mobile
 ```
 
+Check out the .example.env file for both the mobile and desktop client. Make the necessary changes and rename it to .env (otherwise the app will crash on startup)
+
 To run a client, change into the respective directory (admin_panel or mobile) and run the following
 ```bash
 flutter run # Debug mode
