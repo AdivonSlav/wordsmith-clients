@@ -20,6 +20,14 @@ dependencies:
   wordsmith_utils:
     path: ../wordsmith_utils
 
+# Temporary override due to flutter_secure_storage breaking Linux support
+dependency_overrides:
+  flutter_secure_storage_linux:
+    git:
+      url: https://github.com/prateekmedia/flutter_secure_storage.git
+      ref: patch-1
+      path: flutter_secure_storage_linux
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

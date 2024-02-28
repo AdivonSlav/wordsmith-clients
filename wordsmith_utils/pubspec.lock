@@ -295,12 +295,13 @@ packages:
     source: hosted
     version: "9.0.0"
   flutter_secure_storage_linux:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: flutter_secure_storage_linux
-      sha256: "3d5032e314774ee0e1a7d0a9f5e2793486f0dff2dd9ef5a23f4e3fb2a0ae6a9e"
-      url: "https://pub.dev"
-    source: hosted
+      path: flutter_secure_storage_linux
+      ref: patch-1
+      resolved-ref: da8ab43bc51c8c3249a261c33b27aa6f018f819b
+      url: "https://github.com/prateekmedia/flutter_secure_storage.git"
+    source: git
     version: "1.2.0"
   flutter_secure_storage_macos:
     dependency: transitive
