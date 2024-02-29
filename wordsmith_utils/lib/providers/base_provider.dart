@@ -285,6 +285,67 @@ abstract class BaseProvider<T> extends AuthProvider {
     return await _handleMultipartResponse(response);
   }
 
+  /// Makes an HTTP DELETE request
+  ///
+  /// Parameters:
+  /// - [id]: ID of the entity being deleted
+  /// - [additionalRoute]: A route to append to the endpoint configured for the provider
+  /// - [contentType]: Content type of the request. Defaults to application/json
+  /// - [bearerToken]: Bearer token if the request needs to be authorized
+  /// - [retryForRefresh]: If set to true and status 401 is the initial response, the provider will attempt to refresh the access token and attempt the request again
+  Future<EntityResult<T>> delete(
+      {required int id,
+      String additionalRoute = "",
+      String contentType = "",
+      String bearerToken = "",
+      bool retryForRefresh = false}) async {
+    var url = "$apiUrl$_endpoint$additionalRoute/$id";
+
+    Uri uri;
+
+    try {
+      uri = Uri.parse(url);
+    } catch (error) {
+      _logger.severe("Invalid URL: $url");
+      throw BaseException("Something bad happened");
+    }
+
+    var headers =
+        _createHeaders(contentType: contentType, bearerToken: bearerToken);
+    late http.Response response;
+
+    try {
+      response = await http.delete(uri, headers: headers);
+    } catch (error) {
+      _handleInternalAppError(error);
+    }
+
+    // If retrying is enabled and status 401 is returned, attempt to refresh the access token and send the request again
+    if (retryForRefresh == true && response.statusCode == 401) {
+      var success = await _attemptTokenRefresh();
+
+      if (success == true) {
+        bearerToken = await SecureStore.getValue("access_token") ?? "";
+        headers =
+            _createHeaders(contentType: contentType, bearerToken: bearerToken);
+        late http.Response refreshedResponse;
+
+        try {
+          refreshedResponse = await http.delete(uri, headers: headers);
+        } catch (error) {
+          _handleInternalAppError(error);
+        }
+
+        return await _handleResponse(refreshedResponse);
+      } else {
+        throw BaseException("Session timed out",
+            type: ExceptionType.unauthorizedException);
+      }
+    }
+
+    return await _handleResponse(response);
+  }
+
   T fromJson(dynamic data) {
     throw UnimplementedError();
   }
@@ -615,7 +676,7 @@ abstract class BaseProvider<T> extends AuthProvider {
   }
 
   void _handleInternalAppError(Object? error) {
-    _logger.severe(error);
+    _logger.severe(error, null, StackTrace.current);
     throw BaseException(
         "Internal app error. This could also be a server-side issue. Please check back again!",
         type: ExceptionType.internalAppError);
