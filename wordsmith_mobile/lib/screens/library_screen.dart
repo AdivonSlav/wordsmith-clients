@@ -238,7 +238,7 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
 
         return LibraryCategoriesWidget(
           filterValues: _filterValues!,
-          onSelect: (values) {
+          onChange: (values) {
             _refreshWithFilters(values);
             Navigator.of(context).pop();
           },

@@ -64,6 +64,23 @@ class UserLibraryCategoryProvider extends BaseProvider<UserLibraryCategory> {
     }
   }
 
+  Future<Result<String>> deleteCategory(int categoryId) async {
+    var accessToken = await SecureStore.getValue("access_token");
+
+    try {
+      var result = await delete(
+        id: categoryId,
+        bearerToken: accessToken ?? "",
+        retryForRefresh: true,
+      );
+
+      return Success(result.message ?? "Success");
+    } on BaseException catch (error) {
+      _logger.severe(error);
+      return Failure(error);
+    }
+  }
+
   @override
   UserLibraryCategory fromJson(data) {
     return UserLibraryCategory.fromJson(data);

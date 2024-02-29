@@ -6,15 +6,16 @@ import 'package:wordsmith_utils/models/query_result.dart';
 import 'package:wordsmith_utils/models/result.dart';
 import 'package:wordsmith_utils/models/user_library_category/user_library_category.dart';
 import 'package:wordsmith_utils/providers/user_library_category_provider.dart';
+import 'package:wordsmith_utils/show_snackbar.dart';
 
 class LibraryCategoriesWidget extends StatefulWidget {
   final LibraryFilterValues filterValues;
-  final void Function(LibraryFilterValues values) onSelect;
+  final void Function(LibraryFilterValues values) onChange;
 
   const LibraryCategoriesWidget({
     super.key,
     required this.filterValues,
-    required this.onSelect,
+    required this.onChange,
   });
 
   @override
@@ -22,18 +23,34 @@ class LibraryCategoriesWidget extends StatefulWidget {
 }
 
 class _LibraryCategoriesWidgetState extends State<LibraryCategoriesWidget> {
+  late UserLibraryCategoryProvider _userLibraryCategoryProvider;
   late Future<Result<QueryResult<UserLibraryCategory>>> _getLibraryCategories;
 
   void _selectCategory(UserLibraryCategory category) {
     widget.filterValues.selectedCategory = category;
-    widget.onSelect(widget.filterValues);
+    widget.onChange(widget.filterValues);
+  }
+
+  void _deleteCategory(UserLibraryCategory category) async {
+    await _userLibraryCategoryProvider
+        .deleteCategory(category.id)
+        .then((value) {
+      switch (value) {
+        case Success<String>():
+          widget.filterValues.selectedCategory = null;
+          widget.onChange(widget.filterValues);
+        case Failure<String>():
+          Navigator.of(context).pop();
+          showSnackbar(context: context, content: value.exception.toString());
+      }
+    });
   }
 
   @override
   void initState() {
     super.initState();
-    _getLibraryCategories =
-        context.read<UserLibraryCategoryProvider>().getLibraryCategories();
+    _userLibraryCategoryProvider = context.read<UserLibraryCategoryProvider>();
+    _getLibraryCategories = _userLibraryCategoryProvider.getLibraryCategories();
   }
 
   @override
@@ -94,7 +111,7 @@ class _LibraryCategoriesWidgetState extends State<LibraryCategoriesWidget> {
                         title: Text(category.name),
                         trailing: IconButton(
                           icon: const Icon(Icons.delete),
-                          onPressed: () {},
+                          onPressed: () => _deleteCategory(category),
                         ),
                         onTap: () => _selectCategory(category),
                       ),
