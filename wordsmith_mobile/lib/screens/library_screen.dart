@@ -7,6 +7,7 @@ import 'package:wordsmith_mobile/widgets/library/library_categories_add.dart';
 import 'package:wordsmith_mobile/widgets/library/library_categories_remove.dart';
 import 'package:wordsmith_mobile/widgets/library/library_filters.dart';
 import 'package:wordsmith_mobile/widgets/library/library_grid_tile.dart';
+import 'package:wordsmith_mobile/widgets/library/library_info.dart';
 import 'package:wordsmith_mobile/widgets/library/library_view.dart';
 import 'package:wordsmith_utils/dialogs/show_error_dialog.dart';
 import 'package:wordsmith_utils/logger.dart';
@@ -188,6 +189,16 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
     );
   }
 
+  void _openInfo(int index) {
+    showModalBottomSheet(
+        context: context,
+        builder: (BuildContext context) {
+          return LibraryInfoWidget(
+            libraryEntry: _userLibraryList[index],
+          );
+        });
+  }
+
   void _openFilters() {
     showModalBottomSheet(
         context: context,
@@ -318,6 +329,8 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
       } else {
         _removeBookFromSelection(index);
       }
+    } else {
+      _openInfo(index);
     }
   }
 

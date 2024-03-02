@@ -97,7 +97,7 @@ class _LibraryGridTileWidgetState extends State<LibraryGridTileWidget>
                   child: EBookImageWidget(
                     width: size.width,
                     height: size.height,
-                    coverArtUrl: widget.libraryEntry.eBook!.coverArt.imagePath,
+                    coverArtUrl: widget.libraryEntry.eBook.coverArt.imagePath,
                     fit: BoxFit.fill,
                   ),
                 );

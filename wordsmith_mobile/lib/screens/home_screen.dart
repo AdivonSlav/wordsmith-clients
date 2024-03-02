@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:wordsmith_mobile/widgets/home_ebook_display.dart';
+import 'package:wordsmith_mobile/widgets/home/home_ebook_display.dart';
 import 'package:wordsmith_utils/models/ebook/ebook.dart';
 import 'package:wordsmith_utils/models/query_result.dart';
 import 'package:wordsmith_utils/models/result.dart';
