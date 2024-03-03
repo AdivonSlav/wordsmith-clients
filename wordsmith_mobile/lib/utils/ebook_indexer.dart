@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:wordsmith_utils/exceptions/base_exception.dart';
@@ -16,6 +14,7 @@ const String _authorColumn = "author";
 const String _isReadColumn = "isRead";
 const String _readProgressColumn = "readProgress";
 const String _encodedImageColumn = "encodedImage";
+const String _modifiedDateColumn = "modifiedDate";
 const String _pathColumn = "path";
 
 class EBookIndexModel {
@@ -25,6 +24,7 @@ class EBookIndexModel {
   bool? isRead;
   String? readProgress;
   String? encodedImage;
+  DateTime? modifiedDate;
   String? path;
 
   EBookIndexModel({
@@ -45,6 +45,7 @@ class EBookIndexModel {
       _isReadColumn: isRead == true ? 1 : 0,
       _readProgressColumn: readProgress,
       _encodedImageColumn: encodedImage,
+      _modifiedDateColumn: modifiedDate?.millisecondsSinceEpoch,
       _pathColumn: path
     };
 
@@ -58,6 +59,10 @@ class EBookIndexModel {
     isRead = (map[_isReadColumn] as int) == 1;
     readProgress = map[_readProgressColumn] as String;
     encodedImage = map[_encodedImageColumn] as String;
+    modifiedDate = DateTime.fromMillisecondsSinceEpoch(
+      map[_modifiedDateColumn] as int,
+      isUtc: true,
+    );
     path = map[_pathColumn] as String;
   }
 }
@@ -73,7 +78,11 @@ abstract class EBookIndexer {
   }
 
   static void initDatabase() async {
-    _db = await openDatabase("index.db", onCreate: _onDatabaseCreate);
+    _db = await openDatabase(
+      "index.db",
+      onCreate: _onDatabaseCreate,
+      version: 1,
+    );
     _logger.info("Opened ebook index database");
   }
 
@@ -147,6 +156,7 @@ abstract class EBookIndexer {
         $_isReadColumn INTEGER,
         $_readProgressColumn TEXT,
         $_encodedImageColumn TEXT,
+        $_modifiedDateColumn INT,
         $_pathColumn TEXT)''',
     );
   }
@@ -162,10 +172,9 @@ abstract class EBookIndexer {
           type: ExceptionType.internalAppError));
     }
 
-    final savePath = File("$docPath/${transferFile.name}.epub");
-    final savedFile =
-        await savePath.writeAsBytes(await transferFile.file.readAsBytes());
+    final savePath = "$docPath/${transferFile.name}.epub";
+    await transferFile.file.saveTo(savePath);
 
-    return Success(savedFile.path);
+    return Success(savePath);
   }
 }

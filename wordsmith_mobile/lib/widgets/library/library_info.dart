@@ -1,8 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:wordsmith_mobile/screens/ebook_screen.dart';
+import 'package:wordsmith_mobile/utils/ebook_indexer.dart';
 import 'package:wordsmith_mobile/widgets/ebook/ebook_image.dart';
 import 'package:wordsmith_utils/datetime_formatter.dart';
+import 'package:wordsmith_utils/dialogs/progress_indicator_dialog.dart';
+import 'package:wordsmith_utils/dialogs/show_error_dialog.dart';
+import 'package:wordsmith_utils/dialogs/show_info_dialog.dart';
+import 'package:wordsmith_utils/logger.dart';
+import 'package:wordsmith_utils/models/ebook/ebook_parse.dart';
+import 'package:wordsmith_utils/models/result.dart';
+import 'package:wordsmith_utils/models/transfer_file.dart';
 import 'package:wordsmith_utils/models/user_library/user_library.dart';
+import 'package:wordsmith_utils/providers/ebook_download_provider.dart';
+import 'package:wordsmith_utils/providers/ebook_parse_provider.dart';
 
 class LibraryInfoWidget extends StatefulWidget {
   final UserLibrary libraryEntry;
@@ -14,6 +25,10 @@ class LibraryInfoWidget extends StatefulWidget {
 }
 
 class _LibraryInfoWidgetState extends State<LibraryInfoWidget> {
+  final _logger = LogManager.getLogger("LibraryInfoWidget");
+  late EBookDownloadProvider _eBookDownloadProvider;
+  late EBookParseProvider _eBookParseProvider;
+
   final double imageAspectRatio = 1.5;
 
   void _openBookPage() {
@@ -23,6 +38,85 @@ class _LibraryInfoWidgetState extends State<LibraryInfoWidget> {
             EBookScreenWidget(ebook: widget.libraryEntry.eBook),
       ),
     );
+  }
+
+  Future<TransferFile?> _downloadBook() async {
+    ProgressIndicatorDialog().show(context, text: "Downloading...");
+    return await _eBookDownloadProvider
+        .download(widget.libraryEntry.eBookId)
+        .then((result) {
+      ProgressIndicatorDialog().dismiss();
+      switch (result) {
+        case Success<TransferFile>(data: final d):
+          _logger.info("Downloaded ${d.name}");
+          return d;
+        case Failure<TransferFile>(exception: final e):
+          showErrorDialog(context: context, content: Text(e.toString()));
+      }
+
+      return null;
+    });
+  }
+
+  Future<String?> _parseForCoverArt(TransferFile file) async {
+    ProgressIndicatorDialog().show(context, text: "Parsing...");
+    return await _eBookParseProvider.getParsed(file).then((result) {
+      ProgressIndicatorDialog().dismiss();
+      switch (result) {
+        case Success<EBookParse>(data: final d):
+          _logger.info("Got parsed cover art for ${file.name}");
+          return d.encodedCoverArt;
+        case Failure<EBookParse>(exception: final e):
+          showErrorDialog(context: context, content: Text(e.toString()));
+      }
+
+      return null;
+    });
+  }
+
+  Future<bool> _index(TransferFile file) async {
+    ProgressIndicatorDialog().show(context, text: "Indexing...");
+    return await EBookIndexer.addToIndex(widget.libraryEntry, file)
+        .then((result) {
+      switch (result) {
+        case Success<String>(data: final d):
+          _logger.info("Added to index with path $d");
+          return true;
+        case Failure<String>(exception: final e):
+          showErrorDialog(context: context, content: Text(e.toString()));
+      }
+
+      return false;
+    });
+  }
+
+  Future<void> _syncToLibrary() async {
+    TransferFile? file = await _downloadBook();
+
+    if (file == null) return;
+
+    String? encodedCoverArt = await _parseForCoverArt(file);
+
+    if (encodedCoverArt == null) return;
+
+    await _index(file).then((result) {
+      if (result == true) {
+        showInfoDialog(
+          context: context,
+          title: const Text("Success"),
+          content: const Text(
+            "Succesfully downloaded the eBook!",
+          ),
+        );
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _eBookDownloadProvider = context.read<EBookDownloadProvider>();
+    _eBookParseProvider = context.read<EBookParseProvider>();
   }
 
   @override
@@ -100,7 +194,7 @@ class _LibraryInfoWidgetState extends State<LibraryInfoWidget> {
                 label: const Text("Read"),
               ),
               FilledButton.icon(
-                onPressed: () {},
+                onPressed: _syncToLibrary,
                 icon: const Icon(Icons.download),
                 label: const Text("Download"),
               ),

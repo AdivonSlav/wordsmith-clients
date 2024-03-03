@@ -1,4 +1,6 @@
 import "dart:convert";
+import "package:file_selector/file_selector.dart";
+import "package:flutter/foundation.dart";
 import "package:wordsmith_utils/exceptions/base_exception.dart";
 import "package:wordsmith_utils/exceptions/exception_types.dart";
 import "package:wordsmith_utils/logger.dart";
@@ -63,7 +65,7 @@ abstract class BaseProvider<T> extends AuthProvider {
 
     // If retrying is enabled and status 401 is returned, attempt to refresh the access token and send the request again
     if (retryForRefresh == true && response.statusCode == 401) {
-      var success = await _attemptTokenRefresh();
+      var success = await attemptTokenRefresh();
 
       if (success == true) {
         bearerToken = await SecureStore.getValue("access_token") ?? "";
@@ -128,7 +130,7 @@ abstract class BaseProvider<T> extends AuthProvider {
 
     // If retrying is enabled and status 401 is returned, attempt to refresh the access token and send the request again
     if (retryForRefresh == true && response.statusCode == 401) {
-      var success = await _attemptTokenRefresh();
+      var success = await attemptTokenRefresh();
 
       if (success == true) {
         bearerToken = await SecureStore.getValue("access_token") ?? "";
@@ -190,7 +192,7 @@ abstract class BaseProvider<T> extends AuthProvider {
 
     // If retrying is enabled and status 401 is returned, attempt to refresh the access token and send the request again
     if (retryForRefresh == true && response.statusCode == 401) {
-      var success = await _attemptTokenRefresh();
+      var success = await attemptTokenRefresh();
 
       if (success == true) {
         bearerToken = await SecureStore.getValue("access_token") ?? "";
@@ -258,7 +260,7 @@ abstract class BaseProvider<T> extends AuthProvider {
 
     // If retrying is enabled and status 401 is returned, attempt to refresh the access token and send the request again
     if (retryForRefresh == true && response.statusCode == 401) {
-      var success = await _attemptTokenRefresh();
+      var success = await attemptTokenRefresh();
 
       if (success == true) {
         http.MultipartRequest? retryRequest =
@@ -322,7 +324,7 @@ abstract class BaseProvider<T> extends AuthProvider {
 
     // If retrying is enabled and status 401 is returned, attempt to refresh the access token and send the request again
     if (retryForRefresh == true && response.statusCode == 401) {
-      var success = await _attemptTokenRefresh();
+      var success = await attemptTokenRefresh();
 
       if (success == true) {
         bearerToken = await SecureStore.getValue("access_token") ?? "";
@@ -344,6 +346,65 @@ abstract class BaseProvider<T> extends AuthProvider {
     }
 
     return await _handleResponse(response);
+  }
+
+  Future<TransferFile> getBytes(
+      {String endpoint = "",
+      String additionalRoute = "",
+      String contentType = "",
+      String bearerToken = "",
+      bool retryForRefresh = true}) async {
+    var url = apiUrl;
+
+    if (endpoint.isNotEmpty) {
+      url += endpoint;
+    } else {
+      url += _endpoint;
+    }
+
+    url += additionalRoute;
+
+    Uri uri;
+
+    try {
+      uri = Uri.parse(url);
+    } catch (error) {
+      _logger.severe("Invalid URL: $url");
+      throw BaseException("Something bad happened");
+    }
+
+    var headers = {"Authorization": "Bearer $bearerToken"};
+    late http.Response response;
+
+    try {
+      response = await http.get(uri, headers: headers);
+    } catch (error) {
+      _handleInternalAppError(error);
+    }
+
+    // If retrying is enabled and status 401 is returned, attempt to refresh the access token and send the request again
+    if (retryForRefresh == true && response.statusCode == 401) {
+      var success = await attemptTokenRefresh();
+
+      if (success == true) {
+        bearerToken = await SecureStore.getValue("access_token") ?? "";
+        headers = {"Authorization": "Bearer $bearerToken"};
+        late http.Response refreshedResponse;
+
+        try {
+          refreshedResponse = await http.get(uri, headers: headers);
+        } catch (error) {
+          _handleInternalAppError(error);
+        }
+
+        return await _handleByteResponse(refreshedResponse);
+      } else {
+        throw BaseException("Session timed out",
+            type: ExceptionType.unauthorizedException);
+      }
+    }
+
+    return await _handleByteResponse(response);
   }
 
   T fromJson(dynamic data) {
@@ -385,7 +446,7 @@ abstract class BaseProvider<T> extends AuthProvider {
     } else if (response.statusCode == 403) {
       throw BaseException("$details", type: ExceptionType.forbiddenException);
     } else {
-      _logger.severe(response.body);
+      _logger.severe(details);
       throw BaseException("Something bad happened");
     }
   }
@@ -438,7 +499,8 @@ abstract class BaseProvider<T> extends AuthProvider {
   /// Returns true if new access credentials were stored
   ///
   /// If the token cannot be refreshed, all stored credentials are deleted and the login session is considered terminated
-  Future<bool> _attemptTokenRefresh() async {
+  @protected
+  Future<bool> attemptTokenRefresh() async {
     var refreshToken = await SecureStore.getValue("refresh_token");
     Map<String, String> query = {
       "id": await SecureStore.getValue("user_ref_id") ?? ""
@@ -670,6 +732,35 @@ abstract class BaseProvider<T> extends AuthProvider {
           data["result"] == null ? null : fromJson(data["result"]);
 
       return entityResult;
+    }
+
+    throw BaseException("Unknown error");
+  }
+
+  Future<TransferFile> _handleByteResponse(http.Response response) async {
+    if (_isValidResponse(response)) {
+      var bytes = response.bodyBytes;
+      String? contentDisposition = response.headers['content-disposition'];
+      String? contentType = response.headers['content-type'];
+      String filename = "file";
+      String mimeType = "application/octet-stream";
+
+      if (contentDisposition != null && contentDisposition.isNotEmpty) {
+        var filenameRegex = RegExp('filename=.+;');
+        var match = filenameRegex.firstMatch(contentDisposition);
+
+        if (match != null) {
+          filename = match.group(0) ?? "";
+          filename = filename.replaceAll("filename=", "").replaceAll(";", "");
+        }
+      }
+
+      if (contentType != null && contentType.isNotEmpty) {
+        mimeType = contentType;
+      }
+
+      return TransferFile(
+          XFile.fromData(bytes, name: filename, mimeType: mimeType), filename);
     }
 
     throw BaseException("Unknown error");
