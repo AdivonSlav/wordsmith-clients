@@ -10,6 +10,14 @@ abstract class LogManager {
     Logger.root.onRecord.listen((record) {
       print(
           "${record.time} ${record.loggerName} ${record.level.name}: ${record.message}");
+
+      if (record.level >= Level.SEVERE) {
+        print(record.error);
+      }
+
+      if (record.level >= Level.SEVERE) {
+        print(record.stackTrace);
+      }
     });
   }
 
