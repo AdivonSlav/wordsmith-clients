@@ -31,6 +31,8 @@ class _LibraryInfoWidgetState extends State<LibraryInfoWidget> {
 
   final double imageAspectRatio = 1.5;
 
+  EBookIndexModel? _indexModel;
+
   void _openBookPage() {
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -74,40 +76,61 @@ class _LibraryInfoWidgetState extends State<LibraryInfoWidget> {
     });
   }
 
-  Future<bool> _index(TransferFile file) async {
+  Future<EBookIndexModel?> _index(TransferFile file) async {
     ProgressIndicatorDialog().show(context, text: "Indexing...");
     return await EBookIndexer.addToIndex(widget.libraryEntry, file)
         .then((result) {
+      ProgressIndicatorDialog().dismiss();
       switch (result) {
-        case Success<String>(data: final d):
-          _logger.info("Added to index with path $d");
-          return true;
-        case Failure<String>(exception: final e):
+        case Success(data: final d):
+          _logger.info("Added to index with path ${d.path}");
+          return d;
+        case Failure(exception: final e):
           showErrorDialog(context: context, content: Text(e.toString()));
       }
 
-      return false;
+      return null;
     });
   }
 
   Future<void> _syncToLibrary() async {
+    if (_indexModel != null) return;
+
     TransferFile? file = await _downloadBook();
 
     if (file == null) return;
 
     String? encodedCoverArt = await _parseForCoverArt(file);
+    widget.libraryEntry.eBook.coverArt.encodedImage = encodedCoverArt;
 
     if (encodedCoverArt == null) return;
 
-    await _index(file).then((result) {
-      if (result == true) {
-        showInfoDialog(
+    await _index(file).then((result) async {
+      if (result != null) {
+        await showInfoDialog(
           context: context,
           title: const Text("Success"),
           content: const Text(
-            "Succesfully downloaded the eBook!",
+            "Succesfully downloaded the ebook!",
           ),
         );
+
+        setState(() {
+          _indexModel = result;
+        });
+      }
+    });
+  }
+
+  Future<void> _fetchIndexEntry() async {
+    await EBookIndexer.getById(widget.libraryEntry.eBookId).then((result) {
+      switch (result) {
+        case Success<EBookIndexModel?>():
+          setState(() {
+            _indexModel = result.data;
+          });
+        case Failure<EBookIndexModel?>():
+          showErrorDialog(context: context, content: Text(result.toString()));
       }
     });
   }
@@ -117,6 +140,8 @@ class _LibraryInfoWidgetState extends State<LibraryInfoWidget> {
     super.initState();
     _eBookDownloadProvider = context.read<EBookDownloadProvider>();
     _eBookParseProvider = context.read<EBookParseProvider>();
+    // _indexModelFuture = EBookIndexer.getById(widget.libraryEntry.eBookId);
+    _fetchIndexEntry();
   }
 
   @override
@@ -195,8 +220,9 @@ class _LibraryInfoWidgetState extends State<LibraryInfoWidget> {
               ),
               FilledButton.icon(
                 onPressed: _syncToLibrary,
-                icon: const Icon(Icons.download),
-                label: const Text("Download"),
+                icon: Icon(
+                    _indexModel == null ? Icons.download : Icons.download_done),
+                label: Text(_indexModel == null ? "Download" : "Downloaded"),
               ),
               IconButton.filledTonal(
                 onPressed: () {},

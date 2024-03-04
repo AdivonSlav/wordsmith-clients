@@ -17,7 +17,7 @@ class EBook {
   final int chapterCount;
   final String path;
   final User author;
-  final Image coverArt;
+  Image coverArt;
   final String genres;
   final MaturityRating maturityRating;
 

@@ -14,7 +14,7 @@ const String _authorColumn = "author";
 const String _isReadColumn = "isRead";
 const String _readProgressColumn = "readProgress";
 const String _encodedImageColumn = "encodedImage";
-const String _modifiedDateColumn = "modifiedDate";
+const String _updatedDateColumn = "updatedDate";
 const String _pathColumn = "path";
 
 class EBookIndexModel {
@@ -24,7 +24,7 @@ class EBookIndexModel {
   bool? isRead;
   String? readProgress;
   String? encodedImage;
-  DateTime? modifiedDate;
+  DateTime? updatedDate;
   String? path;
 
   EBookIndexModel({
@@ -34,6 +34,7 @@ class EBookIndexModel {
     required this.isRead,
     required this.readProgress,
     required this.encodedImage,
+    required this.updatedDate,
     required this.path,
   });
 
@@ -45,7 +46,7 @@ class EBookIndexModel {
       _isReadColumn: isRead == true ? 1 : 0,
       _readProgressColumn: readProgress,
       _encodedImageColumn: encodedImage,
-      _modifiedDateColumn: modifiedDate?.millisecondsSinceEpoch,
+      _updatedDateColumn: updatedDate?.millisecondsSinceEpoch,
       _pathColumn: path
     };
 
@@ -59,8 +60,8 @@ class EBookIndexModel {
     isRead = (map[_isReadColumn] as int) == 1;
     readProgress = map[_readProgressColumn] as String;
     encodedImage = map[_encodedImageColumn] as String;
-    modifiedDate = DateTime.fromMillisecondsSinceEpoch(
-      map[_modifiedDateColumn] as int,
+    updatedDate = DateTime.fromMillisecondsSinceEpoch(
+      map[_updatedDateColumn] as int,
       isUtc: true,
     );
     path = map[_pathColumn] as String;
@@ -78,6 +79,7 @@ abstract class EBookIndexer {
   }
 
   static void initDatabase() async {
+    await databaseFactory.deleteDatabase("index.db");
     _db = await openDatabase(
       "index.db",
       onCreate: _onDatabaseCreate,
@@ -86,25 +88,32 @@ abstract class EBookIndexer {
     _logger.info("Opened ebook index database");
   }
 
-  static Future<Result<String>> addToIndex(
+  static Future<Result<EBookIndexModel>> addToIndex(
       UserLibrary libraryEntry, TransferFile transferFile) async {
     var pathToBook = await _writeBook(transferFile);
 
     switch (pathToBook) {
       case Success(data: final path):
-        var model = EBookIndexModel(
-          id: libraryEntry.eBookId,
-          title: libraryEntry.eBook.title,
-          author: libraryEntry.eBook.author.username,
-          isRead: libraryEntry.isRead,
-          readProgress: libraryEntry.readProgress,
-          encodedImage: libraryEntry.eBook.coverArt.encodedImage,
-          path: path,
-        );
+        try {
+          var model = EBookIndexModel(
+            id: libraryEntry.eBookId,
+            title: libraryEntry.eBook.title,
+            author: libraryEntry.eBook.author.username,
+            isRead: libraryEntry.isRead,
+            readProgress: libraryEntry.readProgress,
+            encodedImage: libraryEntry.eBook.coverArt.encodedImage,
+            updatedDate: libraryEntry.eBook.updatedDate,
+            path: path,
+          );
 
-        await _db.insert(_eBookTable, model.toMap());
+          await _db.insert(_eBookTable, model.toMap());
 
-        return Success(path);
+          return Success(model);
+        } catch (error, stackTrace) {
+          _logger.severe("Could not index ebook!", error, stackTrace);
+          return Failure(BaseException(error.toString(),
+              type: ExceptionType.internalAppError));
+        }
       case Failure(exception: final e):
         return Failure(e);
     }
@@ -120,9 +129,11 @@ abstract class EBookIndexer {
 
       if (records.isEmpty) return const Success(null);
 
-      return Success(EBookIndexModel.fromMap(records[0]));
-    } on Exception catch (error) {
-      _logger.severe(error, StackTrace.current);
+      var model = EBookIndexModel.fromMap(records[0]);
+
+      return Success(model);
+    } catch (error, stackTrace) {
+      _logger.severe("Error getting results from index!", error, stackTrace);
       return Failure(BaseException("Could not fetch downloaded ebook!",
           type: ExceptionType.internalAppError));
     }
@@ -140,8 +151,8 @@ abstract class EBookIndexer {
       }
 
       return Success(models);
-    } on Exception catch (error) {
-      _logger.severe(error, StackTrace.current);
+    } catch (error, stackTrace) {
+      _logger.severe("Error getting results from index!", error, stackTrace);
       return Failure(BaseException("Could not fetch downloaded ebooks!",
           type: ExceptionType.internalAppError));
     }
@@ -156,7 +167,7 @@ abstract class EBookIndexer {
         $_isReadColumn INTEGER,
         $_readProgressColumn TEXT,
         $_encodedImageColumn TEXT,
-        $_modifiedDateColumn INT,
+        $_updatedDateColumn INT,
         $_pathColumn TEXT)''',
     );
   }
@@ -166,14 +177,21 @@ abstract class EBookIndexer {
 
     try {
       docPath = await _localDocumentsPath;
-    } on MissingPlatformDirectoryException catch (error) {
-      _logger.severe(error, StackTrace.current);
+    } on MissingPlatformDirectoryException catch (error, stackTrace) {
+      _logger.severe("Could not save ebook!", error, stackTrace);
       return Failure(BaseException("Could not save ebook!",
           type: ExceptionType.internalAppError));
     }
 
-    final savePath = "$docPath/${transferFile.name}.epub";
-    await transferFile.file.saveTo(savePath);
+    final savePath = "$docPath/${transferFile.name}";
+
+    try {
+      await transferFile.file.saveTo(savePath);
+    } catch (error, stackTrace) {
+      _logger.severe("Could not save ebook!", error, stackTrace);
+      return Failure(BaseException("Could not save",
+          type: ExceptionType.internalAppError));
+    }
 
     return Success(savePath);
   }

@@ -5,7 +5,7 @@ part "image.g.dart";
 @JsonSerializable()
 class Image {
   final String? imagePath;
-  final String? encodedImage;
+  String? encodedImage;
   final String format;
   final int size;
 
