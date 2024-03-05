@@ -11,7 +11,7 @@ class UserLibrary {
   final Ebook eBook;
   final DateTime syncDate;
   final bool isRead;
-  final String? readProgress;
+  final String readProgress;
   final int? userLibraryCategoryId;
   final int lastChapterId;
   final int lastPage;

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wordsmith_mobile/screens/ebook_screen.dart';
-import 'package:wordsmith_mobile/utils/indexer/ebook_index_provider.dart';
-import 'package:wordsmith_mobile/utils/indexer/models/ebook_index_model.dart';
+import 'package:wordsmith_mobile/utils/indexers/ebook_index_provider.dart';
+import 'package:wordsmith_mobile/utils/indexers/models/ebook_index_model.dart';
 import 'package:wordsmith_mobile/widgets/ebook/ebook_image.dart';
 import 'package:wordsmith_utils/datetime_formatter.dart';
 import 'package:wordsmith_utils/dialogs/progress_indicator_dialog.dart';

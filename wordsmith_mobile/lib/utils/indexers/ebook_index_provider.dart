@@ -1,6 +1,6 @@
 import 'package:path_provider/path_provider.dart';
-import 'package:wordsmith_mobile/utils/indexer/base_index_provider.dart';
-import 'package:wordsmith_mobile/utils/indexer/models/ebook_index_model.dart';
+import 'package:wordsmith_mobile/utils/indexers/base_index_provider.dart';
+import 'package:wordsmith_mobile/utils/indexers/models/ebook_index_model.dart';
 import 'package:wordsmith_utils/exceptions/base_exception.dart';
 import 'package:wordsmith_utils/exceptions/exception_types.dart';
 import 'package:wordsmith_utils/logger.dart';
@@ -13,6 +13,11 @@ class EbookIndexProvider extends BaseIndexProvider {
 
   Future<Result<EbookIndexModel>> addToIndex(
       UserLibrary libraryEntry, TransferFile transferFile) async {
+    if (libraryEntry.eBook.coverArt.encodedImage == null) {
+      return Failure(BaseException("Cover art for the ebook was not found!",
+          type: ExceptionType.internalAppError));
+    }
+
     var pathToBook = await _writeBook(transferFile);
 
     switch (pathToBook) {
@@ -24,7 +29,7 @@ class EbookIndexProvider extends BaseIndexProvider {
             author: libraryEntry.eBook.author.username,
             isRead: libraryEntry.isRead,
             readProgress: libraryEntry.readProgress,
-            encodedImage: libraryEntry.eBook.coverArt.encodedImage,
+            encodedImage: libraryEntry.eBook.coverArt.encodedImage!,
             updatedDate: libraryEntry.eBook.updatedDate,
             path: path,
           );

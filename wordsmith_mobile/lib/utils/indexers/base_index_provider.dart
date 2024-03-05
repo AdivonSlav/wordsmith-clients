@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:wordsmith_mobile/utils/indexer/models/ebook_index_model.dart';
+import 'package:wordsmith_mobile/utils/indexers/models/ebook_index_model.dart';
+import 'package:wordsmith_mobile/utils/indexers/models/user_index_model.dart';
 import 'package:wordsmith_utils/logger.dart';
 
 abstract class BaseIndexProvider extends ChangeNotifier {
-  static final _logger = LogManager.getLogger("EBookIndexer");
+  static final _logger = LogManager.getLogger("BaseIndexProvider");
   static const String _dbPath = "index.db";
 
   @protected
   static late Database db;
   @protected
   static const String eBookTable = "books";
+  @protected
+  static const String userTable = "user";
 
   @protected
   Future<String> get localDocumentsPath async {
@@ -27,7 +30,7 @@ abstract class BaseIndexProvider extends ChangeNotifier {
       onCreate: _onDatabaseCreate,
       version: 1,
     );
-    _logger.info("Opened ebook index database");
+    _logger.info("Opened index database at $_dbPath");
   }
 
   static void _onDatabaseCreate(Database db, int version) async {
@@ -39,8 +42,17 @@ abstract class BaseIndexProvider extends ChangeNotifier {
         ${EbookIndexModel.isReadColumn} INTEGER,
         ${EbookIndexModel.readProgressColumn} TEXT,
         ${EbookIndexModel.encodedImageColumn} TEXT,
-        ${EbookIndexModel.updatedDateColumn} INT,
+        ${EbookIndexModel.updatedDateColumn} INTEGER,
         ${EbookIndexModel.pathColumn} TEXT)''',
+    );
+
+    await db.execute(
+      '''CREATE TABLE $userTable (
+       ${UserIndexModel.idColumn} INTEGER PRIMARY KEY,
+       ${UserIndexModel.usernameColumn} TEXT,
+       ${UserIndexModel.emailColumn} TEXT,
+       ${UserIndexModel.encodedProfileImageColumn} TEXT,
+       ${UserIndexModel.registrationDateColumn} INTEGER)''',
     );
   }
 }

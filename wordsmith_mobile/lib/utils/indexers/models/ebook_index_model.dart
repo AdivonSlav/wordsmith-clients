@@ -1,12 +1,12 @@
 class EbookIndexModel {
-  int? id;
-  String? title;
-  String? author;
-  bool? isRead;
-  String? readProgress;
-  String? encodedImage;
-  DateTime? updatedDate;
-  String? path;
+  int id;
+  String title;
+  String author;
+  bool isRead;
+  String readProgress;
+  String encodedImage;
+  DateTime updatedDate;
+  String path;
 
   static const String _idColumn = "id";
   static const String _titleColumn = "title";
@@ -45,24 +45,23 @@ class EbookIndexModel {
       _isReadColumn: isRead == true ? 1 : 0,
       _readProgressColumn: readProgress,
       _encodedImageColumn: encodedImage,
-      _updatedDateColumn: updatedDate?.millisecondsSinceEpoch,
+      _updatedDateColumn: updatedDate.millisecondsSinceEpoch,
       _pathColumn: path
     };
 
     return map;
   }
 
-  EbookIndexModel.fromMap(Map<String, Object?> map) {
-    id = map[_idColumn] as int;
-    title = map[_titleColumn] as String;
-    author = map[_authorColumn] as String;
-    isRead = (map[_isReadColumn] as int) == 1;
-    readProgress = map[_readProgressColumn] as String;
-    encodedImage = map[_encodedImageColumn] as String;
-    updatedDate = DateTime.fromMillisecondsSinceEpoch(
-      map[_updatedDateColumn] as int,
-      isUtc: true,
-    );
-    path = map[_pathColumn] as String;
-  }
+  EbookIndexModel.fromMap(Map<String, Object?> map)
+      : id = map[_idColumn] as int,
+        title = map[_titleColumn] as String,
+        author = map[_authorColumn] as String,
+        isRead = (map[_isReadColumn] as int) == 1,
+        readProgress = map[_readProgressColumn] as String,
+        encodedImage = map[_encodedImageColumn] as String,
+        updatedDate = DateTime.fromMillisecondsSinceEpoch(
+          map[_updatedDateColumn] as int,
+          isUtc: true,
+        ),
+        path = map[_pathColumn] as String;
 }

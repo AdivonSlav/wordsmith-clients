@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:wordsmith_mobile/utils/indexers/models/user_index_model.dart';
+import 'package:wordsmith_mobile/utils/indexers/user_index_provider.dart';
 import 'package:wordsmith_mobile/widgets/input_field.dart';
 import 'package:wordsmith_utils/dialogs/progress_indicator_dialog.dart';
 import 'package:wordsmith_utils/dialogs/show_error_dialog.dart';
@@ -26,42 +28,55 @@ class _LoginScreenWidgetState extends State<LoginScreenWidget> {
 
   late UserLoginProvider _userLoginProvider;
   late AuthProvider _authProvider;
+  late UserIndexProvider _userIndexProvider;
 
   bool _obscuredPassword = true;
 
-  Future<bool> _submitLogin() async {
-    ProgressIndicatorDialog().show(context);
+  Future<void> _submitLogin() async {
+    ProgressIndicatorDialog().show(context, text: "Logging in...");
 
     var username = _usernameController.text;
     var password = _passwordController.text;
 
     _logger.info("Attempting login with $username:$password");
 
-    bool success = false;
-
     await _userLoginProvider
         .getUserLogin(username, password)
         .then((result) async {
       switch (result) {
         case Success<UserLogin>(data: final d):
-          ProgressIndicatorDialog().dismiss();
-          await _authProvider.storeLogin(loginCreds: d);
-          success = true;
+          await _userIndexProvider.addToIndex(d.user).then((indexResult) async {
+            ProgressIndicatorDialog().dismiss();
+            switch (indexResult) {
+              case Success<UserIndexModel>():
+                Navigator.of(context).pop();
+                await _authProvider.storeLogin(loginCreds: d);
+              case Failure<UserIndexModel>():
+                showErrorDialog(
+                    context: context,
+                    content:
+                        const Text("Failed to login due to internal error!"));
+            }
+          });
         case Failure<UserLogin>(exception: final e):
           ProgressIndicatorDialog().dismiss();
           showErrorDialog(context: context, content: Text(e.toString()));
-          success = false;
+          return false;
       }
     });
+  }
 
-    return success;
+  @override
+  void initState() {
+    super.initState();
+    _userLoginProvider = context.read<UserLoginProvider>();
+    _authProvider = context.read<AuthProvider>();
+    _userIndexProvider = context.read<UserIndexProvider>();
   }
 
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
-    _userLoginProvider = context.read<UserLoginProvider>();
-    _authProvider = context.read<AuthProvider>();
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -121,9 +136,7 @@ class _LoginScreenWidgetState extends State<LoginScreenWidget> {
                               if (_formKey.currentState!.validate()) {
                                 _logger.info("Login in progress...");
 
-                                await _submitLogin().then((success) {
-                                  if (success) Navigator.of(context).pop();
-                                });
+                                await _submitLogin();
                               }
                             },
                             child: const Text("Login")),

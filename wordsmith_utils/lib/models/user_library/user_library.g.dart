@@ -12,7 +12,7 @@ UserLibrary _$UserLibraryFromJson(Map<String, dynamic> json) => UserLibrary(
       json['userId'] as int,
       DateTime.parse(json['syncDate'] as String),
       json['isRead'] as bool,
-      json['readProgress'] as String?,
+      json['readProgress'] as String,
       json['userLibraryCategoryId'] as int?,
       json['lastChapterId'] as int,
       json['lastPage'] as int,
