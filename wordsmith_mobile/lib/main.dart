@@ -4,7 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
-import 'package:wordsmith_mobile/utils/ebook_indexer.dart';
+import 'package:wordsmith_mobile/utils/indexer/ebook_index_provider.dart';
+import 'package:wordsmith_mobile/utils/indexer/base_index_provider.dart';
 import 'package:wordsmith_mobile/utils/themes.dart';
 import 'package:wordsmith_mobile/x509_override.dart';
 import 'package:wordsmith_mobile/widgets/navigation_bar/navigation_bar.dart';
@@ -39,7 +40,7 @@ Future<void> main() async {
 
   initializeDateFormattingForLocale();
 
-  EBookIndexer.initDatabase();
+  BaseIndexProvider.initDatabase();
 
   runApp(MultiProvider(
     providers: [
@@ -53,6 +54,7 @@ Future<void> main() async {
       ChangeNotifierProvider(create: (_) => EBookProvider()),
       ChangeNotifierProvider(create: (_) => UserLibraryProvider()),
       ChangeNotifierProvider(create: (_) => UserLibraryCategoryProvider()),
+      ChangeNotifierProvider(create: (_) => EbookIndexProvider()),
     ],
     child: const Application(),
   ));

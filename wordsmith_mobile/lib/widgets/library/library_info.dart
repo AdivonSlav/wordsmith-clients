@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wordsmith_mobile/screens/ebook_screen.dart';
-import 'package:wordsmith_mobile/utils/ebook_indexer.dart';
+import 'package:wordsmith_mobile/utils/indexer/ebook_index_provider.dart';
+import 'package:wordsmith_mobile/utils/indexer/models/ebook_index_model.dart';
 import 'package:wordsmith_mobile/widgets/ebook/ebook_image.dart';
 import 'package:wordsmith_utils/datetime_formatter.dart';
 import 'package:wordsmith_utils/dialogs/progress_indicator_dialog.dart';
@@ -28,10 +29,11 @@ class _LibraryInfoWidgetState extends State<LibraryInfoWidget> {
   final _logger = LogManager.getLogger("LibraryInfoWidget");
   late EBookDownloadProvider _eBookDownloadProvider;
   late EBookParseProvider _eBookParseProvider;
+  late EbookIndexProvider _ebookIndexProvider;
 
   final double imageAspectRatio = 1.5;
 
-  EBookIndexModel? _indexModel;
+  EbookIndexModel? _indexModel;
 
   void _openBookPage() {
     Navigator.of(context).push(
@@ -76,9 +78,10 @@ class _LibraryInfoWidgetState extends State<LibraryInfoWidget> {
     });
   }
 
-  Future<EBookIndexModel?> _index(TransferFile file) async {
+  Future<EbookIndexModel?> _index(TransferFile file) async {
     ProgressIndicatorDialog().show(context, text: "Indexing...");
-    return await EBookIndexer.addToIndex(widget.libraryEntry, file)
+    return await _ebookIndexProvider
+        .addToIndex(widget.libraryEntry, file)
         .then((result) {
       ProgressIndicatorDialog().dismiss();
       switch (result) {
@@ -123,13 +126,15 @@ class _LibraryInfoWidgetState extends State<LibraryInfoWidget> {
   }
 
   Future<void> _fetchIndexEntry() async {
-    await EBookIndexer.getById(widget.libraryEntry.eBookId).then((result) {
+    await _ebookIndexProvider
+        .getById(widget.libraryEntry.eBookId)
+        .then((result) {
       switch (result) {
-        case Success<EBookIndexModel?>():
+        case Success<EbookIndexModel?>():
           setState(() {
             _indexModel = result.data;
           });
-        case Failure<EBookIndexModel?>():
+        case Failure<EbookIndexModel?>():
           showErrorDialog(context: context, content: Text(result.toString()));
       }
     });
@@ -140,7 +145,7 @@ class _LibraryInfoWidgetState extends State<LibraryInfoWidget> {
     super.initState();
     _eBookDownloadProvider = context.read<EBookDownloadProvider>();
     _eBookParseProvider = context.read<EBookParseProvider>();
-    // _indexModelFuture = EBookIndexer.getById(widget.libraryEntry.eBookId);
+    _ebookIndexProvider = context.read<EbookIndexProvider>();
     _fetchIndexEntry();
   }
 
