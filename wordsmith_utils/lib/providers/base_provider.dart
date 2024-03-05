@@ -1,4 +1,5 @@
 import "dart:convert";
+import "dart:io";
 import "package:file_selector/file_selector.dart";
 import "package:flutter/foundation.dart";
 import "package:wordsmith_utils/exceptions/base_exception.dart";
@@ -59,8 +60,8 @@ abstract class BaseProvider<T> extends AuthProvider {
 
     try {
       response = await http.get(uri, headers: headers);
-    } catch (error) {
-      _handleInternalAppError(error);
+    } catch (error, stackTrace) {
+      _handleInternalAppError(error, stackTrace);
     }
 
     // If retrying is enabled and status 401 is returned, attempt to refresh the access token and send the request again
@@ -75,8 +76,8 @@ abstract class BaseProvider<T> extends AuthProvider {
 
         try {
           refreshedResponse = await http.get(uri, headers: headers);
-        } catch (error) {
-          _handleInternalAppError(error);
+        } catch (error, stackTrace) {
+          _handleInternalAppError(error, stackTrace);
         }
 
         return await _handleGetResponse(refreshedResponse);
@@ -124,8 +125,8 @@ abstract class BaseProvider<T> extends AuthProvider {
 
     try {
       response = await http.put(uri, body: jsonRequest, headers: headers);
-    } catch (error) {
-      _handleInternalAppError(error);
+    } catch (error, stackTrace) {
+      _handleInternalAppError(error, stackTrace);
     }
 
     // If retrying is enabled and status 401 is returned, attempt to refresh the access token and send the request again
@@ -141,8 +142,8 @@ abstract class BaseProvider<T> extends AuthProvider {
         try {
           refreshedResponse =
               await http.put(uri, body: jsonRequest, headers: headers);
-        } catch (error) {
-          _handleInternalAppError(error);
+        } catch (error, stackTrace) {
+          _handleInternalAppError(error, stackTrace);
         }
 
         return await _handleResponse(refreshedResponse);
@@ -186,10 +187,9 @@ abstract class BaseProvider<T> extends AuthProvider {
 
     try {
       response = await http.post(uri, body: jsonRequest, headers: headers);
-    } catch (error) {
-      _handleInternalAppError(error);
+    } catch (error, stackTrace) {
+      _handleInternalAppError(error, stackTrace);
     }
-
     // If retrying is enabled and status 401 is returned, attempt to refresh the access token and send the request again
     if (retryForRefresh == true && response.statusCode == 401) {
       var success = await attemptTokenRefresh();
@@ -203,8 +203,8 @@ abstract class BaseProvider<T> extends AuthProvider {
         try {
           refreshedResponse =
               await http.post(uri, body: jsonRequest, headers: headers);
-        } catch (error) {
-          _handleInternalAppError(error);
+        } catch (error, stackTrace) {
+          _handleInternalAppError(error, stackTrace);
         }
 
         return await _handleResponse(refreshedResponse);
@@ -254,8 +254,8 @@ abstract class BaseProvider<T> extends AuthProvider {
 
     try {
       response = await request.send();
-    } catch (error) {
-      _handleInternalAppError(error);
+    } catch (error, stackTrace) {
+      _handleInternalAppError(error, stackTrace);
     }
 
     // If retrying is enabled and status 401 is returned, attempt to refresh the access token and send the request again
@@ -273,8 +273,8 @@ abstract class BaseProvider<T> extends AuthProvider {
 
         try {
           retryResponse = await retryRequest.send();
-        } catch (error) {
-          _handleInternalAppError(error);
+        } catch (error, stackTrace) {
+          _handleInternalAppError(error, stackTrace);
         }
 
         return await _handleMultipartResponse(retryResponse);
@@ -318,8 +318,8 @@ abstract class BaseProvider<T> extends AuthProvider {
 
     try {
       response = await http.delete(uri, headers: headers);
-    } catch (error) {
-      _handleInternalAppError(error);
+    } catch (error, stackTrace) {
+      _handleInternalAppError(error, stackTrace);
     }
 
     // If retrying is enabled and status 401 is returned, attempt to refresh the access token and send the request again
@@ -334,8 +334,8 @@ abstract class BaseProvider<T> extends AuthProvider {
 
         try {
           refreshedResponse = await http.delete(uri, headers: headers);
-        } catch (error) {
-          _handleInternalAppError(error);
+        } catch (error, stackTrace) {
+          _handleInternalAppError(error, stackTrace);
         }
 
         return await _handleResponse(refreshedResponse);
@@ -378,8 +378,8 @@ abstract class BaseProvider<T> extends AuthProvider {
 
     try {
       response = await http.get(uri, headers: headers);
-    } catch (error) {
-      _handleInternalAppError(error);
+    } catch (error, stackTrace) {
+      _handleInternalAppError(error, stackTrace);
     }
 
     // If retrying is enabled and status 401 is returned, attempt to refresh the access token and send the request again
@@ -393,8 +393,8 @@ abstract class BaseProvider<T> extends AuthProvider {
 
         try {
           refreshedResponse = await http.get(uri, headers: headers);
-        } catch (error) {
-          _handleInternalAppError(error);
+        } catch (error, stackTrace) {
+          _handleInternalAppError(error, stackTrace);
         }
 
         return await _handleByteResponse(refreshedResponse);
@@ -766,10 +766,20 @@ abstract class BaseProvider<T> extends AuthProvider {
     throw BaseException("Unknown error");
   }
 
-  void _handleInternalAppError(Object? error) {
-    _logger.severe(error, null, StackTrace.current);
-    throw BaseException(
-        "Internal app error. This could also be a server-side issue. Please check back again!",
-        type: ExceptionType.internalAppError);
+  void _handleInternalAppError(Object? error, StackTrace stackTrace) {
+    _logger.severe("Internal app error", error, stackTrace);
+
+    String message = "";
+    late ExceptionType type;
+
+    if (error is SocketException) {
+      message = "Could not make connection to the API.";
+      type = ExceptionType.socketException;
+    } else {
+      message = "Internal app error. This could also be a server-side issue.";
+      type = ExceptionType.internalAppError;
+    }
+
+    throw BaseException(message, type: type);
   }
 }
