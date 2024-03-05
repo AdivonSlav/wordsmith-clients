@@ -6,7 +6,7 @@ import "package:wordsmith_utils/models/user/user.dart";
 part "ebook.g.dart";
 
 @JsonSerializable()
-class EBook {
+class Ebook {
   final int id;
   final String title;
   final String description;
@@ -21,7 +21,7 @@ class EBook {
   final String genres;
   final MaturityRating maturityRating;
 
-  EBook(
+  Ebook(
     this.id,
     this.title,
     this.description,
@@ -37,7 +37,7 @@ class EBook {
     this.maturityRating,
   );
 
-  factory EBook.fromJson(Map<String, dynamic> json) => _$EBookFromJson(json);
+  factory Ebook.fromJson(Map<String, dynamic> json) => _$EbookFromJson(json);
 
-  Map<String, dynamic> toJson() => _$EBookToJson(this);
+  Map<String, dynamic> toJson() => _$EbookToJson(this);
 }

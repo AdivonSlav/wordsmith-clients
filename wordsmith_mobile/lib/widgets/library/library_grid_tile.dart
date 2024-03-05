@@ -94,7 +94,7 @@ class _LibraryGridTileWidgetState extends State<LibraryGridTileWidget>
                     sigmaX: _animation.value,
                     sigmaY: _animation.value,
                   ),
-                  child: EBookImageWidget(
+                  child: EbookImageWidget(
                     width: size.width,
                     height: size.height,
                     coverArtUrl: widget.libraryEntry.eBook.coverArt.imagePath,

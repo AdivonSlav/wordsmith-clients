@@ -6,7 +6,7 @@ import 'package:wordsmith_utils/models/ebook/ebook.dart';
 
 class HomeEBookDisplayWidget extends StatelessWidget {
   final String title;
-  final List<EBook> ebooks;
+  final List<Ebook> ebooks;
 
   const HomeEBookDisplayWidget(
       {super.key, required this.title, required this.ebooks});
@@ -47,10 +47,10 @@ class HomeEBookDisplayWidget extends StatelessWidget {
                 onTap: () {
                   Navigator.of(context).push(MaterialPageRoute(
                     builder: (context) =>
-                        EBookScreenWidget(ebook: ebooks[itemIndex]),
+                        EbookScreenWidget(ebook: ebooks[itemIndex]),
                   ));
                 },
-                child: EBookImageWidget(
+                child: EbookImageWidget(
                   coverArtUrl: ebooks[itemIndex].coverArt.imagePath,
                   fit: BoxFit.fill,
                 ),

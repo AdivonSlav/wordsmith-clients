@@ -10,16 +10,16 @@ import 'package:wordsmith_utils/models/user_library/user_library.dart';
 import 'package:wordsmith_utils/providers/user_library_provider.dart';
 import 'package:wordsmith_utils/show_snackbar.dart';
 
-class EBookScreenWidget extends StatefulWidget {
-  final EBook ebook;
+class EbookScreenWidget extends StatefulWidget {
+  final Ebook ebook;
 
-  const EBookScreenWidget({super.key, required this.ebook});
+  const EbookScreenWidget({super.key, required this.ebook});
 
   @override
-  State<StatefulWidget> createState() => _EBookScreenWidget();
+  State<StatefulWidget> createState() => _EbookScreenWidget();
 }
 
-class _EBookScreenWidget extends State<EBookScreenWidget> {
+class _EbookScreenWidget extends State<EbookScreenWidget> {
   late Future<Result<UserLibrary?>> _getLibraryEntry;
   late UserLibraryProvider _userLibraryProvider;
   UserLibrary? _userLibrary;
@@ -76,7 +76,7 @@ class _EBookScreenWidget extends State<EBookScreenWidget> {
     super.initState();
     _userLibraryProvider = context.read<UserLibraryProvider>();
     _getLibraryEntry =
-        _userLibraryProvider.getLibraryEntryByEBook(eBookId: widget.ebook.id);
+        _userLibraryProvider.getLibraryEntryByEbook(eBookId: widget.ebook.id);
   }
 
   @override
@@ -107,7 +107,7 @@ class _EBookScreenWidget extends State<EBookScreenWidget> {
             children: <Widget>[
               Hero(
                 tag: widget.ebook.title,
-                child: EBookImageWidget(
+                child: EbookImageWidget(
                   width: size.width,
                   height: size.height * 0.75,
                   coverArtUrl: widget.ebook.coverArt.imagePath,
@@ -215,7 +215,7 @@ class _EBookScreenWidget extends State<EBookScreenWidget> {
                                       const EdgeInsets.symmetric(vertical: 8.0),
                                   child: Row(
                                     children: <Widget>[
-                                      EBookRatingStarsWidget(
+                                      EbookRatingStarsWidget(
                                           rating: widget.ebook.ratingAverage),
                                       const SizedBox(width: 12.0),
                                       Text(

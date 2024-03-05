@@ -8,12 +8,12 @@ import 'package:wordsmith_utils/models/transfer_file.dart';
 import 'package:wordsmith_utils/providers/base_provider.dart';
 import 'package:wordsmith_utils/secure_store.dart';
 
-class EBookProvider extends BaseProvider<EBook> {
+class EbookProvider extends BaseProvider<Ebook> {
   final _logger = LogManager.getLogger("EBookProvider");
 
-  EBookProvider() : super("ebooks");
+  EbookProvider() : super("ebooks");
 
-  Future<Result<QueryResult<EBook>>> getNewlyAdded(
+  Future<Result<QueryResult<Ebook>>> getNewlyAdded(
       {required int page, required int pageSize}) async {
     var accessToken = await SecureStore.getValue("access_token");
 
@@ -34,7 +34,7 @@ class EBookProvider extends BaseProvider<EBook> {
     }
   }
 
-  Future<Result<EBook>> postEBook(EBookInsert insert, TransferFile file) async {
+  Future<Result<Ebook>> postEBook(EbookInsert insert, TransferFile file) async {
     var accessToken = await SecureStore.getValue("access_token");
 
     try {
@@ -64,7 +64,7 @@ class EBookProvider extends BaseProvider<EBook> {
   }
 
   @override
-  EBook fromJson(data) {
-    return EBook.fromJson(data);
+  Ebook fromJson(data) {
+    return Ebook.fromJson(data);
   }
 }

@@ -5,15 +5,15 @@ import "package:wordsmith_utils/models/report/report_details.dart";
 part "ebook_report.g.dart";
 
 @JsonSerializable()
-class EBookReport {
+class EbookReport {
   final int id;
-  final EBook reportedEBook;
+  final Ebook reportedEbook;
   final ReportDetails reportDetails;
 
-  EBookReport(this.id, this.reportedEBook, this.reportDetails);
+  EbookReport(this.id, this.reportedEbook, this.reportDetails);
 
-  factory EBookReport.fromJson(Map<String, dynamic> json) =>
-      _$EBookReportFromJson(json);
+  factory EbookReport.fromJson(Map<String, dynamic> json) =>
+      _$EbookReportFromJson(json);
 
-  Map<String, dynamic> toJson() => _$EBookReportToJson(this);
+  Map<String, dynamic> toJson() => _$EbookReportToJson(this);
 }

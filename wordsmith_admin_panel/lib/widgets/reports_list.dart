@@ -50,7 +50,7 @@ class _ReportsListWidgetState extends State<ReportsListWidget> {
         }
 
         var userReports = castOrNull<QueryResult<UserReport>>(snapshot.data);
-        var eBookReports = castOrNull<QueryResult<EBookReport>>(snapshot.data);
+        var eBookReports = castOrNull<QueryResult<EbookReport>>(snapshot.data);
 
         return SizedBox(
           height: SizeConfig.safeBlockVertical * 70.0,

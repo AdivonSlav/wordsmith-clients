@@ -27,8 +27,8 @@ class LibraryInfoWidget extends StatefulWidget {
 
 class _LibraryInfoWidgetState extends State<LibraryInfoWidget> {
   final _logger = LogManager.getLogger("LibraryInfoWidget");
-  late EBookDownloadProvider _eBookDownloadProvider;
-  late EBookParseProvider _eBookParseProvider;
+  late EbookDownloadProvider _eBookDownloadProvider;
+  late EbookParseProvider _eBookParseProvider;
   late EbookIndexProvider _ebookIndexProvider;
 
   final double imageAspectRatio = 1.5;
@@ -39,7 +39,7 @@ class _LibraryInfoWidgetState extends State<LibraryInfoWidget> {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) =>
-            EBookScreenWidget(ebook: widget.libraryEntry.eBook),
+            EbookScreenWidget(ebook: widget.libraryEntry.eBook),
       ),
     );
   }
@@ -67,10 +67,10 @@ class _LibraryInfoWidgetState extends State<LibraryInfoWidget> {
     return await _eBookParseProvider.getParsed(file).then((result) {
       ProgressIndicatorDialog().dismiss();
       switch (result) {
-        case Success<EBookParse>(data: final d):
+        case Success<EbookParse>(data: final d):
           _logger.info("Got parsed cover art for ${file.name}");
           return d.encodedCoverArt;
-        case Failure<EBookParse>(exception: final e):
+        case Failure<EbookParse>(exception: final e):
           showErrorDialog(context: context, content: Text(e.toString()));
       }
 
@@ -143,8 +143,8 @@ class _LibraryInfoWidgetState extends State<LibraryInfoWidget> {
   @override
   void initState() {
     super.initState();
-    _eBookDownloadProvider = context.read<EBookDownloadProvider>();
-    _eBookParseProvider = context.read<EBookParseProvider>();
+    _eBookDownloadProvider = context.read<EbookDownloadProvider>();
+    _eBookParseProvider = context.read<EbookParseProvider>();
     _ebookIndexProvider = context.read<EbookIndexProvider>();
     _fetchIndexEntry();
   }
@@ -165,7 +165,7 @@ class _LibraryInfoWidgetState extends State<LibraryInfoWidget> {
                   SizedBox(
                     width: constraints.maxWidth * 0.35,
                     height: constraints.maxWidth * 0.35 * imageAspectRatio,
-                    child: EBookImageWidget(
+                    child: EbookImageWidget(
                       coverArtUrl:
                           widget.libraryEntry.eBook.coverArt.imagePath!,
                       fit: BoxFit.fill,

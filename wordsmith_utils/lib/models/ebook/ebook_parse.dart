@@ -3,16 +3,16 @@ import 'package:json_annotation/json_annotation.dart';
 part "ebook_parse.g.dart";
 
 @JsonSerializable()
-class EBookParse {
+class EbookParse {
   final String title;
   final String description;
   final String encodedCoverArt;
   final List<String> chapters;
 
-  EBookParse(this.title, this.description, this.encodedCoverArt, this.chapters);
+  EbookParse(this.title, this.description, this.encodedCoverArt, this.chapters);
 
-  factory EBookParse.fromJson(Map<String, dynamic> json) =>
-      _$EBookParseFromJson(json);
+  factory EbookParse.fromJson(Map<String, dynamic> json) =>
+      _$EbookParseFromJson(json);
 
-  Map<String, dynamic> toJson() => _$EBookParseToJson(this);
+  Map<String, dynamic> toJson() => _$EbookParseToJson(this);
 }

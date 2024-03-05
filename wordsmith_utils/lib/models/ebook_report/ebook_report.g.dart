@@ -6,15 +6,15 @@ part of 'ebook_report.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-EBookReport _$EBookReportFromJson(Map<String, dynamic> json) => EBookReport(
+EbookReport _$EbookReportFromJson(Map<String, dynamic> json) => EbookReport(
       json['id'] as int,
-      EBook.fromJson(json['reportedEBook'] as Map<String, dynamic>),
+      Ebook.fromJson(json['reportedEbook'] as Map<String, dynamic>),
       ReportDetails.fromJson(json['reportDetails'] as Map<String, dynamic>),
     );
 
-Map<String, dynamic> _$EBookReportToJson(EBookReport instance) =>
+Map<String, dynamic> _$EbookReportToJson(EbookReport instance) =>
     <String, dynamic>{
       'id': instance.id,
-      'reportedEBook': instance.reportedEBook,
+      'reportedEbook': instance.reportedEbook,
       'reportDetails': instance.reportDetails,
     };

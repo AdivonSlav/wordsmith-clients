@@ -6,12 +6,12 @@ import "package:wordsmith_utils/models/result.dart";
 import "package:wordsmith_utils/providers/base_provider.dart";
 import "package:wordsmith_utils/secure_store.dart";
 
-class EBookReportsProvider extends BaseProvider<EBookReport> {
-  final _logger = LogManager.getLogger("EBookReportsProvider");
+class EbookReportsProvider extends BaseProvider<EbookReport> {
+  final _logger = LogManager.getLogger("EbookReportsProvider");
 
-  EBookReportsProvider() : super("ebook-reports");
+  EbookReportsProvider() : super("ebook-reports");
 
-  Future<Result<QueryResult<EBookReport>>> getEBookReports(
+  Future<Result<QueryResult<EbookReport>>> getEBookReports(
       {required int page,
       required int pageSize,
       String? reason,
@@ -44,7 +44,7 @@ class EBookReportsProvider extends BaseProvider<EBookReport> {
   }
 
   @override
-  EBookReport fromJson(data) {
-    return EBookReport.fromJson(data);
+  EbookReport fromJson(data) {
+    return EbookReport.fromJson(data);
   }
 }

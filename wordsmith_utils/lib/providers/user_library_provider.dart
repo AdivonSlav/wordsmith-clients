@@ -30,7 +30,7 @@ class UserLibraryProvider extends BaseProvider<UserLibrary> {
     }
   }
 
-  Future<Result<UserLibrary?>> getLibraryEntryByEBook(
+  Future<Result<UserLibrary?>> getLibraryEntryByEbook(
       {required int eBookId}) async {
     var accessToken = await SecureStore.getValue("access_token");
 

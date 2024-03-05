@@ -8,7 +8,7 @@ class UserLibrary {
   final int id;
   final int eBookId;
   final int userId;
-  final EBook eBook;
+  final Ebook eBook;
   final DateTime syncDate;
   final bool isRead;
   final String? readProgress;

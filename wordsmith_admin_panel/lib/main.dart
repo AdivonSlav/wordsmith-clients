@@ -58,7 +58,7 @@ void main() async {
         create: (_) => UserReportsProvider(),
       ),
       ChangeNotifierProvider(
-        create: (_) => EBookReportsProvider(),
+        create: (_) => EbookReportsProvider(),
       )
     ],
     child: const Application(),

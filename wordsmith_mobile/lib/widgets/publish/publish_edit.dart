@@ -17,8 +17,8 @@ import 'package:wordsmith_utils/size_config.dart';
 import 'package:wordsmith_utils/validators.dart';
 
 class PublishEditWidget extends StatefulWidget {
-  final EBookParse parsedEbook;
-  final void Function(EBookInsert ebook) onEditCallback;
+  final EbookParse parsedEbook;
+  final void Function(EbookInsert ebook) onEditCallback;
 
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
@@ -81,10 +81,10 @@ class _PublishEditWidgetState extends State<PublishEditWidget> {
     }
 
     ProgressIndicatorDialog().show(context);
-    
+
     var authorId = AuthProvider.loggedUser!.id;
     var genreIds = _selectedGenres.map((e) => e.id).toList();
-    var insert = EBookInsert(
+    var insert = EbookInsert(
         widget._titleController.text,
         widget._descriptionController.text.trim(),
         widget.parsedEbook.encodedCoverArt,
@@ -116,7 +116,7 @@ class _PublishEditWidgetState extends State<PublishEditWidget> {
               key: _formKey,
               child: Column(
                 children: [
-                  EBookImageWidget(
+                  EbookImageWidget(
                     width: size.width * 0.75,
                     height: size.height * 0.60,
                     fit: BoxFit.fill,

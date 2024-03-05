@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-class EBookRatingStarsWidget extends StatelessWidget {
+class EbookRatingStarsWidget extends StatelessWidget {
   final double? rating;
 
-  const EBookRatingStarsWidget({super.key, required this.rating});
+  const EbookRatingStarsWidget({super.key, required this.rating});
 
   @override
   Widget build(BuildContext context) {

@@ -11,7 +11,7 @@ import "package:wordsmith_utils/size_config.dart";
 Future<dynamic> showReportDialog(
     {required BuildContext context,
     UserReport? userReport,
-    EBookReport? eBookReport}) async {
+    EbookReport? eBookReport}) async {
   if (userReport == null && eBookReport == null) {
     return showErrorDialog(
         context: context, content: const Text("Error opening report"));
@@ -69,7 +69,7 @@ Future<dynamic> showReportDialog(
                       child: TextFieldWidget(
                         controller: TextEditingController(
                           text: userReport?.reportedUser.username ??
-                              eBookReport!.reportedEBook.title,
+                              eBookReport!.reportedEbook.title,
                         ),
                       ),
                     ),

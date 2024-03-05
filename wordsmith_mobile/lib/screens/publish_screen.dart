@@ -21,12 +21,12 @@ class PublishScreenWidget extends StatefulWidget {
 
 class _PublishScreenWidgetState extends State<PublishScreenWidget> {
   final _logger = LogManager.getLogger("PublishScreen");
-  late EBookProvider _ebookProvider;
-  late EBookParse _parsedEbook;
+  late EbookProvider _ebookProvider;
+  late EbookParse _parsedEbook;
   late TransferFile _epubFile;
   bool _hasParsed = false;
 
-  void _getParsedEBook(EBookParse ebook, TransferFile file) async {
+  void _getParsedEBook(EbookParse ebook, TransferFile file) async {
     setState(() {
       _parsedEbook = ebook;
       _epubFile = file;
@@ -34,13 +34,13 @@ class _PublishScreenWidgetState extends State<PublishScreenWidget> {
     });
   }
 
-  void _submitEditedEBook(EBookInsert ebook) async {
+  void _submitEditedEBook(EbookInsert ebook) async {
     await _ebookProvider.postEBook(ebook, _epubFile).then((result) {
       switch (result) {
-        case Success<EBook>():
+        case Success<Ebook>():
           _logger.info("Succesfully published ebook ${result.data.title}");
           Navigator.of(context).pop(true);
-        case Failure<EBook>():
+        case Failure<Ebook>():
           showErrorDialog(
               context: context, content: Text(result.exception.toString()));
       }
@@ -52,7 +52,7 @@ class _PublishScreenWidgetState extends State<PublishScreenWidget> {
   @override
   void initState() {
     super.initState();
-    _ebookProvider = context.read<EBookProvider>();
+    _ebookProvider = context.read<EbookProvider>();
   }
 
   @override

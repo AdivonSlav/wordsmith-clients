@@ -24,7 +24,7 @@ class ReportsScreenWidget extends StatefulWidget {
 
 class _ReportsScreenWidgetState extends State<ReportsScreenWidget> {
   late UserReportsProvider _userReportsProvider;
-  late EBookReportsProvider _eBookReportsProvider;
+  late EbookReportsProvider _eBookReportsProvider;
   final TextEditingController _reasonFilterController = TextEditingController();
   int selectedView = 0;
 
@@ -32,7 +32,7 @@ class _ReportsScreenWidgetState extends State<ReportsScreenWidget> {
   int _totalPages = 0;
   final int _pageSize = 10;
   late Future<Result<QueryResult<UserReport>>> _userReports;
-  late Future<Result<QueryResult<EBookReport>>> _eBookReports;
+  late Future<Result<QueryResult<EbookReport>>> _eBookReports;
 
   void getUserReports({String? reason, DateTime? reportDate}) async {
     _userReports = _userReportsProvider.getUserReports(
@@ -136,7 +136,7 @@ class _ReportsScreenWidgetState extends State<ReportsScreenWidget> {
   void initState() {
     super.initState();
     _userReportsProvider = context.read<UserReportsProvider>();
-    _eBookReportsProvider = context.read<EBookReportsProvider>();
+    _eBookReportsProvider = context.read<EbookReportsProvider>();
 
     _userReports = _userReportsProvider.getUserReports(
         page: _currentPage, pageSize: _pageSize);
@@ -232,7 +232,7 @@ class _ReportsScreenWidgetState extends State<ReportsScreenWidget> {
                   }
                 } else if (selectedView == 1) {
                   var snapshotData =
-                      snapshot.data as Result<QueryResult<EBookReport>>;
+                      snapshot.data as Result<QueryResult<EbookReport>>;
 
                   switch (snapshotData) {
                     case Success(data: final d):
@@ -244,7 +244,7 @@ class _ReportsScreenWidgetState extends State<ReportsScreenWidget> {
 
                 _totalPages = selectedView == 0
                     ? (snapshot.data as QueryResult<UserReport>).totalPages!
-                    : (snapshot.data as QueryResult<EBookReport>).totalPages!;
+                    : (snapshot.data as QueryResult<EbookReport>).totalPages!;
 
                 return PaginationNavWidget(
                   currentPage: _currentPage,

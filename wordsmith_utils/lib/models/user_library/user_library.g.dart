@@ -16,7 +16,7 @@ UserLibrary _$UserLibraryFromJson(Map<String, dynamic> json) => UserLibrary(
       json['userLibraryCategoryId'] as int?,
       json['lastChapterId'] as int,
       json['lastPage'] as int,
-      EBook.fromJson(json['eBook'] as Map<String, dynamic>),
+      Ebook.fromJson(json['eBook'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$UserLibraryToJson(UserLibrary instance) =>

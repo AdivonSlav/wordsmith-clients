@@ -5,17 +5,17 @@ import 'package:wordsmith_utils/models/transfer_file.dart';
 import 'package:wordsmith_utils/providers/base_provider.dart';
 import 'package:wordsmith_utils/secure_store.dart';
 
-class EBookDownloadProvider extends BaseProvider<void> {
-  final _logger = LogManager.getLogger("EBookDownloadProvider");
+class EbookDownloadProvider extends BaseProvider<void> {
+  final _logger = LogManager.getLogger("EbookDownloadProvider");
 
-  EBookDownloadProvider() : super("ebooks");
+  EbookDownloadProvider() : super("ebooks");
 
-  Future<Result<TransferFile>> download(int eBookId) async {
+  Future<Result<TransferFile>> download(int ebookId) async {
     var accessToken = await SecureStore.getValue("access_token");
 
     try {
       var file = await getBytes(
-          additionalRoute: "/$eBookId/download",
+          additionalRoute: "/$ebookId/download",
           bearerToken: accessToken ?? "");
 
       return Success(file);

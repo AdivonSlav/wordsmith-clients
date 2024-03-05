@@ -10,7 +10,7 @@ import 'package:wordsmith_utils/providers/ebook_parse_provider.dart';
 import 'package:wordsmith_utils/size_config.dart';
 
 class PublishUploadWidget extends StatelessWidget {
-  final void Function(EBookParse ebook, TransferFile file) onUploadCallback;
+  final void Function(EbookParse ebook, TransferFile file) onUploadCallback;
 
   const PublishUploadWidget({
     super.key,
@@ -20,7 +20,7 @@ class PublishUploadWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final logger = LogManager.getLogger("PublishUploadWidget");
-    final eBookParseProvider = Provider.of<EBookParseProvider>(context);
+    final eBookParseProvider = Provider.of<EbookParseProvider>(context);
 
     void uploadForParsing() async {
       var file = await EpubHelper.pickEpub();
@@ -40,10 +40,10 @@ class PublishUploadWidget extends StatelessWidget {
         } else {
           await eBookParseProvider.getParsed(transferFile).then((result) {
             switch (result) {
-              case Success<EBookParse>():
+              case Success<EbookParse>():
                 logger.info("Got parsed ebook ${result.data.title}");
                 onUploadCallback(result.data, transferFile);
-              case Failure<EBookParse>():
+              case Failure<EbookParse>():
                 showErrorDialog(
                   context: context,
                   content: Text(result.exception.toString()),

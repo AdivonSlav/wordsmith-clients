@@ -6,7 +6,7 @@ part of 'ebook.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-EBook _$EBookFromJson(Map<String, dynamic> json) => EBook(
+Ebook _$EbookFromJson(Map<String, dynamic> json) => Ebook(
       json['id'] as int,
       json['title'] as String,
       json['description'] as String,
@@ -22,7 +22,7 @@ EBook _$EBookFromJson(Map<String, dynamic> json) => EBook(
       MaturityRating.fromJson(json['maturityRating'] as Map<String, dynamic>),
     );
 
-Map<String, dynamic> _$EBookToJson(EBook instance) => <String, dynamic>{
+Map<String, dynamic> _$EbookToJson(Ebook instance) => <String, dynamic>{
       'id': instance.id,
       'title': instance.title,
       'description': instance.description,

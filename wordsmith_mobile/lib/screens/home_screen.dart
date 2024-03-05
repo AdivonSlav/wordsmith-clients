@@ -14,9 +14,9 @@ class HomeScreenWidget extends StatefulWidget {
 }
 
 class _HomeScreenWidgetState extends State<HomeScreenWidget> {
-  late EBookProvider _eBookProvider;
+  late EbookProvider _eBookProvider;
 
-  late Future<Result<QueryResult<EBook>>> _getNewlyAddedBooks;
+  late Future<Result<QueryResult<Ebook>>> _getNewlyAddedBooks;
 
   final _page = 1;
   final _pageSize = 15;
@@ -24,14 +24,14 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
   @override
   void initState() {
     super.initState();
-    _eBookProvider = context.read<EBookProvider>();
+    _eBookProvider = context.read<EbookProvider>();
     _getNewlyAddedBooks =
         _eBookProvider.getNewlyAdded(page: _page, pageSize: _pageSize);
   }
 
   @override
   Widget build(BuildContext context) {
-    _eBookProvider = context.read<EBookProvider>();
+    _eBookProvider = context.read<EbookProvider>();
 
     return Padding(
       padding: const EdgeInsets.only(left: 14.0, right: 14.0),
@@ -44,7 +44,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
                 return const Center(child: CircularProgressIndicator());
               }
 
-              List<EBook> ebooks = [];
+              List<Ebook> ebooks = [];
 
               switch (snapshot.data!) {
                 case Success(data: final d):

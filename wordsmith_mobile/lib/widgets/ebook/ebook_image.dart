@@ -6,7 +6,7 @@ import 'package:wordsmith_utils/logger.dart';
 import 'package:wordsmith_utils/providers/base_provider.dart';
 import 'package:wordsmith_utils/size_config.dart';
 
-class EBookImageWidget extends StatefulWidget {
+class EbookImageWidget extends StatefulWidget {
   final String? encodedCoverArt;
   final String? coverArtUrl;
   final double? width;
@@ -15,7 +15,7 @@ class EBookImageWidget extends StatefulWidget {
   final BoxFit? fit;
   final Alignment? imageAlignment;
 
-  const EBookImageWidget({
+  const EbookImageWidget({
     super.key,
     this.encodedCoverArt,
     this.coverArtUrl,
@@ -27,10 +27,10 @@ class EBookImageWidget extends StatefulWidget {
   });
 
   @override
-  State<StatefulWidget> createState() => _EBookImageWidgetState();
+  State<StatefulWidget> createState() => _EbookImageWidgetState();
 }
 
-class _EBookImageWidgetState extends State<EBookImageWidget> {
+class _EbookImageWidgetState extends State<EbookImageWidget> {
   final _logger = LogManager.getLogger("EBookImageWidget");
   final String _apiUrl = BaseProvider.apiUrl;
 

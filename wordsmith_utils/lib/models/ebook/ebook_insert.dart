@@ -3,7 +3,7 @@ import 'package:json_annotation/json_annotation.dart';
 part "ebook_insert.g.dart";
 
 @JsonSerializable()
-class EBookInsert {
+class EbookInsert {
   final String title;
   final String description;
   final String encodedCoverArt;
@@ -13,11 +13,11 @@ class EBookInsert {
   final List<int> genreIds;
   final int maturityRatingId;
 
-  EBookInsert(this.title, this.description, this.encodedCoverArt, this.chapters,
+  EbookInsert(this.title, this.description, this.encodedCoverArt, this.chapters,
       this.price, this.authorId, this.genreIds, this.maturityRatingId);
 
-  factory EBookInsert.fromJson(Map<String, dynamic> json) =>
-      _$EBookInsertFromJson(json);
+  factory EbookInsert.fromJson(Map<String, dynamic> json) =>
+      _$EbookInsertFromJson(json);
 
-  Map<String, dynamic> toJson() => _$EBookInsertToJson(this);
+  Map<String, dynamic> toJson() => _$EbookInsertToJson(this);
 }

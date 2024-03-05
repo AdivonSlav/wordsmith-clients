@@ -6,12 +6,12 @@ import "package:wordsmith_utils/models/transfer_file.dart";
 import "package:wordsmith_utils/providers/base_provider.dart";
 import "package:wordsmith_utils/secure_store.dart";
 
-class EBookParseProvider extends BaseProvider<EBookParse> {
+class EbookParseProvider extends BaseProvider<EbookParse> {
   final _logger = LogManager.getLogger("EBookParseProvider");
 
-  EBookParseProvider() : super("ebooks");
+  EbookParseProvider() : super("ebooks");
 
-  Future<Result<EBookParse>> getParsed(TransferFile file) async {
+  Future<Result<EbookParse>> getParsed(TransferFile file) async {
     var accessToken = await SecureStore.getValue("access_token");
 
     try {
@@ -32,7 +32,7 @@ class EBookParseProvider extends BaseProvider<EBookParse> {
   }
 
   @override
-  EBookParse fromJson(data) {
-    return EBookParse.fromJson(data);
+  EbookParse fromJson(data) {
+    return EbookParse.fromJson(data);
   }
 }
