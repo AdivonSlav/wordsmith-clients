@@ -24,7 +24,7 @@ abstract class BaseIndexProvider extends ChangeNotifier {
   }
 
   static Future<void> initDatabase() async {
-    await databaseFactory.deleteDatabase(_dbPath);
+    // await databaseFactory.deleteDatabase(_dbPath);
     db = await openDatabase(
       _dbPath,
       onCreate: _onDatabaseCreate,
