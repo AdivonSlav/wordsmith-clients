@@ -85,7 +85,8 @@ class EbookIndexProvider extends BaseIndexProvider {
     try {
       var records = await BaseIndexProvider.db.query(
         BaseIndexProvider.eBookTable,
-        where: "${EbookIndexModel.idColumn} = $id",
+        where: "${EbookIndexModel.idColumn} = ?",
+        whereArgs: [id],
       );
 
       if (records.isEmpty) return const Success(null);
