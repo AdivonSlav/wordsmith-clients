@@ -8,8 +8,7 @@ void initializeDateFormattingForLocale() {
 
 String formatDateTime(
     {required DateTime date, required String format, String? localeName}) {
-  // All DateTimes should be expected as UTC. Appending Z here to make sure Flutter knows this
-  DateTime dateAsUtc = DateTime.parse("${date}Z");
+  DateTime dateAsUtc = DateTime.parse("$date");
   String locale = localeName ?? Platform.localeName;
 
   return DateFormat(format, locale).format(dateAsUtc.toLocal());

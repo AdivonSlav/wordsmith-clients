@@ -1,6 +1,8 @@
 import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:wordsmith_mobile/utils/indexers/ebook_index_provider.dart';
+import 'package:wordsmith_mobile/utils/indexers/models/ebook_index_model.dart';
 import 'package:wordsmith_mobile/utils/library_filter_values.dart';
 import 'package:wordsmith_mobile/widgets/library/library_categories.dart';
 import 'package:wordsmith_mobile/widgets/library/library_categories_add.dart';
@@ -8,12 +10,16 @@ import 'package:wordsmith_mobile/widgets/library/library_categories_remove.dart'
 import 'package:wordsmith_mobile/widgets/library/library_filters.dart';
 import 'package:wordsmith_mobile/widgets/library/library_grid_tile.dart';
 import 'package:wordsmith_mobile/widgets/library/library_info.dart';
+import 'package:wordsmith_mobile/widgets/library/library_offline_grid_tile.dart';
+import 'package:wordsmith_mobile/widgets/library/library_offline_info.dart';
 import 'package:wordsmith_mobile/widgets/library/library_view.dart';
 import 'package:wordsmith_utils/dialogs/show_error_dialog.dart';
+import 'package:wordsmith_utils/exceptions/exception_types.dart';
 import 'package:wordsmith_utils/logger.dart';
 import 'package:wordsmith_utils/models/result.dart';
 import 'package:wordsmith_utils/models/user_library/user_library.dart';
 import 'package:wordsmith_utils/providers/user_library_provider.dart';
+import 'package:wordsmith_utils/show_snackbar.dart';
 
 class LibraryScreenWidget extends StatefulWidget {
   const LibraryScreenWidget({super.key});
@@ -24,13 +30,17 @@ class LibraryScreenWidget extends StatefulWidget {
 
 class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
   final _logger = LogManager.getLogger("LibraryScreen");
-  late UserLibraryProvider _userLibraryProvider;
   final _scrollController = ScrollController();
+  late UserLibraryProvider _userLibraryProvider;
+  late EbookIndexProvider _ebookIndexProvider;
 
   final List<UserLibrary> _userLibraryList = [];
-  final _pageSize = 15;
-  var _page = 1;
-  var _hasMore = true;
+  final List<EbookIndexModel> _indexModelList = [];
+  final int _pageSize = 15;
+  int _page = 1;
+  bool _hasMore = true;
+  bool _isOffline = false;
+
   LibraryFilterValues? _filterValues;
 
   var _isLoading = false;
@@ -44,24 +54,46 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
     _isLoading = true;
 
     List<UserLibrary> libraryResult = [];
+    List<EbookIndexModel> indexModelResult = [];
 
     await _userLibraryProvider
         .getLibraryEntries(
       maturityRatingId: _filterValues?.selectedMaturityRatingId,
       isRead: _filterValues?.isRead,
       orderBy: _filterValues != null
-          ? "${_filterValues!.sortByProperty}:${_filterValues!.sortByDirection}"
-          : "EBook.Title:asc",
+          ? "${_filterValues!.sort.apiValue}:${_filterValues!.sortDirection.apiValue}"
+          : "${LibrarySorts.title.apiValue}:${LibrarySortDirections.ascending.apiValue}",
       libraryCategoryId: _filterValues?.selectedCategory?.id,
       page: _page,
       pageSize: _pageSize,
     )
-        .then((result) {
+        .then((result) async {
       switch (result) {
         case Success(data: final d):
           libraryResult = d.result;
+          _isOffline = false;
         case Failure(exception: final e):
-          showErrorDialog(context: context, content: Text(e.toString()));
+          if (e.type == ExceptionType.socketException) {
+            _isOffline = true;
+            showSnackbar(
+              context: context,
+              content: "Offline. You are only able to view downloaded ebooks",
+            );
+
+            await _ebookIndexProvider
+                .getAll(filterValues: _filterValues)
+                .then((result) {
+              switch (result) {
+                case Success():
+                  indexModelResult = result.data;
+                case Failure():
+                  showErrorDialog(
+                      context: context, content: Text(e.toString()));
+              }
+            });
+          } else {
+            showErrorDialog(context: context, content: Text(e.toString()));
+          }
       }
     });
 
@@ -74,14 +106,20 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
       }
 
       _userLibraryList.addAll(libraryResult);
+
+      if (_isOffline) {
+        _indexModelList.addAll(indexModelResult);
+      } else {
+        _indexModelList.clear();
+      }
     });
   }
 
   Future _buildFilterValues() async {
     setState(() {
       _filterValues = LibraryFilterValues(
-        sortByProperty: "EBook.Title",
-        sortByDirection: "asc",
+        sort: LibrarySorts.title,
+        sortDirection: LibrarySortDirections.ascending,
       );
     });
   }
@@ -92,6 +130,7 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
       _hasMore = true;
       _page = 1;
       _userLibraryList.clear();
+      _indexModelList.clear();
       _removeAllBooksFromSelection();
     });
 
@@ -189,13 +228,50 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
     );
   }
 
+  Widget _buildTile(int index) {
+    if (index < _userLibraryList.length && !_isOffline) {
+      var libraryEntry = _userLibraryList[index];
+      var isSelected = _isBookSelected(index);
+
+      return LibraryGridTileWidget(
+        libraryEntry: libraryEntry,
+        tileIndex: index,
+        isSelected: isSelected,
+        isSelectingBooks: _isSelectingBooks,
+        onBookTap: _onBookTap,
+        onBookLongPress: _onBookLongPress,
+      );
+    } else if (index < _indexModelList.length && _isOffline) {
+      var model = _indexModelList[index];
+      var isSelected = _isBookSelected(index);
+
+      return LibraryOfflineGridTileWidget(
+        indexModel: model,
+        tileIndex: index,
+        isSelected: isSelected,
+        isSelectingBooks: _isSelectingBooks,
+        onBookTap: _onBookTap,
+        onBookLongPress: _onBookLongPress,
+      );
+    } else {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 32.0),
+        child: Center(
+          child: _hasMore ? const CircularProgressIndicator() : Container(),
+        ),
+      );
+    }
+  }
+
   void _openInfo(int index) {
     showModalBottomSheet(
         context: context,
         builder: (BuildContext context) {
-          return LibraryInfoWidget(
-            libraryEntry: _userLibraryList[index],
-          );
+          if (!_isOffline) {
+            return LibraryInfoWidget(libraryEntry: _userLibraryList[index]);
+          } else {
+            return LibraryOfflineInfoWidget(indexModel: _indexModelList[index]);
+          }
         });
   }
 
@@ -343,6 +419,7 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
   @override
   void initState() {
     _userLibraryProvider = context.read<UserLibraryProvider>();
+    _ebookIndexProvider = context.read<EbookIndexProvider>();
     super.initState();
 
     Future.microtask(() {
@@ -397,30 +474,11 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
                         mainAxisSpacing: 15.0,
                         childAspectRatio: size.width / (size.height * 0.75),
                       ),
-                      itemCount: _userLibraryList.length + 1,
+                      itemCount: !_isOffline
+                          ? _userLibraryList.length + 1
+                          : _indexModelList.length + 1,
                       itemBuilder: (BuildContext context, int index) {
-                        if (index < _userLibraryList.length) {
-                          var libraryEntry = _userLibraryList[index];
-                          var isSelected = _isBookSelected(index);
-
-                          return LibraryGridTileWidget(
-                            libraryEntry: libraryEntry,
-                            tileIndex: index,
-                            isSelected: isSelected,
-                            isSelectingBooks: _isSelectingBooks,
-                            onBookTap: _onBookTap,
-                            onBookLongPress: _onBookLongPress,
-                          );
-                        } else {
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 32.0),
-                            child: Center(
-                              child: _hasMore
-                                  ? const CircularProgressIndicator()
-                                  : Container(),
-                            ),
-                          );
-                        }
+                        return _buildTile(index);
                       },
                     ),
                   ),

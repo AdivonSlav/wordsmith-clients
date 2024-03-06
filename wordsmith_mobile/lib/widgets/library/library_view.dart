@@ -13,12 +13,6 @@ class LibraryViewWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var sortByList = {
-      "SyncDate": "Most recent",
-      "EBook.PublishedDate": "Publication date",
-      "EBook.Title": "Title",
-    };
-
     return Padding(
       padding: const EdgeInsets.all(18.0),
       child: Column(
@@ -34,15 +28,13 @@ class LibraryViewWidget extends StatelessWidget {
           const Divider(height: 30.0),
           Wrap(
             spacing: 8.0,
-            children: sortByList.entries.map<ChoiceChip>((entry) {
-              var property = entry.key;
-              var label = entry.value;
+            children: LibrarySorts.values.map<ChoiceChip>((sort) {
               return ChoiceChip(
-                label: Text(label),
-                selected: filterValues.sortByProperty == property,
+                label: Text(sort.label),
+                selected: filterValues.sort == sort,
                 onSelected: (bool selected) {
                   if (selected) {
-                    filterValues.sortByProperty = property;
+                    filterValues.sort = sort;
                     onSelect(filterValues);
                   }
                 },
@@ -54,21 +46,25 @@ class LibraryViewWidget extends StatelessWidget {
             spacing: 8.0,
             children: <Widget>[
               ChoiceChip(
-                label: const Text("Ascending"),
-                selected: filterValues.sortByDirection == "asc",
+                label: Text(LibrarySortDirections.ascending.label),
+                selected: filterValues.sortDirection ==
+                    LibrarySortDirections.ascending,
                 onSelected: (bool selected) {
                   if (selected) {
-                    filterValues.sortByDirection = "asc";
+                    filterValues.sortDirection =
+                        LibrarySortDirections.ascending;
                     onSelect(filterValues);
                   }
                 },
               ),
               ChoiceChip(
-                label: const Text("Descending"),
-                selected: filterValues.sortByDirection == "desc",
+                label: Text(LibrarySortDirections.descending.label),
+                selected: filterValues.sortDirection ==
+                    LibrarySortDirections.descending,
                 onSelected: (bool selected) {
                   if (selected) {
-                    filterValues.sortByDirection = "desc";
+                    filterValues.sortDirection =
+                        LibrarySortDirections.descending;
                     onSelect(filterValues);
                   }
                 },

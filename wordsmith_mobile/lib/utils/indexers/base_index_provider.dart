@@ -23,7 +23,7 @@ abstract class BaseIndexProvider extends ChangeNotifier {
     return directory.path;
   }
 
-  static void initDatabase() async {
+  static Future<void> initDatabase() async {
     await databaseFactory.deleteDatabase(_dbPath);
     db = await openDatabase(
       _dbPath,
@@ -38,11 +38,16 @@ abstract class BaseIndexProvider extends ChangeNotifier {
       '''CREATE TABLE $eBookTable (
         ${EbookIndexModel.idColumn} INTEGER PRIMARY KEY,
         ${EbookIndexModel.titleColumn} TEXT,
+        ${EbookIndexModel.descriptionColumn} TEXT,
         ${EbookIndexModel.authorColumn} TEXT,
         ${EbookIndexModel.isReadColumn} INTEGER,
         ${EbookIndexModel.readProgressColumn} TEXT,
         ${EbookIndexModel.encodedImageColumn} TEXT,
+        ${EbookIndexModel.syncDateColumn} INTEGER,
+        ${EbookIndexModel.publishedDateColumn} INTEGER,
         ${EbookIndexModel.updatedDateColumn} INTEGER,
+        ${EbookIndexModel.genresColumn} TEXT,
+        ${EbookIndexModel.maturityRatingColumn} TEXT,
         ${EbookIndexModel.pathColumn} TEXT)''',
     );
 

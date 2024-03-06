@@ -1,3 +1,5 @@
+import 'package:wordsmith_utils/models/user/user.dart';
+
 class UserIndexModel {
   int id;
   String username;
@@ -5,17 +7,11 @@ class UserIndexModel {
   String encodedProfileImage;
   DateTime registrationDate;
 
-  static const String _idColumn = "id";
-  static const String _usernameColumn = "username";
-  static const String _emailColumn = "email";
-  static const String _encodedProfileImageColumn = "encodedProfileImage";
-  static const String _registrationDateColumn = "registrationDateColumn";
-
-  static String get idColumn => _idColumn;
-  static String get usernameColumn => _usernameColumn;
-  static String get emailColumn => _emailColumn;
-  static String get encodedProfileImageColumn => _encodedProfileImageColumn;
-  static String get registrationDateColumn => _registrationDateColumn;
+  static const String idColumn = "id";
+  static const String usernameColumn = "username";
+  static const String emailColumn = "email";
+  static const String encodedProfileImageColumn = "encoded_profile_image";
+  static const String registrationDateColumn = "registration_date";
 
   UserIndexModel({
     required this.id,
@@ -25,25 +21,31 @@ class UserIndexModel {
     required this.registrationDate,
   });
 
+  User toUser() {
+    var user = User(id, username, email, null, registrationDate);
+
+    return user;
+  }
+
   Map<String, Object?> toMap() {
     var map = <String, Object?>{
-      _idColumn: id,
-      _usernameColumn: username,
-      _emailColumn: email,
-      _encodedProfileImageColumn: encodedProfileImage,
-      _registrationDateColumn: registrationDate.millisecondsSinceEpoch,
+      idColumn: id,
+      usernameColumn: username,
+      emailColumn: email,
+      encodedProfileImageColumn: encodedProfileImage,
+      registrationDateColumn: registrationDate.millisecondsSinceEpoch,
     };
 
     return map;
   }
 
   UserIndexModel.fromMap(Map<String, Object?> map)
-      : id = map[_idColumn] as int,
-        username = map[_usernameColumn] as String,
-        email = map[_emailColumn] as String,
-        encodedProfileImage = map[_encodedProfileImageColumn] as String,
+      : id = map[idColumn] as int,
+        username = map[usernameColumn] as String,
+        email = map[emailColumn] as String,
+        encodedProfileImage = map[encodedProfileImageColumn] as String,
         registrationDate = DateTime.fromMillisecondsSinceEpoch(
-          map[_registrationDateColumn] as int,
+          map[registrationDateColumn] as int,
           isUtc: true,
         );
 }

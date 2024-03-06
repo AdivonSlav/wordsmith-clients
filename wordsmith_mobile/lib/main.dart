@@ -41,7 +41,7 @@ Future<void> main() async {
 
   initializeDateFormattingForLocale();
 
-  BaseIndexProvider.initDatabase();
+  await BaseIndexProvider.initDatabase();
 
   runApp(MultiProvider(
     providers: [

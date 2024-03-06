@@ -4,6 +4,8 @@ import 'package:wordsmith_mobile/screens/home_screen.dart';
 import 'package:wordsmith_mobile/screens/intro_screen.dart';
 import 'package:wordsmith_mobile/screens/library_screen.dart';
 import 'package:wordsmith_mobile/screens/profile_screen.dart';
+import 'package:wordsmith_mobile/utils/indexers/models/user_index_model.dart';
+import 'package:wordsmith_mobile/utils/indexers/user_index_provider.dart';
 import 'package:wordsmith_mobile/widgets/navigation_bar/app_bar_settings_trailing.dart';
 import 'package:wordsmith_mobile/widgets/navigation_bar/navigation_bar_error.dart';
 import 'package:wordsmith_mobile/widgets/navigation_bar/navigation_bar_loading.dart';
@@ -25,6 +27,7 @@ class _NavigationBarWidgetState extends State<NavigationBarWidget> {
   late Future<void> _checkLoggedUserFuture;
   late UserProvider _userProvider;
   late AuthProvider _authProvider;
+  late UserIndexProvider _userIndexProvider;
 
   int _selectedIndex = 0;
   late Widget _page;
@@ -51,15 +54,40 @@ class _NavigationBarWidgetState extends State<NavigationBarWidget> {
     }
   }
 
+  Future<void> _storeUserFromIndex() async {
+    await _userIndexProvider.getUser().then((result) async {
+      switch (result) {
+        case Success<UserIndexModel?>(data: final d):
+          if (d != null) {
+            var user = d.toUser();
+
+            await _authProvider.storeLogin(user: user);
+          }
+          break;
+        case Failure(exception: final e):
+          return Future.error(e);
+      }
+    });
+  }
+
   Future<void> _checkLoggedUser() async {
     await _userProvider.getLoggedUser().then((result) async {
       switch (result) {
         case Success<User>(data: final d):
-          await _authProvider.storeLogin(user: d);
+          await _userIndexProvider.addToIndex(d).then((indexResult) async {
+            switch (indexResult) {
+              case Success<UserIndexModel>():
+                await _authProvider.storeLogin(user: d);
+              case Failure<UserIndexModel>(exception: final e):
+                return Future.error(e);
+            }
+          });
         case Failure<User>(exception: final e):
           if (e.type == ExceptionType.internalAppError) {
             return Future.error(e);
           }
+
+          return await _storeUserFromIndex();
       }
     });
   }
@@ -68,6 +96,7 @@ class _NavigationBarWidgetState extends State<NavigationBarWidget> {
   void initState() {
     _userProvider = context.read<UserProvider>();
     _authProvider = context.read<AuthProvider>();
+    _userIndexProvider = context.read<UserIndexProvider>();
 
     _checkLoggedUserFuture = _checkLoggedUser();
 

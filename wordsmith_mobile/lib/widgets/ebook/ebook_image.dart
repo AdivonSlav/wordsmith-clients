@@ -50,8 +50,8 @@ class _EbookImageWidgetState extends State<EbookImageWidget> {
       if (widget.encodedCoverArt != null) {
         coverArtBytes = _toByteArray(widget.encodedCoverArt!);
       }
-    } catch (error) {
-      _logger.severe("Could not decode ebook cover art $error");
+    } catch (error, stackTrace) {
+      _logger.severe("Could not decode ebook cover art!", error, stackTrace);
     }
 
     late ImageProvider<Object> imageProvider;
