@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:wordsmith_mobile/utils/indexers/user_index_provider.dart';
 import 'package:wordsmith_mobile/widgets/input_field.dart';
 import 'package:wordsmith_utils/dialogs/progress_indicator_dialog.dart';
 import 'package:wordsmith_utils/dialogs/show_error_dialog.dart';
@@ -32,6 +33,7 @@ class _RegistrationScreenWidgetState extends State<RegistrationScreenWidget> {
   late UserProvider _userProvider;
   late UserLoginProvider _userLoginProvider;
   late AuthProvider _authProvider;
+  late UserIndexProvider _userIndexProvider;
 
   bool _obscuredPassword = true;
   bool _registrationInProgress = false;
@@ -48,13 +50,19 @@ class _RegistrationScreenWidgetState extends State<RegistrationScreenWidget> {
     return null;
   }
 
-  Future<bool> _submitRegistration() async {
-    ProgressIndicatorDialog().show(context);
+  Future<void> _submitRegistration() async {
+    ProgressIndicatorDialog()
+        .show(context, text: "Registration in progress...");
+
+    var userInsert = UserInsert(
+      _usernameController.text,
+      _emailController.text,
+      _passwordController.text,
+      _confirmPasswordController.text,
+      null,
+    );
+
     _logger.info("Attempting registration for ${_usernameController.text}");
-
-    var userInsert = UserInsert(_usernameController.text, _emailController.text,
-        _passwordController.text, _confirmPasswordController.text, null);
-
     User? registerResult;
 
     await _userProvider.postNewUser(userInsert).then((result) {
@@ -73,27 +81,38 @@ class _RegistrationScreenWidgetState extends State<RegistrationScreenWidget> {
             .then((result) async {
           switch (result) {
             case Success<UserLogin>(data: final d):
-              await _authProvider.storeLogin(loginCreds: d);
+              await _userIndexProvider
+                  .addToIndex(d.user)
+                  .then((indexResult) async {
+                ProgressIndicatorDialog().dismiss();
+                switch (indexResult) {
+                  case Success():
+                    Navigator.of(context).pop();
+                    await _authProvider.storeLogin(loginCreds: d);
+                  case Failure():
+                    showErrorDialog(
+                      context: context,
+                      content:
+                          const Text("Failed to login due to internal error!"),
+                    );
+                }
+              });
             case Failure<UserLogin>(exception: final e):
+              ProgressIndicatorDialog().dismiss();
               showErrorDialog(context: context, content: Text(e.toString()));
           }
         });
       });
-
-      ProgressIndicatorDialog().dismiss();
-      return true;
     }
-
-    ProgressIndicatorDialog().dismiss();
-    return false;
   }
 
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
-    _userProvider = context.read<UserProvider>();
-    _userLoginProvider = context.read<UserLoginProvider>();
-    _authProvider = context.read<AuthProvider>();
+    _userProvider = Provider.of<UserProvider>(context);
+    _userLoginProvider = Provider.of<UserLoginProvider>(context);
+    _authProvider = Provider.of<AuthProvider>(context);
+    _userIndexProvider = Provider.of<UserIndexProvider>(context);
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -176,12 +195,7 @@ class _RegistrationScreenWidgetState extends State<RegistrationScreenWidget> {
                             child: FilledButton(
                               onPressed: () async {
                                 if (_formKey.currentState!.validate()) {
-                                  await _submitRegistration().then((success) {
-                                    if (success) {
-                                      _logger.info("Registered and logged in");
-                                      Navigator.of(context).pop();
-                                    }
-                                  });
+                                  await _submitRegistration();
                                 } else {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(

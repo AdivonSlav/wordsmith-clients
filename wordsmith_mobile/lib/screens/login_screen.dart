@@ -61,7 +61,6 @@ class _LoginScreenWidgetState extends State<LoginScreenWidget> {
         case Failure<UserLogin>(exception: final e):
           ProgressIndicatorDialog().dismiss();
           showErrorDialog(context: context, content: Text(e.toString()));
-          return false;
       }
     });
   }

@@ -14,6 +14,15 @@ import 'package:wordsmith_utils/models/user_library/user_library.dart';
 class EbookIndexProvider extends BaseIndexProvider {
   final _logger = LogManager.getLogger("EBookIndexer");
 
+  Future<String> get localBookSavePath async {
+    String docPath = await localDocumentsPath;
+    var saveDirectory = Directory("$docPath/books");
+
+    await saveDirectory.create();
+
+    return saveDirectory.path;
+  }
+
   Future<Result<EbookIndexModel>> addToIndex(
       UserLibrary libraryEntry, TransferFile transferFile) async {
     if (libraryEntry.eBook.coverArt.encodedImage == null) {
@@ -73,6 +82,32 @@ class EbookIndexProvider extends BaseIndexProvider {
       );
 
       _logger.info("Deleted ebook from index at ${ebook.path}");
+      return const Success("Succesfully deleted from index");
+    } catch (error, stackTrace) {
+      _logger.severe(
+        "Could not delete ebook ${ebook.title} from index!",
+        error,
+        stackTrace,
+      );
+      return Failure(BaseException("Could not delete ebooks from index!",
+          type: ExceptionType.internalAppError));
+    }
+  }
+
+  Future<Result<String>> removeAll() async {
+    var deleteResult = await _deleteAllBooks();
+
+    if (deleteResult is Failure) {
+      return Failure((deleteResult as Failure).exception);
+    }
+
+    try {
+      await BaseIndexProvider.db.delete(
+        BaseIndexProvider.eBookTable,
+        where: null,
+      );
+
+      _logger.info("Deleted all ebooks from index");
       return const Success("Succesfully deleted from index");
     } catch (error, stackTrace) {
       _logger.severe("Could not delete ebooks from index!", error, stackTrace);
@@ -136,17 +171,17 @@ class EbookIndexProvider extends BaseIndexProvider {
   }
 
   Future<Result<String>> _writeBook(TransferFile transferFile) async {
-    late String docPath;
+    late String savePath;
 
     try {
-      docPath = await localDocumentsPath;
+      savePath = await localBookSavePath;
     } on MissingPlatformDirectoryException catch (error, stackTrace) {
       _logger.severe("Could not save ebook!", error, stackTrace);
       return Failure(BaseException("Could not save ebook!",
           type: ExceptionType.internalAppError));
     }
 
-    final savePath = "$docPath/${transferFile.name}";
+    savePath += "/${transferFile.name}";
 
     try {
       await transferFile.file.saveTo(savePath);
@@ -171,6 +206,30 @@ class EbookIndexProvider extends BaseIndexProvider {
     try {
       await file.delete();
       return const Success("Ebook succesfully deleted");
+    } on FileSystemException catch (error, stackTrace) {
+      _logger.severe("Could not delete ebook!", error, stackTrace);
+      return Failure(BaseException("Could not delete ebook!",
+          type: ExceptionType.internalAppError));
+    }
+  }
+
+  Future<Result<String>> _deleteAllBooks() async {
+    late String savePath;
+
+    try {
+      savePath = await localDocumentsPath;
+    } on MissingPlatformDirectoryException catch (error, stackTrace) {
+      _logger.severe("Could not save ebook!", error, stackTrace);
+      return Failure(BaseException("Could not save ebook!",
+          type: ExceptionType.internalAppError));
+    }
+
+    try {
+      var saveDir = Directory(savePath);
+
+      await saveDir.delete(recursive: true);
+
+      return const Success("All ebooks succesfully deleted");
     } on FileSystemException catch (error, stackTrace) {
       _logger.severe("Could not delete ebook!", error, stackTrace);
       return Failure(BaseException("Could not delete ebook!",
