@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:path_provider/path_provider.dart';
 import 'package:wordsmith_mobile/utils/indexers/base_index_provider.dart';
 import 'package:wordsmith_mobile/utils/indexers/models/ebook_index_model.dart';
@@ -56,8 +58,27 @@ class EbookIndexProvider extends BaseIndexProvider {
     }
   }
 
-  Future<bool> removeFromIndex(int eBookId) async {
-    return true;
+  Future<Result<String>> removeFromIndex(EbookIndexModel ebook) async {
+    var deleteResult = await _deleteBook(ebook.path);
+
+    if (deleteResult is Failure) {
+      return Failure((deleteResult as Failure).exception);
+    }
+
+    try {
+      await BaseIndexProvider.db.delete(
+        BaseIndexProvider.eBookTable,
+        where: "${EbookIndexModel.idColumn} = ?",
+        whereArgs: [ebook.id],
+      );
+
+      _logger.info("Deleted ebook from index at ${ebook.path}");
+      return const Success("Succesfully deleted from index");
+    } catch (error, stackTrace) {
+      _logger.severe("Could not delete ebooks from index!", error, stackTrace);
+      return Failure(BaseException("Could not delete ebooks from index!",
+          type: ExceptionType.internalAppError));
+    }
   }
 
   Future<Result<EbookIndexModel?>> getById(int id) async {
@@ -135,5 +156,24 @@ class EbookIndexProvider extends BaseIndexProvider {
     }
 
     return Success(savePath);
+  }
+
+  Future<Result<String>> _deleteBook(String path) async {
+    var file = File(path);
+
+    if (!await file.exists()) {
+      _logger.warning("Ebook path $path passed for deletion does not exist!");
+      return Failure(BaseException("Ebook doesn't exist!",
+          type: ExceptionType.internalAppError));
+    }
+
+    try {
+      await file.delete();
+      return const Success("Ebook succesfully deleted");
+    } on FileSystemException catch (error, stackTrace) {
+      _logger.severe("Could not delete ebook!", error, stackTrace);
+      return Failure(BaseException("Could not delete ebook!",
+          type: ExceptionType.internalAppError));
+    }
   }
 }

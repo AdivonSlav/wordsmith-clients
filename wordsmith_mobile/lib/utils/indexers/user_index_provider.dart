@@ -44,6 +44,23 @@ class UserIndexProvider extends BaseIndexProvider {
     }
   }
 
+  Future<Result<String>> removeFromIndex() async {
+    try {
+      // Table will only ever contain one row so deleting all is fine
+      await BaseIndexProvider.db.delete(
+        BaseIndexProvider.userTable,
+        where: null,
+      );
+
+      _logger.info("Deleted user from index!");
+      return const Success("Succesfully deleted user from index");
+    } catch (error, stackTrace) {
+      _logger.severe("Could not delete user from index!", error, stackTrace);
+      return Failure(BaseException("Could not delete user from index!",
+          type: ExceptionType.internalAppError));
+    }
+  }
+
   Future<Result<UserIndexModel?>> getUser() async {
     try {
       // Table will only ever contain one row
