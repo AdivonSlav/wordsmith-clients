@@ -4,6 +4,7 @@ import 'package:wordsmith_mobile/screens/ebook_screen.dart';
 import 'package:wordsmith_mobile/utils/indexers/ebook_index_provider.dart';
 import 'package:wordsmith_mobile/utils/indexers/models/ebook_index_model.dart';
 import 'package:wordsmith_mobile/widgets/ebook/ebook_image.dart';
+import 'package:wordsmith_mobile/widgets/library/library_remove.dart';
 import 'package:wordsmith_utils/datetime_formatter.dart';
 import 'package:wordsmith_utils/dialogs/progress_indicator_dialog.dart';
 import 'package:wordsmith_utils/dialogs/show_error_dialog.dart';
@@ -34,6 +35,20 @@ class _LibraryInfoWidgetState extends State<LibraryInfoWidget> {
   final double imageAspectRatio = 1.5;
 
   EbookIndexModel? _indexModel;
+
+  void _showRemoveDialog() async {
+    await showDialog(
+        context: context,
+        builder: (context) {
+          return LibraryRemoveWidget(
+              indexModel: _indexModel, libraryEntry: widget.libraryEntry);
+        }).then(
+      (result) {
+        if (result == null) return;
+        if (result == true) Navigator.of(context).pop(true);
+      },
+    );
+  }
 
   void _openBookPage() {
     Navigator.of(context).push(
@@ -230,7 +245,7 @@ class _LibraryInfoWidgetState extends State<LibraryInfoWidget> {
                 label: Text(_indexModel == null ? "Download" : "Downloaded"),
               ),
               IconButton.filledTonal(
-                onPressed: () {},
+                onPressed: _showRemoveDialog,
                 color: Colors.red,
                 icon: const Icon(Icons.delete),
               ),

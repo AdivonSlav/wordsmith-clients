@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wordsmith_mobile/utils/indexers/models/ebook_index_model.dart';
 import 'package:wordsmith_mobile/widgets/ebook/ebook_image.dart';
+import 'package:wordsmith_mobile/widgets/library/library_offline_remove.dart';
 import 'package:wordsmith_utils/datetime_formatter.dart';
 
 class LibraryOfflineInfoWidget extends StatefulWidget {
@@ -15,6 +16,19 @@ class LibraryOfflineInfoWidget extends StatefulWidget {
 
 class _LibraryOfflineInfoWidgetState extends State<LibraryOfflineInfoWidget> {
   final double imageAspectRatio = 1.5;
+
+  void _showRemoveDialog() async {
+    await showDialog(
+        context: context,
+        builder: (context) {
+          return LibraryOfflineRemoveWidget(indexModel: widget.indexModel);
+        }).then(
+      (result) {
+        if (result == null) return;
+        if (result == true) Navigator.of(context).pop(true);
+      },
+    );
+  }
 
   @override
   void initState() {
@@ -90,7 +104,7 @@ class _LibraryOfflineInfoWidgetState extends State<LibraryOfflineInfoWidget> {
                 label: const Text("Read"),
               ),
               IconButton.filledTonal(
-                onPressed: () {},
+                onPressed: _showRemoveDialog,
                 color: Colors.red,
                 icon: const Icon(Icons.delete),
               ),

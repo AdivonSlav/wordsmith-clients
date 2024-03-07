@@ -1,5 +1,6 @@
 import 'dart:collection';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
 import 'package:wordsmith_mobile/utils/indexers/ebook_index_provider.dart';
 import 'package:wordsmith_mobile/utils/indexers/models/ebook_index_model.dart';
@@ -40,6 +41,7 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
   int _page = 1;
   bool _hasMore = true;
   bool _isOffline = false;
+  bool _hasDisplayedOfflineMessage = false;
 
   LibraryFilterValues? _filterValues;
 
@@ -49,12 +51,26 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
   // Keys are indices within the grid, while the values are the IDs of the library entries themselves
   final _selectedBooks = HashMap<int, int>();
 
+  // Resetting this value forces the book selection banner to replay its animations
+  var _bannerAnimationKey = UniqueKey();
+
   Future _getLibraryBooks() async {
     if (_isLoading) return;
     _isLoading = true;
 
     List<UserLibrary> libraryResult = [];
     List<EbookIndexModel> indexModelResult = [];
+
+    await _ebookIndexProvider
+        .getAll(filterValues: _filterValues)
+        .then((result) {
+      switch (result) {
+        case Success():
+          indexModelResult = result.data;
+        case Failure(exception: final e):
+          showErrorDialog(context: context, content: Text(e.toString()));
+      }
+    });
 
     await _userLibraryProvider
         .getLibraryEntries(
@@ -75,22 +91,14 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
         case Failure(exception: final e):
           if (e.type == ExceptionType.socketException) {
             _isOffline = true;
-            showSnackbar(
-              context: context,
-              content: "Offline. You are only able to view downloaded ebooks",
-            );
 
-            await _ebookIndexProvider
-                .getAll(filterValues: _filterValues)
-                .then((result) {
-              switch (result) {
-                case Success():
-                  indexModelResult = result.data;
-                case Failure():
-                  showErrorDialog(
-                      context: context, content: Text(e.toString()));
-              }
-            });
+            if (!_hasDisplayedOfflineMessage) {
+              showSnackbar(
+                context: context,
+                content: "Offline. You are only able to view downloaded ebooks",
+              );
+              _hasDisplayedOfflineMessage = true;
+            }
           } else {
             showErrorDialog(context: context, content: Text(e.toString()));
           }
@@ -176,9 +184,15 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
 
   Widget _buildBanner() {
     if (_isSelectingBooks) {
-      return MaterialBanner(
-        content: Text("${_selectedBooks.length}/20"),
-        actions: [
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const SizedBox(width: 8.0),
+          Text(
+            "${_selectedBooks.length}",
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          const Spacer(),
           TextButton(
             onPressed: () {
               if (_selectedBooks.isEmpty) {
@@ -203,15 +217,13 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
                 : "Remove from category"),
           ),
           IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.delete_forever),
-          ),
-          IconButton(
             onPressed: () => _removeAllBooksFromSelection(),
             icon: const Icon(Icons.close),
           ),
         ],
-      );
+      )
+          .animate(key: _bannerAnimationKey)
+          .fade(duration: const Duration(milliseconds: 100));
     }
 
     return Row(
@@ -225,7 +237,9 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
         ),
         IconButton(onPressed: _openSorts, icon: const Icon(Icons.sort)),
       ],
-    );
+    )
+        .animate(key: _bannerAnimationKey)
+        .fade(duration: const Duration(milliseconds: 100));
   }
 
   Widget _buildTile(int index) {
@@ -263,8 +277,8 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
     }
   }
 
-  void _openInfo(int index) {
-    showModalBottomSheet(
+  void _openInfo(int index) async {
+    await showModalBottomSheet(
         context: context,
         builder: (BuildContext context) {
           if (!_isOffline) {
@@ -272,7 +286,10 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
           } else {
             return LibraryOfflineInfoWidget(indexModel: _indexModelList[index]);
           }
-        });
+        }).then((result) {
+      if (result == null) return;
+      if (result == true) _refresh();
+    });
   }
 
   void _openFilters() {
@@ -360,11 +377,26 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
         });
   }
 
+  void _enterBookSelection() {
+    setState(() {
+      _isSelectingBooks = true;
+      _bannerAnimationKey = UniqueKey();
+      _logger.info("Started selecting books!");
+    });
+  }
+
+  void _exitBookSelection() {
+    setState(() {
+      _isSelectingBooks = false;
+      _bannerAnimationKey = UniqueKey();
+      _logger.info("Stopped selecting books!");
+    });
+  }
+
   void _addBookToSelection(int index, int entryId) {
     setState(() {
       if (_selectedBooks.isEmpty) {
-        _isSelectingBooks = true;
-        _logger.info("Started selecting books!");
+        _enterBookSelection();
       }
 
       _selectedBooks[index] = entryId;
@@ -380,17 +412,15 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
           "Removed book $index from selection. Selection is now at ${_selectedBooks.length}");
 
       if (_selectedBooks.isEmpty) {
-        _isSelectingBooks = false;
-        _logger.info("Stopped selecting books");
+        _exitBookSelection();
       }
     });
   }
 
   void _removeAllBooksFromSelection() {
     setState(() {
-      _isSelectingBooks = false;
+      _exitBookSelection();
       _selectedBooks.clear();
-      _logger.info("Stopped selecting books");
     });
   }
 
@@ -501,11 +531,7 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
                       child: Visibility(
                           visible: !_isSelectingBooks,
                           child: IconButton(
-                            onPressed: () {
-                              setState(() {
-                                _isSelectingBooks = true;
-                              });
-                            },
+                            onPressed: _enterBookSelection,
                             icon: const Icon(Icons.edit),
                             color: theme.colorScheme.onPrimary,
                           )),
