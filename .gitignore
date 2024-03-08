@@ -835,6 +835,7 @@ Temporary Items
 
 # Include any specific files here.
 
+.vscode/settings.json
 
 ### ---------------------------- References ---------------------------- ###
 
