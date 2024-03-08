@@ -20,8 +20,15 @@ dependencies:
   path_provider: ^2.1.2
   sqflite: ^2.3.2
   mime: ^1.0.4
+
   wordsmith_utils:
     path: ../wordsmith_utils
+
+  epub_view:
+    git:
+      url: https://github.com/AdivonSlav/packages.flutter
+      ref: dev
+      path: packages/epub_view/
 
   cupertino_icons: ^1.0.2
 

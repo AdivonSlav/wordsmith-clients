@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wordsmith_mobile/screens/ebook_screen.dart';
+import 'package:wordsmith_mobile/screens/reader_screen.dart';
 import 'package:wordsmith_mobile/utils/indexers/ebook_index_provider.dart';
 import 'package:wordsmith_mobile/utils/indexers/models/ebook_index_model.dart';
 import 'package:wordsmith_mobile/widgets/ebook/ebook_image.dart';
@@ -47,6 +48,18 @@ class _LibraryInfoWidgetState extends State<LibraryInfoWidget> {
         if (result == null) return;
         if (result == true) Navigator.of(context).pop(true);
       },
+    );
+  }
+
+  void _openReaderPage() {
+    var model = _indexModel;
+
+    if (model == null) return;
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => ReaderScreenWidget(indexModel: model),
+      ),
     );
   }
 
@@ -234,7 +247,7 @@ class _LibraryInfoWidgetState extends State<LibraryInfoWidget> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               FilledButton.icon(
-                onPressed: () {},
+                onPressed: _openReaderPage,
                 icon: const Icon(Icons.chrome_reader_mode),
                 label: const Text("Read"),
               ),
