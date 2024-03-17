@@ -3,9 +3,11 @@ import 'package:flutter/services.dart';
 
 class InputField extends StatelessWidget {
   final String labelText;
+  final String? initialValue;
   final TextEditingController controller;
   final bool obscureText;
   final double? width;
+  final String? prefixText;
   final Widget? suffixIcon;
   final String? helperText;
   final String? Function(String? value)? validator;
@@ -13,15 +15,18 @@ class InputField extends StatelessWidget {
   final int? maxLines;
   final int? maxLength;
   final bool? readOnly;
+  final TextInputType? textInputType;
   final List<TextInputFormatter>? inputFormatters;
   final void Function(String? value)? onChangedCallback;
 
   const InputField({
     super.key,
     required this.labelText,
+    this.initialValue,
     required this.controller,
     required this.obscureText,
     this.width,
+    this.prefixText,
     this.suffixIcon,
     this.helperText,
     this.validator,
@@ -29,6 +34,7 @@ class InputField extends StatelessWidget {
     this.maxLines,
     this.maxLength,
     this.readOnly,
+    this.textInputType,
     this.inputFormatters,
     this.onChangedCallback,
   });
@@ -44,12 +50,14 @@ class InputField extends StatelessWidget {
       ),
       child: TextFormField(
         controller: controller,
+        initialValue: initialValue,
         obscureText: obscureText,
         autovalidateMode: AutovalidateMode.onUserInteraction,
         decoration: InputDecoration(
             filled: false,
             fillColor: theme.inputDecorationTheme.fillColor,
             hintStyle: theme.inputDecorationTheme.hintStyle,
+            prefixText: prefixText,
             suffixIcon: suffixIcon,
             labelText: labelText,
             helperText: helperText,
@@ -62,6 +70,7 @@ class InputField extends StatelessWidget {
         maxLength: maxLength,
         readOnly: readOnly ?? false,
         inputFormatters: inputFormatters,
+        keyboardType: textInputType,
         onChanged: onChangedCallback,
       ),
     );

@@ -10,7 +10,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  provider: ^6.0.5
   file_selector: ^1.0.1
   logging: ^1.2.0
   adaptive_theme: ^3.5.0
@@ -19,7 +18,10 @@ dependencies:
   flutter_dotenv: ^5.1.0
   path_provider: ^2.1.2
   sqflite: ^2.3.2
+  currency_text_input_formatter: ^2.1.13
   mime: ^1.0.4
+  font_awesome_flutter: ^10.7.0
+  webview_flutter: ^4.7.0
 
   wordsmith_utils:
     path: ../wordsmith_utils

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:wordsmith_mobile/utils/indexers/models/ebook_index_model.dart';
 import 'package:wordsmith_mobile/widgets/ebook/ebook_image.dart';
 import 'package:wordsmith_mobile/widgets/library/library_offline_remove.dart';
-import 'package:wordsmith_utils/datetime_formatter.dart';
+import 'package:wordsmith_utils/formatters/datetime_formatter.dart';
 
 class LibraryOfflineInfoWidget extends StatefulWidget {
   final EbookIndexModel indexModel;

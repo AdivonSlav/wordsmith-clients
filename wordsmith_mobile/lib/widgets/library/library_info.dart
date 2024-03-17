@@ -6,10 +6,10 @@ import 'package:wordsmith_mobile/utils/indexers/ebook_index_provider.dart';
 import 'package:wordsmith_mobile/utils/indexers/models/ebook_index_model.dart';
 import 'package:wordsmith_mobile/widgets/ebook/ebook_image.dart';
 import 'package:wordsmith_mobile/widgets/library/library_remove.dart';
-import 'package:wordsmith_utils/datetime_formatter.dart';
 import 'package:wordsmith_utils/dialogs/progress_indicator_dialog.dart';
 import 'package:wordsmith_utils/dialogs/show_error_dialog.dart';
 import 'package:wordsmith_utils/dialogs/show_info_dialog.dart';
+import 'package:wordsmith_utils/formatters/datetime_formatter.dart';
 import 'package:wordsmith_utils/logger.dart';
 import 'package:wordsmith_utils/models/ebook/ebook_parse.dart';
 import 'package:wordsmith_utils/models/result.dart';
@@ -67,7 +67,7 @@ class _LibraryInfoWidgetState extends State<LibraryInfoWidget> {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) =>
-            EbookScreenWidget(ebook: widget.libraryEntry.eBook),
+            EbookScreenWidget(ebookId: widget.libraryEntry.eBook.id),
       ),
     );
   }

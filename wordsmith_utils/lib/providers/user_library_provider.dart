@@ -12,9 +12,11 @@ class UserLibraryProvider extends BaseProvider<UserLibrary> {
 
   UserLibraryProvider() : super("user-libraries");
 
-  Future<Result<UserLibrary>> addToUserLibrary(int eBookId) async {
+  Future<Result<UserLibrary>> addToUserLibrary(int eBookId,
+      [String? orderReferenceId]) async {
     var accessToken = await SecureStore.getValue("access_token");
-    var insert = UserLibraryInsert(eBookId);
+    var insert =
+        UserLibraryInsert(eBookId: eBookId, orderReferenceId: orderReferenceId);
 
     try {
       var result = await post(
@@ -35,10 +37,10 @@ class UserLibraryProvider extends BaseProvider<UserLibrary> {
     var accessToken = await SecureStore.getValue("access_token");
 
     try {
-      Map<String, String> query = {
+      Map<String, dynamic> query = {
         "page": "1",
         "pageSize": "1",
-        "eBookId": eBookId.toString()
+        "eBookId": eBookId.toString(),
       };
 
       var result = await get(

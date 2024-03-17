@@ -47,7 +47,7 @@ class HomeEBookDisplayWidget extends StatelessWidget {
                 onTap: () {
                   Navigator.of(context).push(MaterialPageRoute(
                     builder: (context) =>
-                        EbookScreenWidget(ebook: ebooks[itemIndex]),
+                        EbookScreenWidget(ebookId: ebooks[itemIndex].id),
                   ));
                 },
                 child: EbookImageWidget(

@@ -89,3 +89,21 @@ String? validateCategoryName(String? value) {
 
   return null;
 }
+
+// String? validatePrice(String? value) {
+//   if (value == null) {
+//     return "You must provide a value";
+//   }
+
+//   var decimalValue = Decimal.tryParse(value);
+
+//   if (decimalValue == null) {
+//     return "Input is not a decimal number!";
+//   }
+
+//   decimalValue.toDouble()
+
+//   if (decimalValue > Decimal.parse("100.00")) {
+
+//   }
+// }
