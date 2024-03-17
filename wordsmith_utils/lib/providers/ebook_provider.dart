@@ -25,7 +25,27 @@ class EbookProvider extends BaseProvider<Ebook> {
       };
 
       var result = await get(
-          filter: query, bearerToken: accessToken ?? "", retryForRefresh: true);
+        filter: query,
+        bearerToken: accessToken ?? "",
+        retryForRefresh: true,
+      );
+
+      return Success(result);
+    } on BaseException catch (error) {
+      _logger.severe(error);
+      return Failure(error);
+    }
+  }
+
+  Future<Result<QueryResult<Ebook>>> getById(int ebookId) async {
+    var accessToken = await SecureStore.getValue("access_token");
+
+    try {
+      var result = await get(
+        additionalRoute: "/$ebookId",
+        bearerToken: accessToken ?? "",
+        retryForRefresh: true,
+      );
 
       return Success(result);
     } on BaseException catch (error) {
@@ -47,6 +67,10 @@ class EbookProvider extends BaseProvider<Ebook> {
         "genreIds": insert.genreIds,
         "maturityRatingId": insert.maturityRatingId.toString(),
       };
+
+      if (insert.price != null) {
+        fields["price"] = insert.price!;
+      }
 
       Map<String, TransferFile> files = {"file": file};
 

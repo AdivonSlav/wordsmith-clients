@@ -35,7 +35,10 @@ class _PublishScreenWidgetState extends State<PublishScreenWidget> {
   }
 
   void _submitEditedEBook(EbookInsert ebook) async {
+    ProgressIndicatorDialog().show(context, text: "Publishing...");
+
     await _ebookProvider.postEBook(ebook, _epubFile).then((result) {
+      ProgressIndicatorDialog().dismiss();
       switch (result) {
         case Success<Ebook>():
           _logger.info("Succesfully published ebook ${result.data.title}");
@@ -45,8 +48,6 @@ class _PublishScreenWidgetState extends State<PublishScreenWidget> {
               context: context, content: Text(result.exception.toString()));
       }
     });
-
-    ProgressIndicatorDialog().dismiss();
   }
 
   @override

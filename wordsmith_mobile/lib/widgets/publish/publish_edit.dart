@@ -1,11 +1,12 @@
+import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:wordsmith_mobile/widgets/ebook/ebook_image.dart';
 import 'package:wordsmith_mobile/widgets/input_field.dart';
 import 'package:wordsmith_mobile/widgets/publish/publish_chapters_view.dart';
 import 'package:wordsmith_mobile/widgets/publish/publish_genres.dart';
 import 'package:wordsmith_mobile/widgets/publish/publish_instructions.dart';
 import 'package:wordsmith_mobile/widgets/publish/publish_maturity_ratings.dart';
-import 'package:wordsmith_utils/dialogs/progress_indicator_dialog.dart';
 import 'package:wordsmith_utils/dialogs/show_error_dialog.dart';
 import 'package:wordsmith_utils/logger.dart';
 import 'package:wordsmith_utils/models/ebook/ebook_insert.dart';
@@ -22,6 +23,7 @@ class PublishEditWidget extends StatefulWidget {
 
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
+  final _priceController = TextEditingController();
 
   PublishEditWidget({
     super.key,
@@ -43,7 +45,16 @@ class _PublishEditWidgetState extends State<PublishEditWidget> {
   final _titleMaxLength = 40;
   final _descriptionMaxLength = 800;
 
-  var _uploadInProgress = false;
+  final String _initialPriceValue = "0.01";
+  final _currencyFormatter = CurrencyTextInputFormatter(
+    symbol: "\$ ",
+    locale: "en",
+    decimalDigits: 2,
+    maxValue: 100.00,
+  );
+
+  bool _uploadInProgress = false;
+  bool _enteringPrice = false;
 
   List<Genre> _selectedGenres = [];
   MaturityRating? _selectedMaturityRating;
@@ -80,16 +91,18 @@ class _PublishEditWidgetState extends State<PublishEditWidget> {
       return;
     }
 
-    ProgressIndicatorDialog().show(context);
-
+    double? price = _enteringPrice
+        ? _currencyFormatter.getUnformattedValue().toDouble()
+        : null;
     var authorId = AuthProvider.loggedUser!.id;
     var genreIds = _selectedGenres.map((e) => e.id).toList();
+
     var insert = EbookInsert(
         widget._titleController.text,
         widget._descriptionController.text.trim(),
         widget.parsedEbook.encodedCoverArt,
         widget.parsedEbook.chapters,
-        null, // TODO: Pass when payment system is implemented
+        price,
         authorId,
         genreIds,
         _selectedMaturityRating!.id);
@@ -97,10 +110,41 @@ class _PublishEditWidgetState extends State<PublishEditWidget> {
     widget.onEditCallback(insert);
   }
 
+  void _enterPriceEdit(bool? value) {
+    if (value == null) return;
+
+    setState(() {
+      _enteringPrice = value;
+
+      if (value) {
+        widget._priceController.text =
+            _currencyFormatter.format(_initialPriceValue);
+      } else {
+        widget._priceController.clear();
+      }
+    });
+  }
+
+  String? _validatePriceInput(String? value) {
+    if (!_enteringPrice) return null;
+    if (value == null || value.isEmpty) {
+      return "You must enter a price";
+    }
+
+    var asNum = _currencyFormatter.getUnformattedValue();
+
+    if (asNum == 0.0) {
+      return "Price must be at least \$ $_initialPriceValue";
+    }
+
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     _logger.info("Loaded ebook ${widget.parsedEbook.title} for editing");
     var size = MediaQuery.of(context).size;
+    var theme = Theme.of(context);
 
     return SingleChildScrollView(
       child: Padding(
@@ -159,6 +203,35 @@ class _PublishEditWidgetState extends State<PublishEditWidget> {
                   ),
                   PublishMaturityRatingsWidget(
                     onMaturityRatingSelect: _getSelectedMaturityRating,
+                  ),
+                  const SizedBox(
+                    height: 20.0,
+                  ),
+                  Row(
+                    children: <Widget>[
+                      Checkbox(
+                        value: _enteringPrice,
+                        onChanged: _enterPriceEdit,
+                      ),
+                      Text(
+                        "Specify price",
+                        style: theme.textTheme.labelLarge,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 10.0,
+                  ),
+                  Visibility(
+                    visible: _enteringPrice,
+                    child: InputField(
+                      labelText: "Price",
+                      controller: widget._priceController,
+                      obscureText: false,
+                      textInputType: TextInputType.number,
+                      validator: _validatePriceInput,
+                      inputFormatters: <TextInputFormatter>[_currencyFormatter],
+                    ),
                   ),
                   const SizedBox(
                     height: 20.0,
