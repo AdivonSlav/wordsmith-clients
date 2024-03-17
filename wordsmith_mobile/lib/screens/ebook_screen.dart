@@ -47,7 +47,10 @@ class _EbookScreenWidget extends State<EbookScreenWidget> {
         context: context,
         builder: (BuildContext context) {
           if (ebook.price != null) {
-            return EbookPurchaseWidget(ebook: ebook);
+            return EbookPurchaseWidget(
+              ebook: ebook,
+              setLibraryEntry: _setLibraryEntry,
+            );
           }
 
           return AlertDialog(
@@ -87,9 +90,7 @@ class _EbookScreenWidget extends State<EbookScreenWidget> {
       }
     });
 
-    setState(() {
-      _userLibrary = addResult;
-    });
+    _setLibraryEntry(addResult);
   }
 
   void _getLibraryEntry() async {
@@ -98,12 +99,18 @@ class _EbookScreenWidget extends State<EbookScreenWidget> {
         .then((result) {
       switch (result) {
         case Success():
-          setState(() {
-            _userLibrary = result.data;
-          });
+          if (result.data != null) {
+            _setLibraryEntry(result.data!);
+          }
         case Failure(exception: final e):
           showSnackbar(context: context, content: e.toString());
       }
+    });
+  }
+
+  void _setLibraryEntry(UserLibrary entry) {
+    setState(() {
+      _userLibrary = entry;
     });
   }
 

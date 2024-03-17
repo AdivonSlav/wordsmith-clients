@@ -8,10 +8,12 @@ part of 'user_library_insert.dart';
 
 UserLibraryInsert _$UserLibraryInsertFromJson(Map<String, dynamic> json) =>
     UserLibraryInsert(
-      json['eBookId'] as int,
+      eBookId: json['eBookId'] as int,
+      orderReferenceId: json['orderReferenceId'] as String?,
     );
 
 Map<String, dynamic> _$UserLibraryInsertToJson(UserLibraryInsert instance) =>
     <String, dynamic>{
       'eBookId': instance.eBookId,
+      'orderReferenceId': instance.orderReferenceId,
     };

@@ -8,8 +8,8 @@ class Order {
   final int id;
   final String referenceId;
   final String payPalOrderId;
-  final String payPalCaptureId;
-  final String payPalRefundId;
+  final String? payPalCaptureId;
+  final String? payPalRefundId;
   final OrderStatus status;
   final int? payerId;
   final String payerUsername;

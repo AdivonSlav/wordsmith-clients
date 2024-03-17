@@ -408,7 +408,8 @@ abstract class BaseProvider<T> extends AuthProvider {
   }
 
   T fromJson(dynamic data) {
-    throw UnimplementedError();
+    throw BaseException("Unimplemented fromJson method!",
+        type: ExceptionType.internalAppError);
   }
 
   /// Checks what status the Response returned

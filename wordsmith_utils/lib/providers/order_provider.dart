@@ -1,4 +1,5 @@
 import 'package:wordsmith_utils/exceptions/base_exception.dart';
+import 'package:wordsmith_utils/exceptions/exception_types.dart';
 import 'package:wordsmith_utils/logger.dart';
 import 'package:wordsmith_utils/models/entity_result.dart';
 import 'package:wordsmith_utils/models/order/order.dart';
@@ -34,7 +35,7 @@ class OrderProvider extends BaseProvider<Order> {
 
     try {
       var response = await post(
-        additionalRoute: "$orderId/capture",
+        additionalRoute: "/$orderId/capture",
         bearerToken: accessToken ?? "",
         retryForRefresh: true,
       );
@@ -43,6 +44,19 @@ class OrderProvider extends BaseProvider<Order> {
     } on BaseException catch (error) {
       _logger.severe(error);
       return Failure(error);
+    }
+  }
+
+  @override
+  Order fromJson(data) {
+    try {
+      return Order.fromJson(data);
+    } catch (error, stackTrace) {
+      _logger.severe(error, stackTrace);
+      throw BaseException(
+        "Error parsing JSON",
+        type: ExceptionType.internalAppError,
+      );
     }
   }
 }
