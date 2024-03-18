@@ -78,19 +78,15 @@ class _EbookScreenWidget extends State<EbookScreenWidget> {
   void _addToLibrary() async {
     ProgressIndicatorDialog().show(context);
 
-    late UserLibrary addResult;
-
     await _userLibraryProvider.addToUserLibrary(widget.ebookId).then((result) {
       ProgressIndicatorDialog().dismiss();
       switch (result) {
         case Success<UserLibrary>():
-          addResult = result.data;
+          _setLibraryEntry(result.data);
         case Failure<UserLibrary>():
           showSnackbar(context: context, content: result.exception.toString());
       }
     });
-
-    _setLibraryEntry(addResult);
   }
 
   void _getLibraryEntry() async {
