@@ -10,6 +10,7 @@ import 'package:wordsmith_mobile/utils/indexers/user_index_provider.dart';
 import 'package:wordsmith_mobile/utils/themes.dart';
 import 'package:wordsmith_mobile/x509_override.dart';
 import 'package:wordsmith_mobile/widgets/navigation_bar/navigation_bar.dart';
+import 'package:wordsmith_utils/dialogs/progress_indicator_dialog.dart';
 import 'package:wordsmith_utils/formatters/datetime_formatter.dart';
 import 'package:wordsmith_utils/logger.dart';
 import 'package:wordsmith_utils/providers/auth_provider.dart';
@@ -80,6 +81,7 @@ class Application extends StatelessWidget {
         theme: theme,
         darkTheme: darkTheme,
         home: const NavigationBarWidget(),
+        navigatorKey: navigatorKey,
       ),
     );
   }

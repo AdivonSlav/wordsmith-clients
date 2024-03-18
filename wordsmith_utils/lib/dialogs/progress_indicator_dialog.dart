@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
+final navigatorKey = GlobalKey<NavigatorState>();
+
 class ProgressIndicatorDialog {
   static final ProgressIndicatorDialog _singleton =
       ProgressIndicatorDialog._internal();
 
-  late BuildContext _context;
   bool isDisplayed = false;
 
   factory ProgressIndicatorDialog() {
@@ -13,17 +14,15 @@ class ProgressIndicatorDialog {
 
   ProgressIndicatorDialog._internal();
 
-  show(BuildContext context, {String text = "loading..."}) {
+  show(BuildContext context, {String text = "Loading..."}) {
     if (isDisplayed == true) {
       return;
     }
 
     showDialog(
-      context: context,
+      context: navigatorKey.currentContext!,
       barrierDismissible: false,
-      builder: (BuildContext dialogContext) {
-        _context = dialogContext;
-
+      builder: (BuildContext context) {
         return PopScope(
           canPop: false,
           child: SimpleDialog(
@@ -55,7 +54,7 @@ class ProgressIndicatorDialog {
 
   dismiss() {
     if (isDisplayed == true) {
-      Navigator.of(_context).pop();
+      Navigator.of(navigatorKey.currentContext!).pop();
       isDisplayed = false;
     }
   }
