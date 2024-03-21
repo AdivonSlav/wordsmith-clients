@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wordsmith_mobile/widgets/ebook/ebook_image.dart';
 import 'package:wordsmith_mobile/widgets/ebook/ebook_purchase.dart';
-import 'package:wordsmith_mobile/widgets/ebook/ebook_rating_stars.dart';
+import 'package:wordsmith_mobile/widgets/ebook/ebook_rating_display.dart';
 import 'package:wordsmith_utils/dialogs/progress_indicator_dialog.dart';
 import 'package:wordsmith_utils/formatters/datetime_formatter.dart';
 import 'package:wordsmith_utils/formatters/number_formatter.dart';
@@ -216,7 +216,7 @@ class _EbookScreenWidget extends State<EbookScreenWidget> {
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               Padding(
-                                padding: const EdgeInsets.only(right: 14.0),
+                                padding: const EdgeInsets.only(right: 12.0),
                                 child: IconButton(
                                   icon: _userLibrary == null
                                       ? const Icon(Icons.add_circle_outline)
@@ -226,10 +226,17 @@ class _EbookScreenWidget extends State<EbookScreenWidget> {
                                 ),
                               ),
                               Padding(
-                                padding: const EdgeInsets.only(right: 14.0),
+                                padding: const EdgeInsets.only(right: 12.0),
                                 child: IconButton(
                                   onPressed: () {},
                                   icon: const Icon(Icons.favorite_outline),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(right: 12.0),
+                                child: IconButton(
+                                  onPressed: () {},
+                                  icon: const Icon(Icons.thumb_up),
                                 ),
                               ),
                             ],
@@ -269,20 +276,8 @@ class _EbookScreenWidget extends State<EbookScreenWidget> {
                                 Padding(
                                   padding:
                                       const EdgeInsets.symmetric(vertical: 8.0),
-                                  child: Row(
-                                    children: <Widget>[
-                                      EbookRatingStarsWidget(
-                                          rating: ebook.ratingAverage),
-                                      const SizedBox(width: 12.0),
-                                      Text(
-                                        "${ebook.ratingAverage ?? "0.0"} (0 ratings)",
-                                        style: const TextStyle(
-                                            fontSize: 16.0,
-                                            color: Colors.grey,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ],
-                                  ),
+                                  child: EbookRatingDisplayWidget(
+                                      rating: ebook.ratingAverage),
                                 ),
                                 Text(
                                   _formatPrice(ebook.price),
