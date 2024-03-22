@@ -7,14 +7,14 @@ class EbookRating {
   final int id;
   final int rating;
   final DateTime ratingDate;
-  final int ebookId;
+  final int eBookId;
   final int userId;
 
   const EbookRating(
     this.id,
     this.rating,
     this.ratingDate,
-    this.ebookId,
+    this.eBookId,
     this.userId,
   );
 
