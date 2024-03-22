@@ -18,6 +18,8 @@ import 'package:wordsmith_utils/providers/base_provider.dart';
 import 'package:wordsmith_utils/providers/ebook_download_provider.dart';
 import 'package:wordsmith_utils/providers/ebook_parse_provider.dart';
 import 'package:wordsmith_utils/providers/ebook_provider.dart';
+import 'package:wordsmith_utils/providers/ebook_rating_provider.dart';
+import 'package:wordsmith_utils/providers/ebook_rating_statistics_provider.dart';
 import 'package:wordsmith_utils/providers/genre_provider.dart';
 import 'package:wordsmith_utils/providers/maturity_ratings_provider.dart';
 import 'package:wordsmith_utils/providers/order_provider.dart';
@@ -60,6 +62,8 @@ Future<void> main() async {
       ChangeNotifierProvider(create: (_) => EbookIndexProvider()),
       ChangeNotifierProvider(create: (_) => UserIndexProvider()),
       ChangeNotifierProvider(create: (_) => OrderProvider()),
+      ChangeNotifierProvider(create: (_) => EbookRatingProvider()),
+      ChangeNotifierProvider(create: (_) => EbookRatingStatisticsProvider()),
     ],
     child: const Application(),
   ));

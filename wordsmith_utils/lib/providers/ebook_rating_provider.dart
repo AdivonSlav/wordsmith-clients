@@ -1,8 +1,8 @@
 import 'package:wordsmith_utils/exceptions/base_exception.dart';
 import 'package:wordsmith_utils/exceptions/exception_types.dart';
 import 'package:wordsmith_utils/logger.dart';
-import 'package:wordsmith_utils/models/ebook/ebook_insert.dart';
 import 'package:wordsmith_utils/models/ebook_rating/ebook_rating.dart';
+import 'package:wordsmith_utils/models/ebook_rating/ebook_rating_insert.dart';
 import 'package:wordsmith_utils/models/ebook_rating/ebook_rating_update.dart';
 import 'package:wordsmith_utils/models/entity_result.dart';
 import 'package:wordsmith_utils/models/query_result.dart';
@@ -53,7 +53,7 @@ class EbookRatingProvider extends BaseProvider<EbookRating> {
   }
 
   Future<Result<EntityResult<EbookRating>>> addRating(
-      EbookInsert insert) async {
+      EbookRatingInsert insert) async {
     var accessToken = await SecureStore.getValue("access_token");
 
     try {

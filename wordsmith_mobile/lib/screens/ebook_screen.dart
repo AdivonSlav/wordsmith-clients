@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:wordsmith_mobile/widgets/ebook/ebook_image.dart';
 import 'package:wordsmith_mobile/widgets/ebook/ebook_purchase.dart';
 import 'package:wordsmith_mobile/widgets/ebook/ebook_rating_display.dart';
+import 'package:wordsmith_mobile/widgets/ebook/ebook_rating_minimal.dart';
 import 'package:wordsmith_utils/dialogs/progress_indicator_dialog.dart';
 import 'package:wordsmith_utils/formatters/datetime_formatter.dart';
 import 'package:wordsmith_utils/formatters/number_formatter.dart';
@@ -36,6 +37,16 @@ class _EbookScreenWidget extends State<EbookScreenWidget> {
     }
 
     return NumberFormatter.formatCurrency(price);
+  }
+
+  void _showRatingDialog(Ebook ebook) async {
+    await showDialog(
+      context: context,
+      builder: (context) => EbookRatingDisplayWidget(
+        ebook: ebook,
+        isInLibrary: _userLibrary != null,
+      ),
+    );
   }
 
   void _showAddToLibraryDialog(Ebook ebook) async {
@@ -235,7 +246,7 @@ class _EbookScreenWidget extends State<EbookScreenWidget> {
                               Padding(
                                 padding: const EdgeInsets.only(right: 12.0),
                                 child: IconButton(
-                                  onPressed: () {},
+                                  onPressed: () => _showRatingDialog(ebook),
                                   icon: const Icon(Icons.thumb_up),
                                 ),
                               ),
@@ -276,7 +287,7 @@ class _EbookScreenWidget extends State<EbookScreenWidget> {
                                 Padding(
                                   padding:
                                       const EdgeInsets.symmetric(vertical: 8.0),
-                                  child: EbookRatingDisplayWidget(
+                                  child: EbookRatingMinimalWidget(
                                       rating: ebook.ratingAverage),
                                 ),
                                 Text(
