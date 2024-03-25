@@ -4,7 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
 import 'package:wordsmith_mobile/utils/indexers/ebook_index_provider.dart';
 import 'package:wordsmith_mobile/utils/indexers/models/ebook_index_model.dart';
-import 'package:wordsmith_mobile/utils/library_filter_values.dart';
+import 'package:wordsmith_mobile/utils/filters/library_filter_values.dart';
 import 'package:wordsmith_mobile/widgets/library/library_categories.dart';
 import 'package:wordsmith_mobile/widgets/library/library_categories_add.dart';
 import 'package:wordsmith_mobile/widgets/library/library_categories_remove.dart';
@@ -18,6 +18,7 @@ import 'package:wordsmith_utils/dialogs/show_error_dialog.dart';
 import 'package:wordsmith_utils/exceptions/exception_types.dart';
 import 'package:wordsmith_utils/logger.dart';
 import 'package:wordsmith_utils/models/result.dart';
+import 'package:wordsmith_utils/models/sorting_directions.dart';
 import 'package:wordsmith_utils/models/user_library/user_library.dart';
 import 'package:wordsmith_utils/providers/user_library_provider.dart';
 import 'package:wordsmith_utils/show_snackbar.dart';
@@ -78,7 +79,7 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
       isRead: _filterValues?.isRead,
       orderBy: _filterValues != null
           ? "${_filterValues!.sort.apiValue}:${_filterValues!.sortDirection.apiValue}"
-          : "${LibrarySorts.title.apiValue}:${LibrarySortDirections.ascending.apiValue}",
+          : "${LibrarySorts.title.apiValue}:${SortDirections.ascending.apiValue}",
       libraryCategoryId: _filterValues?.selectedCategory?.id,
       page: _page,
       pageSize: _pageSize,
@@ -127,7 +128,7 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
     setState(() {
       _filterValues = LibraryFilterValues(
         sort: LibrarySorts.title,
-        sortDirection: LibrarySortDirections.ascending,
+        sortDirection: SortDirections.ascending,
       );
     });
   }

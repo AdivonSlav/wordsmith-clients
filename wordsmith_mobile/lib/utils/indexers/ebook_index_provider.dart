@@ -3,11 +3,12 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:wordsmith_mobile/utils/indexers/base_index_provider.dart';
 import 'package:wordsmith_mobile/utils/indexers/models/ebook_index_model.dart';
-import 'package:wordsmith_mobile/utils/library_filter_values.dart';
+import 'package:wordsmith_mobile/utils/filters/library_filter_values.dart';
 import 'package:wordsmith_utils/exceptions/base_exception.dart';
 import 'package:wordsmith_utils/exceptions/exception_types.dart';
 import 'package:wordsmith_utils/logger.dart';
 import 'package:wordsmith_utils/models/result.dart';
+import 'package:wordsmith_utils/models/sorting_directions.dart';
 import 'package:wordsmith_utils/models/transfer_file.dart';
 import 'package:wordsmith_utils/models/user_library/user_library.dart';
 
@@ -147,7 +148,7 @@ class EbookIndexProvider extends BaseIndexProvider {
 
       if (filterValues != null) {
         orderBy = "${filterValues.sort.indexValue} ";
-        orderBy += filterValues.sortDirection == LibrarySortDirections.ascending
+        orderBy += filterValues.sortDirection == SortDirections.ascending
             ? "ASC"
             : "DESC";
       }

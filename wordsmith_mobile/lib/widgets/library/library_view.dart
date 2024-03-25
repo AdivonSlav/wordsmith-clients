@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:wordsmith_mobile/utils/library_filter_values.dart';
+import 'package:wordsmith_mobile/utils/filters/library_filter_values.dart';
+import 'package:wordsmith_utils/models/sorting_directions.dart';
 
 class LibraryViewWidget extends StatelessWidget {
   final LibraryFilterValues filterValues;
@@ -46,25 +47,23 @@ class LibraryViewWidget extends StatelessWidget {
             spacing: 8.0,
             children: <Widget>[
               ChoiceChip(
-                label: Text(LibrarySortDirections.ascending.label),
-                selected: filterValues.sortDirection ==
-                    LibrarySortDirections.ascending,
+                label: Text(SortDirections.ascending.label),
+                selected:
+                    filterValues.sortDirection == SortDirections.ascending,
                 onSelected: (bool selected) {
                   if (selected) {
-                    filterValues.sortDirection =
-                        LibrarySortDirections.ascending;
+                    filterValues.sortDirection = SortDirections.ascending;
                     onSelect(filterValues);
                   }
                 },
               ),
               ChoiceChip(
-                label: Text(LibrarySortDirections.descending.label),
-                selected: filterValues.sortDirection ==
-                    LibrarySortDirections.descending,
+                label: Text(SortDirections.descending.label),
+                selected:
+                    filterValues.sortDirection == SortDirections.descending,
                 onSelected: (bool selected) {
                   if (selected) {
-                    filterValues.sortDirection =
-                        LibrarySortDirections.descending;
+                    filterValues.sortDirection = SortDirections.descending;
                     onSelect(filterValues);
                   }
                 },

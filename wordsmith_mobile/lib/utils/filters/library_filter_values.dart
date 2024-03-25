@@ -1,15 +1,11 @@
 import 'package:wordsmith_mobile/utils/indexers/models/ebook_index_model.dart';
+import 'package:wordsmith_utils/models/sorting_directions.dart';
 import 'package:wordsmith_utils/models/user_library_category/user_library_category.dart';
 
 enum LibrarySorts {
   title,
   mostRecent,
   publicationDate,
-}
-
-enum LibrarySortDirections {
-  ascending,
-  descending,
 }
 
 extension LibrarySortsExtension on LibrarySorts {
@@ -47,29 +43,9 @@ extension LibrarySortsExtension on LibrarySorts {
   }
 }
 
-extension LibrarySortDirectionsExtension on LibrarySortDirections {
-  String get apiValue {
-    switch (this) {
-      case LibrarySortDirections.ascending:
-        return "asc";
-      case LibrarySortDirections.descending:
-        return "desc";
-    }
-  }
-
-  String get label {
-    switch (this) {
-      case LibrarySortDirections.ascending:
-        return "Ascending";
-      case LibrarySortDirections.descending:
-        return "Descending";
-    }
-  }
-}
-
 class LibraryFilterValues {
   LibrarySorts sort;
-  LibrarySortDirections sortDirection;
+  SortDirections sortDirection;
   int? selectedMaturityRatingId;
   bool? isRead;
   UserLibraryCategory? selectedCategory;
