@@ -1,3 +1,5 @@
+import 'package:wordsmith_utils/models/sorting_directions.dart';
+
 enum CommentSorts {
   mostRecent,
   mostPopular,
@@ -26,4 +28,14 @@ extension CommentSortsExtension on CommentSorts {
         return "Most popular";
     }
   }
+}
+
+class CommentFilterValues {
+  CommentSorts sort;
+  SortDirections sortDirection;
+
+  CommentFilterValues({
+    required this.sort,
+    required this.sortDirection,
+  });
 }

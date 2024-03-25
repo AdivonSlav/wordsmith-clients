@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:wordsmith_mobile/screens/ebook_comments_screen.dart';
 import 'package:wordsmith_mobile/widgets/ebook/ebook_image.dart';
 import 'package:wordsmith_mobile/widgets/ebook/ebook_purchase.dart';
 import 'package:wordsmith_mobile/widgets/ebook/ebook_rating_display.dart';
@@ -47,6 +48,13 @@ class _EbookScreenWidget extends State<EbookScreenWidget> {
         isInLibrary: _userLibrary != null,
       ),
     );
+  }
+
+  void _showCommentsScreen(Ebook ebook) async {
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (context) => EbookCommentsScreenWidget(
+          ebook: ebook, isInLibrary: _userLibrary != null),
+    ));
   }
 
   void _showAddToLibraryDialog(Ebook ebook) async {
@@ -248,6 +256,13 @@ class _EbookScreenWidget extends State<EbookScreenWidget> {
                                 child: IconButton(
                                   onPressed: () => _showRatingDialog(ebook),
                                   icon: const Icon(Icons.thumb_up),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(right: 12.0),
+                                child: IconButton(
+                                  onPressed: () => _showCommentsScreen(ebook),
+                                  icon: const Icon(Icons.comment),
                                 ),
                               ),
                             ],
