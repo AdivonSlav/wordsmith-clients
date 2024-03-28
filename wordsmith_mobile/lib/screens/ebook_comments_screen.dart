@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
 import 'package:wordsmith_mobile/utils/filters/comment_filter_values.dart';
@@ -13,6 +14,7 @@ import 'package:wordsmith_utils/models/comment/comment_search.dart';
 import 'package:wordsmith_utils/models/ebook/ebook.dart';
 import 'package:wordsmith_utils/models/result.dart';
 import 'package:wordsmith_utils/models/sorting_directions.dart';
+import 'package:wordsmith_utils/providers/auth_provider.dart';
 import 'package:wordsmith_utils/providers/comment_provider.dart';
 import 'package:wordsmith_utils/show_snackbar.dart';
 import 'package:wordsmith_utils/validators.dart';
@@ -53,6 +55,7 @@ class _EbookCommentsScreenWidgetState extends State<EbookCommentsScreenWidget> {
   int _totalCount = 0;
   bool _showCommentAdd = false;
   bool _likingInProgress = false;
+  bool _deletingInProgress = false;
 
   void _showAddComment() {
     if (!widget.isInLibrary) {
@@ -191,9 +194,24 @@ class _EbookCommentsScreenWidgetState extends State<EbookCommentsScreenWidget> {
                     ),
                     Row(
                       children: [
+                        Visibility(
+                          visible:
+                              comment.userId == AuthProvider.loggedUser?.id,
+                          child: IconButton(
+                            onPressed: () => _deleteComment(index),
+                            iconSize: 20.0,
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                            style: const ButtonStyle(
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            icon: const Icon(Icons.delete),
+                          ),
+                        ),
+                        const SizedBox(width: 14.0),
                         IconButton(
                           onPressed: () => _likeComment(index),
-                          iconSize: 24.0,
+                          iconSize: 20.0,
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(),
                           style: const ButtonStyle(
@@ -270,6 +288,7 @@ class _EbookCommentsScreenWidgetState extends State<EbookCommentsScreenWidget> {
             });
           case Failure(exception: final e):
             showSnackbar(context: context, content: e.toString());
+            _likingInProgress = false;
         }
       });
     } else {
@@ -282,9 +301,51 @@ class _EbookCommentsScreenWidgetState extends State<EbookCommentsScreenWidget> {
             });
           case Failure(exception: final e):
             showSnackbar(context: context, content: e.toString());
+            _likingInProgress = false;
         }
       });
     }
+  }
+
+  void _deleteComment(int index) async {
+    if (_deletingInProgress) {
+      return;
+    }
+
+    var shouldDelete = await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Delete comment"),
+        content: const Text("Do you want to delete this comment?"),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text("Yes"),
+          ),
+        ],
+      ),
+    );
+
+    if (!shouldDelete) return;
+
+    _deletingInProgress = true;
+
+    var comment = _comments[index];
+
+    await _commentProvider.deleteComment(comment.id).then((result) {
+      switch (result) {
+        case Success(data: final d):
+          _refresh();
+          _deletingInProgress = false;
+        case Failure(exception: final e):
+          showSnackbar(context: context, content: e.toString());
+          _deletingInProgress = false;
+      }
+    });
   }
 
   Future _getComments() async {
