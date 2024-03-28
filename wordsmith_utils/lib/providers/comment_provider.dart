@@ -15,9 +15,19 @@ class CommentProvider extends BaseProvider<Comment> {
 
   CommentProvider() : super("comments");
 
-  Future<Result<QueryResult<Comment>>> getComments(CommentSearch search) async {
+  Future<Result<QueryResult<Comment>>> getComments(
+    CommentSearch search, {
+    int? page,
+    int? pageSize,
+    String? orderBy,
+  }) async {
     try {
-      var result = await get(filter: search.toJson());
+      var map = search.toJson();
+      map["page"] = page;
+      map["pageSize"] = pageSize;
+      map["orderBy"] = orderBy;
+
+      var result = await get(filter: map);
 
       return Success(result);
     } on BaseException catch (error) {

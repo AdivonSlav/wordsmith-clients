@@ -14,6 +14,9 @@ Comment _$CommentFromJson(Map<String, dynamic> json) => Comment(
       json['eBookChapterId'] as int?,
       json['eBookId'] as int,
       json['userId'] as int,
+      json['user'] == null
+          ? null
+          : User.fromJson(json['user'] as Map<String, dynamic>),
       json['hasLiked'] as bool,
       json['likeCount'] as int,
     );
@@ -26,6 +29,7 @@ Map<String, dynamic> _$CommentToJson(Comment instance) => <String, dynamic>{
       'eBookChapterId': instance.eBookChapterId,
       'eBookId': instance.eBookId,
       'userId': instance.userId,
+      'user': instance.user,
       'hasLiked': instance.hasLiked,
       'likeCount': instance.likeCount,
     };

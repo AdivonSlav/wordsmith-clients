@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:wordsmith_utils/models/user/user.dart';
 
 part "comment.g.dart";
 
@@ -11,6 +12,7 @@ class Comment {
   final int? eBookChapterId;
   final int eBookId;
   final int userId;
+  final User? user;
   final bool hasLiked;
   final int likeCount;
 
@@ -22,6 +24,7 @@ class Comment {
     this.eBookChapterId,
     this.eBookId,
     this.userId,
+    this.user,
     this.hasLiked,
     this.likeCount,
   );

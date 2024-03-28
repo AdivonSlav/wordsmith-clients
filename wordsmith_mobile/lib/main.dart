@@ -15,6 +15,7 @@ import 'package:wordsmith_utils/formatters/datetime_formatter.dart';
 import 'package:wordsmith_utils/logger.dart';
 import 'package:wordsmith_utils/providers/auth_provider.dart';
 import 'package:wordsmith_utils/providers/base_provider.dart';
+import 'package:wordsmith_utils/providers/comment_provider.dart';
 import 'package:wordsmith_utils/providers/ebook_download_provider.dart';
 import 'package:wordsmith_utils/providers/ebook_parse_provider.dart';
 import 'package:wordsmith_utils/providers/ebook_provider.dart';
@@ -64,6 +65,7 @@ Future<void> main() async {
       ChangeNotifierProvider(create: (_) => OrderProvider()),
       ChangeNotifierProvider(create: (_) => EbookRatingProvider()),
       ChangeNotifierProvider(create: (_) => EbookRatingStatisticsProvider()),
+      ChangeNotifierProvider(create: (_) => CommentProvider()),
     ],
     child: const Application(),
   ));

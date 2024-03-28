@@ -1,10 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:provider/provider.dart';
 import 'package:wordsmith_mobile/utils/filters/comment_filter_values.dart';
 import 'package:wordsmith_mobile/widgets/input_field.dart';
+import 'package:wordsmith_utils/dialogs/progress_indicator_dialog.dart';
+import 'package:wordsmith_utils/dialogs/show_error_dialog.dart';
+import 'package:wordsmith_utils/formatters/datetime_formatter.dart';
+import 'package:wordsmith_utils/logger.dart';
+import 'package:wordsmith_utils/models/comment/comment.dart';
+import 'package:wordsmith_utils/models/comment/comment_insert.dart';
+import 'package:wordsmith_utils/models/comment/comment_search.dart';
 import 'package:wordsmith_utils/models/ebook/ebook.dart';
+import 'package:wordsmith_utils/models/result.dart';
 import 'package:wordsmith_utils/models/sorting_directions.dart';
+import 'package:wordsmith_utils/providers/comment_provider.dart';
 import 'package:wordsmith_utils/show_snackbar.dart';
+import 'package:wordsmith_utils/validators.dart';
 
 class EbookCommentsScreenWidget extends StatefulWidget {
   final Ebook ebook;
@@ -22,13 +33,25 @@ class EbookCommentsScreenWidget extends StatefulWidget {
 }
 
 class _EbookCommentsScreenWidgetState extends State<EbookCommentsScreenWidget> {
-  final _commentController = TextEditingController();
-  bool _showCommentAdd = false;
+  final _logger = LogManager.getLogger("EbookCommentsScreen");
+  late CommentProvider _commentProvider;
 
+  final _scrollController = ScrollController();
+  final _commentController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  final List<Comment> _comments = [];
   final CommentFilterValues _commentFilterValues = CommentFilterValues(
     sort: CommentSorts.mostRecent,
     sortDirection: SortDirections.descending,
   );
+  bool _isLoading = false;
+  bool _hasMore = true;
+  int _page = 1;
+  final int _pageSize = 15;
+  int _totalCount = 0;
+
+  bool _showCommentAdd = false;
 
   void _showAddComment() {
     if (!widget.isInLibrary) {
@@ -42,6 +65,7 @@ class _EbookCommentsScreenWidgetState extends State<EbookCommentsScreenWidget> {
 
     setState(() {
       _showCommentAdd = !_showCommentAdd;
+      _commentController.clear();
     });
   }
 
@@ -65,12 +89,23 @@ class _EbookCommentsScreenWidgetState extends State<EbookCommentsScreenWidget> {
           top: 18.0,
           bottom: 8.0,
         ),
-        child: InputField(
-          controller: _commentController,
-          labelText: "Add a comment",
-          obscureText: false,
-          maxLines: 6,
-          maxLength: 400,
+        child: Column(
+          children: <Widget>[
+            Form(
+              key: _formKey,
+              child: InputField(
+                controller: _commentController,
+                labelText: "Add a comment",
+                obscureText: false,
+                validator: validateCommentContent,
+                maxLines: 6,
+                maxLength: 400,
+              ),
+            ),
+            ElevatedButton(
+                onPressed: () => _submitNewComment(),
+                child: const Text("Submit")),
+          ],
         ),
       ).animate().fade(duration: const Duration(milliseconds: 100)),
     );
@@ -79,14 +114,14 @@ class _EbookCommentsScreenWidgetState extends State<EbookCommentsScreenWidget> {
   Widget _buildSegmentedFilter() {
     return SegmentedButton(
       showSelectedIcon: false,
-      segments: const [
+      segments: [
         ButtonSegment<CommentSorts>(
           value: CommentSorts.mostRecent,
-          label: Text("Newest"),
+          label: Text(CommentSorts.mostRecent.label),
         ),
         ButtonSegment<CommentSorts>(
           value: CommentSorts.mostPopular,
-          label: Text("Most popular"),
+          label: Text(CommentSorts.mostPopular.label),
         ),
       ],
       selected: <CommentSorts>{_commentFilterValues.sort},
@@ -98,12 +133,31 @@ class _EbookCommentsScreenWidgetState extends State<EbookCommentsScreenWidget> {
     );
   }
 
+  Widget _buildCommentCount() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8.0),
+      child: Text("${_totalCount.toString()} comments"),
+    );
+  }
+
   Widget _buildCommentList() {
     return ListView.builder(
       scrollDirection: Axis.vertical,
+      physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,
-      itemCount: 25,
+      itemCount: _comments.length + 1,
       itemBuilder: (context, index) {
+        if (index >= _comments.length) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 32.0),
+            child: Center(
+              child: _hasMore ? const CircularProgressIndicator() : Container(),
+            ),
+          );
+        }
+
+        var comment = _comments[index];
+
         return Card(
           child: Padding(
             padding: const EdgeInsets.all(10.0),
@@ -111,24 +165,24 @@ class _EbookCommentsScreenWidgetState extends State<EbookCommentsScreenWidget> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "User #1",
-                  style: TextStyle(
+                  comment.user?.username ?? "Unknown",
+                  style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 14.0,
                   ),
                 ),
                 const SizedBox(height: 4.0),
                 Text(
-                  "Comment content",
-                  style: TextStyle(fontSize: 14.0),
+                  comment.content,
+                  style: const TextStyle(fontSize: 14.0),
                 ),
                 const SizedBox(height: 8.0),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      "1st of January, 2024",
-                      style: TextStyle(
+                      timeAgoSinceDate(date: comment.dateAdded),
+                      style: const TextStyle(
                         fontSize: 12.0,
                         color: Colors.grey,
                       ),
@@ -146,9 +200,9 @@ class _EbookCommentsScreenWidgetState extends State<EbookCommentsScreenWidget> {
                           icon: const Icon(Icons.favorite_border),
                         ),
                         const SizedBox(width: 4.0),
-                        const Text(
-                          "2 likes",
-                          style: TextStyle(
+                        Text(
+                          "${comment.likeCount.toString()} likes",
+                          style: const TextStyle(
                             fontSize: 12.0,
                             color: Colors.grey,
                           ),
@@ -163,6 +217,99 @@ class _EbookCommentsScreenWidgetState extends State<EbookCommentsScreenWidget> {
         );
       },
     );
+  }
+
+  void _submitNewComment() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    ProgressIndicatorDialog().show(context, text: "Submitting...");
+
+    var newComment = CommentInsert(
+      content: _commentController.text,
+      eBookId: widget.ebook.id,
+      eBookChapterId: null,
+    );
+
+    await _commentProvider.postComment(newComment).then((result) {
+      ProgressIndicatorDialog().dismiss();
+      switch (result) {
+        case Success(data: final d):
+          _refresh();
+          _showAddComment();
+          showSnackbar(
+            context: context,
+            content: "Posted comment",
+          );
+        case Failure(exception: final e):
+          showSnackbar(context: context, content: e.toString());
+      }
+    });
+  }
+
+  Future _getComments() async {
+    if (_isLoading) return;
+    _isLoading = true;
+
+    List<Comment> commentResult = [];
+    var search = CommentSearch(eBookId: widget.ebook.id);
+
+    await _commentProvider
+        .getComments(
+      search,
+      page: _page,
+      pageSize: _pageSize,
+      orderBy:
+          "${_commentFilterValues.sort.apiValue}:${_commentFilterValues.sortDirection.apiValue}",
+    )
+        .then((result) {
+      switch (result) {
+        case Success(data: final d):
+          commentResult = d.result;
+          _totalCount = d.totalCount!;
+        case Failure(exception: final e):
+          showErrorDialog(context: context, content: Text(e.toString()));
+      }
+    });
+
+    setState(() {
+      _page++;
+      _isLoading = false;
+
+      if (commentResult.length < _pageSize) {
+        _hasMore = false;
+      }
+
+      _comments.addAll(commentResult);
+    });
+  }
+
+  Future _refresh() async {
+    setState(() {
+      _isLoading = false;
+      _hasMore = true;
+      _page = 1;
+      _comments.clear();
+    });
+
+    _getComments();
+  }
+
+  @override
+  void initState() {
+    _commentProvider = context.read<CommentProvider>();
+    super.initState();
+
+    Future.microtask(() => _getComments());
+
+    _scrollController.addListener(() {
+      if (_scrollController.position.maxScrollExtent ==
+          _scrollController.offset) {
+        _logger.info("Reached the end, should fetch more comments!");
+        _getComments();
+      }
+    });
   }
 
   @override
@@ -188,11 +335,19 @@ class _EbookCommentsScreenWidgetState extends State<EbookCommentsScreenWidget> {
                 Builder(builder: (context) => _buildCommentAddButton()),
               ],
             ),
+            Builder(builder: (context) => _buildCommentCount()),
             Builder(builder: (context) => _buildCommentAddField()),
             const Divider(height: 24.0),
             Expanded(
-              child: Builder(
-                builder: (context) => _buildCommentList(),
+              child: RefreshIndicator(
+                onRefresh: _refresh,
+                child: SingleChildScrollView(
+                  controller: _scrollController,
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: Builder(
+                    builder: (context) => _buildCommentList(),
+                  ),
+                ),
               ),
             ),
           ],
