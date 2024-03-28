@@ -21,13 +21,19 @@ class CommentProvider extends BaseProvider<Comment> {
     int? pageSize,
     String? orderBy,
   }) async {
+    var accessToken = await SecureStore.getValue("access_token");
+
     try {
       var map = search.toJson();
       map["page"] = page;
       map["pageSize"] = pageSize;
       map["orderBy"] = orderBy;
 
-      var result = await get(filter: map);
+      var result = await get(
+        filter: map,
+        bearerToken: accessToken ?? "",
+        retryForRefresh: true,
+      );
 
       return Success(result);
     } on BaseException catch (error) {

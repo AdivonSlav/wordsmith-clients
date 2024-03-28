@@ -40,6 +40,7 @@ class _EbookCommentsScreenWidgetState extends State<EbookCommentsScreenWidget> {
   final _commentController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
+  final Color _likeColor = const Color(0xFFFF9529);
   final List<Comment> _comments = [];
   final CommentFilterValues _commentFilterValues = CommentFilterValues(
     sort: CommentSorts.mostRecent,
@@ -50,8 +51,8 @@ class _EbookCommentsScreenWidgetState extends State<EbookCommentsScreenWidget> {
   int _page = 1;
   final int _pageSize = 15;
   int _totalCount = 0;
-
   bool _showCommentAdd = false;
+  bool _likingInProgress = false;
 
   void _showAddComment() {
     if (!widget.isInLibrary) {
@@ -120,14 +121,15 @@ class _EbookCommentsScreenWidgetState extends State<EbookCommentsScreenWidget> {
           label: Text(CommentSorts.mostRecent.label),
         ),
         ButtonSegment<CommentSorts>(
-          value: CommentSorts.mostPopular,
-          label: Text(CommentSorts.mostPopular.label),
+          value: CommentSorts.mostLiked,
+          label: Text(CommentSorts.mostLiked.label),
         ),
       ],
       selected: <CommentSorts>{_commentFilterValues.sort},
       onSelectionChanged: (Set<CommentSorts> newSelection) {
         setState(() {
           _commentFilterValues.sort = newSelection.first;
+          _refresh();
         });
       },
     );
@@ -190,14 +192,16 @@ class _EbookCommentsScreenWidgetState extends State<EbookCommentsScreenWidget> {
                     Row(
                       children: [
                         IconButton(
-                          onPressed: () {},
+                          onPressed: () => _likeComment(index),
                           iconSize: 24.0,
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(),
                           style: const ButtonStyle(
                             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           ),
-                          icon: const Icon(Icons.favorite_border),
+                          icon: !comment.hasLiked
+                              ? const Icon(Icons.thumb_up_alt_outlined)
+                              : Icon(Icons.thumb_up_alt, color: _likeColor),
                         ),
                         const SizedBox(width: 4.0),
                         Text(
@@ -235,7 +239,7 @@ class _EbookCommentsScreenWidgetState extends State<EbookCommentsScreenWidget> {
     await _commentProvider.postComment(newComment).then((result) {
       ProgressIndicatorDialog().dismiss();
       switch (result) {
-        case Success(data: final d):
+        case Success():
           _refresh();
           _showAddComment();
           showSnackbar(
@@ -246,6 +250,41 @@ class _EbookCommentsScreenWidgetState extends State<EbookCommentsScreenWidget> {
           showSnackbar(context: context, content: e.toString());
       }
     });
+  }
+
+  void _likeComment(int index) async {
+    if (_likingInProgress) {
+      return;
+    }
+    _likingInProgress = true;
+
+    var comment = _comments[index];
+
+    if (!comment.hasLiked) {
+      await _commentProvider.likeComment(comment.id).then((result) {
+        switch (result) {
+          case Success(data: final d):
+            setState(() {
+              _comments[index] = d.result!;
+              _likingInProgress = false;
+            });
+          case Failure(exception: final e):
+            showSnackbar(context: context, content: e.toString());
+        }
+      });
+    } else {
+      await _commentProvider.removeLike(comment.id).then((result) {
+        switch (result) {
+          case Success(data: final d):
+            setState(() {
+              _comments[index] = d.result!;
+              _likingInProgress = false;
+            });
+          case Failure(exception: final e):
+            showSnackbar(context: context, content: e.toString());
+        }
+      });
+    }
   }
 
   Future _getComments() async {

@@ -2,7 +2,7 @@ import 'package:wordsmith_utils/models/sorting_directions.dart';
 
 enum CommentSorts {
   mostRecent,
-  mostPopular,
+  mostLiked,
 }
 
 enum CommentSortDirections {
@@ -15,8 +15,8 @@ extension CommentSortsExtension on CommentSorts {
     switch (this) {
       case CommentSorts.mostRecent:
         return "DateAdded";
-      case CommentSorts.mostPopular:
-        return "TODO";
+      case CommentSorts.mostLiked:
+        return "LikeCount";
     }
   }
 
@@ -24,8 +24,8 @@ extension CommentSortsExtension on CommentSorts {
     switch (this) {
       case CommentSorts.mostRecent:
         return "Most recent";
-      case CommentSorts.mostPopular:
-        return "Most popular";
+      case CommentSorts.mostLiked:
+        return "Most liked";
     }
   }
 }
