@@ -50,6 +50,35 @@ class _ReaderScreenWidgetState extends State<ReaderScreenWidget> {
     return null;
   }
 
+  Widget _buildDrawer() {
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: <Widget>[
+          DrawerHeader(
+            child: Text(widget.indexModel.title),
+          ),
+          ListTile(
+            title: const Text("Comments"),
+            leading: const Icon(Icons.comment),
+            onTap: () {},
+          ),
+          ExpansionTile(
+            title: const Text("Chapters"),
+            leading: const Icon(Icons.layers),
+            children: [
+              EpubViewTableOfContents(
+                controller: _epubController,
+                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   void initState() {
     _openEpub();
@@ -66,11 +95,7 @@ class _ReaderScreenWidgetState extends State<ReaderScreenWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _buildAppBar(),
-      drawer: Drawer(
-        child: EpubViewTableOfContents(
-          controller: _epubController,
-        ),
-      ),
+      drawer: _buildDrawer(),
       body: EpubView(
         controller: _epubController,
         onDocumentLoaded: (document) =>
