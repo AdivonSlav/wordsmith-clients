@@ -10,7 +10,6 @@ import 'package:wordsmith_utils/logger.dart';
 import 'package:wordsmith_utils/models/comment/comment.dart';
 import 'package:wordsmith_utils/models/comment/comment_insert.dart';
 import 'package:wordsmith_utils/models/comment/comment_search.dart';
-import 'package:wordsmith_utils/models/ebook/ebook.dart';
 import 'package:wordsmith_utils/models/result.dart';
 import 'package:wordsmith_utils/models/sorting_directions.dart';
 import 'package:wordsmith_utils/providers/auth_provider.dart';
@@ -19,12 +18,12 @@ import 'package:wordsmith_utils/show_snackbar.dart';
 import 'package:wordsmith_utils/validators.dart';
 
 class EbookCommentsScreenWidget extends StatefulWidget {
-  final Ebook ebook;
+  final int ebookId;
   final bool isInLibrary;
 
   const EbookCommentsScreenWidget({
     super.key,
-    required this.ebook,
+    required this.ebookId,
     required this.isInLibrary,
   });
 
@@ -249,7 +248,7 @@ class _EbookCommentsScreenWidgetState extends State<EbookCommentsScreenWidget> {
 
     var newComment = CommentInsert(
       content: _commentController.text,
-      eBookId: widget.ebook.id,
+      eBookId: widget.ebookId,
       eBookChapterId: null,
     );
 
@@ -352,7 +351,7 @@ class _EbookCommentsScreenWidgetState extends State<EbookCommentsScreenWidget> {
     _isLoading = true;
 
     List<Comment> commentResult = [];
-    var search = CommentSearch(eBookId: widget.ebook.id);
+    var search = CommentSearch(eBookId: widget.ebookId);
 
     await _commentProvider
         .getComments(

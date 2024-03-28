@@ -53,7 +53,7 @@ class _EbookScreenWidget extends State<EbookScreenWidget> {
   void _showCommentsScreen(Ebook ebook) async {
     Navigator.of(context).push(MaterialPageRoute(
       builder: (context) => EbookCommentsScreenWidget(
-          ebook: ebook, isInLibrary: _userLibrary != null),
+          ebookId: ebook.id, isInLibrary: _userLibrary != null),
     ));
   }
 

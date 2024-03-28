@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:epub_view/epub_view.dart';
 import 'package:flutter/material.dart';
+import 'package:wordsmith_mobile/screens/ebook_comments_screen.dart';
 import 'package:wordsmith_mobile/utils/indexers/models/ebook_index_model.dart';
 import 'package:wordsmith_utils/logger.dart';
 
@@ -19,11 +20,20 @@ class _ReaderScreenWidgetState extends State<ReaderScreenWidget> {
   final _selectedTextController = TextEditingController();
   late EpubController _epubController;
 
-  bool _showAppBar = true;
+  final bool _showAppBar = true;
 
   void _openEpub() async {
     var epubFile = File(widget.indexModel.path);
     _epubController = EpubController(document: EpubDocument.openFile(epubFile));
+  }
+
+  void _openEbookComments() async {
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (context) => EbookCommentsScreenWidget(
+        ebookId: widget.indexModel.id,
+        isInLibrary: true,
+      ),
+    ));
   }
 
   PreferredSizeWidget? _buildAppBar() {
@@ -61,7 +71,7 @@ class _ReaderScreenWidgetState extends State<ReaderScreenWidget> {
           ListTile(
             title: const Text("Comments"),
             leading: const Icon(Icons.comment),
-            onTap: () {},
+            onTap: () => _openEbookComments(),
           ),
           ExpansionTile(
             title: const Text("Chapters"),
