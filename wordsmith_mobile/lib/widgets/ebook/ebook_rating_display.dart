@@ -247,6 +247,7 @@ class _EbookRatingDisplayWidgetState extends State<EbookRatingDisplayWidget> {
         switch (result) {
           case Success():
             _getRatingStatistics();
+            _getRatingForCurrentUser();
           case Failure(exception: final e):
             showSnackbar(context: context, content: e.toString());
         }

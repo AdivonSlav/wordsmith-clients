@@ -237,16 +237,6 @@ class _EbookScreenWidget extends State<EbookScreenWidget> {
                               Padding(
                                 padding: const EdgeInsets.only(right: 12.0),
                                 child: IconButton(
-                                  icon: _userLibrary == null
-                                      ? const Icon(Icons.add_circle_outline)
-                                      : const Icon(Icons.check_circle),
-                                  onPressed: () =>
-                                      _showAddToLibraryDialog(ebook),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(right: 12.0),
-                                child: IconButton(
                                   onPressed: () {},
                                   icon: const Icon(Icons.favorite_outline),
                                 ),
@@ -255,7 +245,7 @@ class _EbookScreenWidget extends State<EbookScreenWidget> {
                                 padding: const EdgeInsets.only(right: 12.0),
                                 child: IconButton(
                                   onPressed: () => _showRatingDialog(ebook),
-                                  icon: const Icon(Icons.thumb_up),
+                                  icon: const Icon(Icons.star),
                                 ),
                               ),
                               Padding(
@@ -263,6 +253,19 @@ class _EbookScreenWidget extends State<EbookScreenWidget> {
                                 child: IconButton(
                                   onPressed: () => _showCommentsScreen(ebook),
                                   icon: const Icon(Icons.comment),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(right: 12.0),
+                                child: ElevatedButton.icon(
+                                  label: _userLibrary == null
+                                      ? const Text("Add to library")
+                                      : const Text("Added"),
+                                  icon: _userLibrary == null
+                                      ? const Icon(Icons.add_circle_outline)
+                                      : const Icon(Icons.check_circle),
+                                  onPressed: () =>
+                                      _showAddToLibraryDialog(ebook),
                                 ),
                               ),
                             ],

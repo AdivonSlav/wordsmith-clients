@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
 import 'package:wordsmith_mobile/utils/filters/comment_filter_values.dart';
@@ -338,7 +337,7 @@ class _EbookCommentsScreenWidgetState extends State<EbookCommentsScreenWidget> {
 
     await _commentProvider.deleteComment(comment.id).then((result) {
       switch (result) {
-        case Success(data: final d):
+        case Success():
           _refresh();
           _deletingInProgress = false;
         case Failure(exception: final e):
