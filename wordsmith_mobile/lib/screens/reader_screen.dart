@@ -39,15 +39,19 @@ class _ReaderScreenWidgetState extends State<ReaderScreenWidget> {
   PreferredSizeWidget? _buildAppBar() {
     if (_showAppBar) {
       return AppBar(
-        title: EpubViewActualChapter(
-          controller: _epubController,
-          builder: (chapterValue) {
-            return Text(
-              chapterValue?.chapter?.Title?.replaceAll('\n', '').trim() ?? '',
-              textAlign: TextAlign.start,
-            );
-          },
+        title: Text(
+          widget.indexModel.title,
+          style: const TextStyle(fontSize: 18.0),
         ),
+        // title: EpubViewActualChapter(
+        //   controller: _epubController,
+        //   builder: (chapterValue) {
+        //     return Text(
+        //       chapterValue?.chapter?.Title?.replaceAll('\n', '').trim() ?? '',
+        //       textAlign: TextAlign.start,
+        //     );
+        //   },
+        // ),
         actions: <Widget>[
           IconButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -78,9 +82,22 @@ class _ReaderScreenWidgetState extends State<ReaderScreenWidget> {
             leading: const Icon(Icons.layers),
             children: [
               EpubViewTableOfContents(
+                padding: EdgeInsets.zero,
                 controller: _epubController,
                 physics: const NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
+                itemBuilder: (context, index, chapter, itemCount) {
+                  return ListTile(
+                    title: Text(
+                      chapter.title!.trim(),
+                      style: const TextStyle(
+                        fontSize: 14.0,
+                      ),
+                    ),
+                    onTap: () =>
+                        _epubController.scrollTo(index: chapter.startIndex),
+                  );
+                },
               ),
             ],
           ),
