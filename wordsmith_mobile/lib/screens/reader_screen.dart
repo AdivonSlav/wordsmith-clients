@@ -53,10 +53,7 @@ class _ReaderScreenWidgetState extends State<ReaderScreenWidget> {
         //   },
         // ),
         actions: <Widget>[
-          IconButton(
-            onPressed: () => Navigator.of(context).pop(),
-            icon: const Icon(Icons.arrow_back),
-          ),
+          BackButton(),
         ],
       );
     }
