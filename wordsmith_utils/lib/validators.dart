@@ -90,6 +90,18 @@ String? validateCategoryName(String? value) {
   return null;
 }
 
+String? validateCommentContent(String? value) {
+  if (value == null || value.isEmpty) {
+    return "Enter your comment!";
+  }
+
+  if (value.length < 5) {
+    return "Comment length must be 5 characters or more!";
+  }
+
+  return null;
+}
+
 // String? validatePrice(String? value) {
 //   if (value == null) {
 //     return "You must provide a value";

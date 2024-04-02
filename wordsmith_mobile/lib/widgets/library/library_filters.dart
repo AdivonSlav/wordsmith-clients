@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:wordsmith_mobile/utils/library_filter_values.dart';
+import 'package:wordsmith_mobile/utils/filters/library_filter_values.dart';
 import 'package:wordsmith_utils/models/maturity_rating/maturity_rating.dart';
 import 'package:wordsmith_utils/models/query_result.dart';
 import 'package:wordsmith_utils/models/result.dart';

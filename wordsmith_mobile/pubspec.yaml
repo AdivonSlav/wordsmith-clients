@@ -22,6 +22,9 @@ dependencies:
   mime: ^1.0.4
   font_awesome_flutter: ^10.7.0
   webview_flutter: ^4.7.0
+  cupertino_icons: ^1.0.2
+  provider: ^6.1.2
+  flutter_rating_bar: ^4.0.1
 
   wordsmith_utils:
     path: ../wordsmith_utils
@@ -31,9 +34,6 @@ dependencies:
       url: https://github.com/AdivonSlav/packages.flutter
       ref: dev
       path: packages/epub_view/
-
-  cupertino_icons: ^1.0.2
-  provider: ^6.1.2
 
 dev_dependencies:
   flutter_test:

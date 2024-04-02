@@ -109,16 +109,16 @@ packages:
     dependency: "direct main"
     description:
       name: currency_text_input_formatter
-      sha256: "27edf2ac1564c2968d711c1849562d668afb4fae2fe2f6a81e6c072f366fc2e5"
+      sha256: "4b7b963be72c7cd3c8309ba68c35be3d7d53de8f1f313b8132c00415934905b6"
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.13"
+    version: "2.1.14"
   epub_view:
     dependency: "direct main"
     description:
       path: "packages/epub_view"
       ref: dev
-      resolved-ref: "8342d0bda09f216528a98ad86cf3d558641d27ae"
+      resolved-ref: "89390ea0d8884905bb57b12f15349b3cec9e449e"
       url: "https://github.com/AdivonSlav/packages.flutter"
     source: git
     version: "3.2.0"
@@ -263,6 +263,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.3"
+  flutter_rating_bar:
+    dependency: "direct main"
+    description:
+      name: flutter_rating_bar
+      sha256: d2af03469eac832c591a1eba47c91ecc871fe5708e69967073c043b2d775ed93
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.0.1"
   flutter_secure_storage:
     dependency: transitive
     description:
@@ -349,10 +357,10 @@ packages:
     dependency: transitive
     description:
       name: http
-      sha256: "5895291c13fa8a3bd82e76d5627f69e0d85ca6a30dcac95c4ea19a5d555879c2"
+      sha256: "761a297c042deedc1ffbb156d6e2af13886bb305c2a343a4d972504cd67dd938"
       url: "https://pub.dev"
     source: hosted
-    version: "0.13.6"
+    version: "1.2.1"
   http_parser:
     dependency: transitive
     description:
@@ -674,10 +682,10 @@ packages:
     dependency: transitive
     description:
       name: sqflite_common
-      sha256: "28d8c66baee4968519fb8bd6cdbedad982d6e53359091f0b74544a9f32ec72d5"
+      sha256: "3da423ce7baf868be70e2c0976c28a1bb2f73644268b7ffa7d2e08eab71f16a4"
       url: "https://pub.dev"
     source: hosted
-    version: "2.5.3"
+    version: "2.5.4"
   stack_trace:
     dependency: transitive
     description:
@@ -802,10 +810,10 @@ packages:
     dependency: transitive
     description:
       name: win32
-      sha256: "8cb58b45c47dcb42ab3651533626161d6b67a2921917d8d429791f76972b3480"
+      sha256: "0a989dc7ca2bb51eac91e8fd00851297cfffd641aa7538b165c62637ca0eaa4a"
       url: "https://pub.dev"
     source: hosted
-    version: "5.3.0"
+    version: "5.4.0"
   wordsmith_utils:
     dependency: "direct main"
     description:

@@ -15,7 +15,7 @@ dependencies:
   file_selector: ^1.0.1
   logging: ^1.2.0
   window_manager: ^0.3.7
-  intl: ^0.18.1
+  intl: ^0.19.0
   flutter_dotenv: ^5.1.0
   wordsmith_utils:
     path: ../wordsmith_utils

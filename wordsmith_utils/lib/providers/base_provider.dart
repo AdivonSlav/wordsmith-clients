@@ -296,12 +296,14 @@ abstract class BaseProvider<T> extends AuthProvider {
   /// - [bearerToken]: Bearer token if the request needs to be authorized
   /// - [retryForRefresh]: If set to true and status 401 is the initial response, the provider will attempt to refresh the access token and attempt the request again
   Future<EntityResult<T>> delete(
-      {required int id,
+      {int? id,
       String additionalRoute = "",
       String contentType = "",
       String bearerToken = "",
       bool retryForRefresh = false}) async {
-    var url = "$apiUrl$_endpoint$additionalRoute/$id";
+    var url = "$apiUrl$_endpoint$additionalRoute";
+
+    if (id != null) url += "/$id";
 
     Uri uri;
 

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:wordsmith_mobile/screens/ebook_comments_screen.dart';
 import 'package:wordsmith_mobile/widgets/ebook/ebook_image.dart';
 import 'package:wordsmith_mobile/widgets/ebook/ebook_purchase.dart';
-import 'package:wordsmith_mobile/widgets/ebook/ebook_rating_stars.dart';
+import 'package:wordsmith_mobile/widgets/ebook/ebook_rating_display.dart';
+import 'package:wordsmith_mobile/widgets/ebook/ebook_rating_minimal_display.dart';
 import 'package:wordsmith_utils/dialogs/progress_indicator_dialog.dart';
 import 'package:wordsmith_utils/formatters/datetime_formatter.dart';
 import 'package:wordsmith_utils/formatters/number_formatter.dart';
@@ -36,6 +38,23 @@ class _EbookScreenWidget extends State<EbookScreenWidget> {
     }
 
     return NumberFormatter.formatCurrency(price);
+  }
+
+  void _showRatingDialog(Ebook ebook) async {
+    await showDialog(
+      context: context,
+      builder: (context) => EbookRatingDisplayWidget(
+        ebook: ebook,
+        isInLibrary: _userLibrary != null,
+      ),
+    );
+  }
+
+  void _showCommentsScreen(Ebook ebook) async {
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (context) => EbookCommentsScreenWidget(
+          ebookId: ebook.id, isInLibrary: _userLibrary != null),
+    ));
   }
 
   void _showAddToLibraryDialog(Ebook ebook) async {
@@ -216,20 +235,37 @@ class _EbookScreenWidget extends State<EbookScreenWidget> {
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               Padding(
-                                padding: const EdgeInsets.only(right: 14.0),
+                                padding: const EdgeInsets.only(right: 12.0),
                                 child: IconButton(
+                                  onPressed: () {},
+                                  icon: const Icon(Icons.favorite_outline),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(right: 12.0),
+                                child: IconButton(
+                                  onPressed: () => _showRatingDialog(ebook),
+                                  icon: const Icon(Icons.star),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(right: 12.0),
+                                child: IconButton(
+                                  onPressed: () => _showCommentsScreen(ebook),
+                                  icon: const Icon(Icons.comment),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(right: 12.0),
+                                child: ElevatedButton.icon(
+                                  label: _userLibrary == null
+                                      ? const Text("Add to library")
+                                      : const Text("Added"),
                                   icon: _userLibrary == null
                                       ? const Icon(Icons.add_circle_outline)
                                       : const Icon(Icons.check_circle),
                                   onPressed: () =>
                                       _showAddToLibraryDialog(ebook),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(right: 14.0),
-                                child: IconButton(
-                                  onPressed: () {},
-                                  icon: const Icon(Icons.favorite_outline),
                                 ),
                               ),
                             ],
@@ -269,20 +305,8 @@ class _EbookScreenWidget extends State<EbookScreenWidget> {
                                 Padding(
                                   padding:
                                       const EdgeInsets.symmetric(vertical: 8.0),
-                                  child: Row(
-                                    children: <Widget>[
-                                      EbookRatingStarsWidget(
-                                          rating: ebook.ratingAverage),
-                                      const SizedBox(width: 12.0),
-                                      Text(
-                                        "${ebook.ratingAverage ?? "0.0"} (0 ratings)",
-                                        style: const TextStyle(
-                                            fontSize: 16.0,
-                                            color: Colors.grey,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ],
-                                  ),
+                                  child: EbookRatingMinimalDisplayWidget(
+                                      rating: ebook.ratingAverage),
                                 ),
                                 Text(
                                   _formatPrice(ebook.price),
