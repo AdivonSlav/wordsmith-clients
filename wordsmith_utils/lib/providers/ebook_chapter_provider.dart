@@ -38,4 +38,9 @@ class EbookChapterProvider extends BaseProvider<EbookChapter> {
           type: ExceptionType.internalAppError));
     }
   }
+
+  @override
+  EbookChapter fromJson(data) {
+    return EbookChapter.fromJson(data);
+  }
 }

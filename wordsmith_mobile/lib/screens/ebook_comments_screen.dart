@@ -10,10 +10,13 @@ import 'package:wordsmith_utils/logger.dart';
 import 'package:wordsmith_utils/models/comment/comment.dart';
 import 'package:wordsmith_utils/models/comment/comment_insert.dart';
 import 'package:wordsmith_utils/models/comment/comment_search.dart';
+import 'package:wordsmith_utils/models/ebook_chapter/ebook_chapter.dart';
+import 'package:wordsmith_utils/models/ebook_chapter/ebook_chapter_search.dart';
 import 'package:wordsmith_utils/models/result.dart';
 import 'package:wordsmith_utils/models/sorting_directions.dart';
 import 'package:wordsmith_utils/providers/auth_provider.dart';
 import 'package:wordsmith_utils/providers/comment_provider.dart';
+import 'package:wordsmith_utils/providers/ebook_chapter_provider.dart';
 import 'package:wordsmith_utils/show_snackbar.dart';
 import 'package:wordsmith_utils/validators.dart';
 
@@ -35,6 +38,7 @@ class EbookCommentsScreenWidget extends StatefulWidget {
 class _EbookCommentsScreenWidgetState extends State<EbookCommentsScreenWidget> {
   final _logger = LogManager.getLogger("EbookCommentsScreen");
   late CommentProvider _commentProvider;
+  late EbookChapterProvider _chapterProvider;
 
   final _scrollController = ScrollController();
   final _commentController = TextEditingController();
@@ -42,11 +46,14 @@ class _EbookCommentsScreenWidgetState extends State<EbookCommentsScreenWidget> {
 
   final Color _likeColor = const Color(0xFFFF9529);
   final List<Comment> _comments = [];
+  List<EbookChapter> _chapters = [];
+  int? _selectedChapterId;
   final CommentFilterValues _commentFilterValues = CommentFilterValues(
     sort: CommentSorts.mostRecent,
     sortDirection: SortDirections.descending,
   );
-  bool _isLoading = false;
+  bool _isLoadingComments = false;
+  bool _isLoadingChapters = false;
   bool _hasMore = true;
   int _page = 1;
   final int _pageSize = 15;
@@ -136,6 +143,55 @@ class _EbookCommentsScreenWidgetState extends State<EbookCommentsScreenWidget> {
     );
   }
 
+  Widget _buildChapterSelect() {
+    return Row(
+      children: [
+        const Text("Select a chapter:"),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: DropdownButton(
+              isExpanded: true,
+              value: _selectedChapterId,
+              onChanged: (value) {
+                setState(() {
+                  _selectedChapterId = value;
+                  _refresh();
+                });
+              },
+              selectedItemBuilder: (context) {
+                return _chapters.map<Widget>((value) {
+                  return Container(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      value.chapterName,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  );
+                }).toList();
+              },
+              items: _chapters.map<DropdownMenuItem<int>>((chapter) {
+                return DropdownMenuItem(
+                  value: chapter.id,
+                  child: Text(chapter.chapterName),
+                );
+              }).toList(),
+            ),
+          ),
+        ),
+        IconButton(
+          onPressed: () {
+            setState(() {
+              _selectedChapterId = null;
+              _refresh();
+            });
+          },
+          icon: const Icon(Icons.clear),
+        ),
+      ],
+    );
+  }
+
   Widget _buildCommentCount() {
     return Padding(
       padding: const EdgeInsets.only(top: 8.0),
@@ -167,12 +223,24 @@ class _EbookCommentsScreenWidgetState extends State<EbookCommentsScreenWidget> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  comment.user?.username ?? "Unknown",
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14.0,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      comment.user?.username ?? "Unknown",
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14.0,
+                      ),
+                    ),
+                    Text(
+                      comment.eBookChapter?.chapterName ?? "",
+                      style: const TextStyle(
+                        fontSize: 12.0,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 4.0),
                 Text(
@@ -249,7 +317,7 @@ class _EbookCommentsScreenWidgetState extends State<EbookCommentsScreenWidget> {
     var newComment = CommentInsert(
       content: _commentController.text,
       eBookId: widget.ebookId,
-      eBookChapterId: null,
+      eBookChapterId: _selectedChapterId,
     );
 
     await _commentProvider.postComment(newComment).then((result) {
@@ -347,11 +415,14 @@ class _EbookCommentsScreenWidgetState extends State<EbookCommentsScreenWidget> {
   }
 
   Future _getComments() async {
-    if (_isLoading) return;
-    _isLoading = true;
+    if (_isLoadingComments) return;
+    _isLoadingComments = true;
 
     List<Comment> commentResult = [];
-    var search = CommentSearch(eBookId: widget.ebookId);
+    var search = CommentSearch(
+      eBookId: widget.ebookId,
+      eBookChapterId: _selectedChapterId,
+    );
 
     await _commentProvider
         .getComments(
@@ -371,35 +442,66 @@ class _EbookCommentsScreenWidgetState extends State<EbookCommentsScreenWidget> {
       }
     });
 
-    setState(() {
-      _page++;
-      _isLoading = false;
+    if (mounted) {
+      setState(() {
+        _page++;
+        _isLoadingComments = false;
 
-      if (commentResult.length < _pageSize) {
-        _hasMore = false;
+        if (commentResult.length < _pageSize) {
+          _hasMore = false;
+        }
+
+        _comments.addAll(commentResult);
+      });
+    }
+  }
+
+  Future _getChapters() async {
+    if (_isLoadingChapters) return;
+    _isLoadingChapters = true;
+
+    var search = EbookChapterSearch(eBookId: widget.ebookId);
+
+    await _chapterProvider
+        .getChapters(search, pageSize: 1000, orderBy: "ChapterNumber:asc")
+        .then((result) {
+      switch (result) {
+        case Success(data: final d):
+          _isLoadingChapters = false;
+          if (mounted) {
+            setState(() {
+              _chapters = d.result;
+            });
+          }
+        case Failure(exception: final e):
+          showErrorDialog(context: context, content: Text(e.toString()));
       }
-
-      _comments.addAll(commentResult);
     });
   }
 
   Future _refresh() async {
-    setState(() {
-      _isLoading = false;
-      _hasMore = true;
-      _page = 1;
-      _comments.clear();
-    });
+    if (mounted) {
+      setState(() {
+        _isLoadingComments = false;
+        _hasMore = true;
+        _page = 1;
+        _comments.clear();
+      });
 
-    _getComments();
+      _getComments();
+    }
   }
 
   @override
   void initState() {
     _commentProvider = context.read<CommentProvider>();
+    _chapterProvider = context.read<EbookChapterProvider>();
     super.initState();
 
-    Future.microtask(() => _getComments());
+    Future.microtask(() {
+      _getComments();
+      _getChapters();
+    });
 
     _scrollController.addListener(() {
       if (_scrollController.position.maxScrollExtent ==
@@ -415,6 +517,7 @@ class _EbookCommentsScreenWidgetState extends State<EbookCommentsScreenWidget> {
     var theme = Theme.of(context);
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Text(
           "Comments",
@@ -433,6 +536,7 @@ class _EbookCommentsScreenWidgetState extends State<EbookCommentsScreenWidget> {
                 Builder(builder: (context) => _buildCommentAddButton()),
               ],
             ),
+            Builder(builder: (context) => _buildChapterSelect()),
             Builder(builder: (context) => _buildCommentCount()),
             Builder(builder: (context) => _buildCommentAddField()),
             const Divider(height: 24.0),
