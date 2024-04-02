@@ -18,18 +18,28 @@ Additonally, if on Linux, the following dependencies must be installed. An examp
 apt install libsecret-1-dev libjsoncpp-dev libsecret-1-0 libjsoncpp25
 ```
 
-### Testing credentials
+### Credentials
 
 For test purposes, the API backend provides some test accounts for the client applications.
 
 ```bash
 # Admin account
-Username: admin
+Username: orwell47
 Password: default$123
+PayPal email: orwell47@personal.com
+PayPal password: default$123
 
 # Normal user account
-Username: JohnDoe
+Username: john_doe1
 Password: default$123
+PayPal email: john_doe1@personal.com
+PayPal password: default$123
+
+# Seller user acount (will have published books)
+Username: jane_doe2
+Password: default$123
+PayPal email: jane_doe2@personal.com
+PayPal password: default$123
 ```
 
 ### Setup
