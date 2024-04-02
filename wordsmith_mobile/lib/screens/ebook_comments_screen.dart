@@ -23,11 +23,13 @@ import 'package:wordsmith_utils/validators.dart';
 class EbookCommentsScreenWidget extends StatefulWidget {
   final int ebookId;
   final bool isInLibrary;
+  final int? ebookChapterId;
 
   const EbookCommentsScreenWidget({
     super.key,
     required this.ebookId,
     required this.isInLibrary,
+    this.ebookChapterId,
   });
 
   @override
@@ -497,6 +499,8 @@ class _EbookCommentsScreenWidgetState extends State<EbookCommentsScreenWidget> {
     _commentProvider = context.read<CommentProvider>();
     _chapterProvider = context.read<EbookChapterProvider>();
     super.initState();
+
+    _selectedChapterId = widget.ebookChapterId;
 
     Future.microtask(() {
       _getComments();
