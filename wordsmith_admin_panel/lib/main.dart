@@ -1,9 +1,12 @@
+import "package:adaptive_theme/adaptive_theme.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter_dotenv/flutter_dotenv.dart";
 import "package:provider/provider.dart";
 import "package:window_manager/window_manager.dart";
+import "package:wordsmith_admin_panel/utils/themes.dart";
 import "package:wordsmith_admin_panel/widgets/dashboard.dart";
+import "package:wordsmith_utils/dialogs/progress_indicator_dialog.dart";
 import "package:wordsmith_utils/logger.dart";
 import "package:wordsmith_utils/providers/auth_provider.dart";
 import "package:wordsmith_utils/providers/base_provider.dart";
@@ -56,23 +59,17 @@ class Application extends StatelessWidget {
   Widget build(BuildContext context) {
     SizeConfig.init(context);
 
-    return MaterialApp(
-      title: "Wordsmith Admin Panel",
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.blue, brightness: Brightness.dark),
-        useMaterial3: true,
-        fontFamily: "Inter",
-        textTheme: const TextTheme(
-          headlineSmall: TextStyle(
-            fontWeight: FontWeight.normal,
-          ),
-          bodyMedium: TextStyle(
-            fontWeight: FontWeight.normal,
-          ),
-        ),
+    return AdaptiveTheme(
+      light: ThemeManager.generateLightTheme(),
+      dark: ThemeManager.generateDarkTheme(),
+      initial: AdaptiveThemeMode.dark,
+      builder: (theme, darkTheme) => MaterialApp(
+        title: "Wordsmith Admin Panel",
+        theme: theme,
+        darkTheme: darkTheme,
+        home: const DashboardWidget(title: Text("Wordsmith")),
+        navigatorKey: navigatorKey,
       ),
-      home: const DashboardWidget(title: Text("Wordsmith")),
     );
   }
 }
