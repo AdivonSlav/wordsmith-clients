@@ -9,25 +9,25 @@ import "package:wordsmith_utils/models/user/user.dart";
 import "package:wordsmith_utils/models/user/user_update.dart";
 import "package:wordsmith_utils/providers/auth_provider.dart";
 import "package:wordsmith_utils/providers/user_provider.dart";
+import "package:wordsmith_utils/show_snackbar.dart";
 import "package:wordsmith_utils/size_config.dart";
 
 class ProfileScreenWidget extends StatefulWidget {
-  ProfileScreenWidget({super.key});
-
-  final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
+  const ProfileScreenWidget({super.key});
 
   @override
   State<StatefulWidget> createState() => _ProfileScreenWidgetState();
 }
 
 class _ProfileScreenWidgetState extends State<ProfileScreenWidget> {
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
   late UserProvider _userProvider;
   late AuthProvider _authProvider;
 
-  Future _updateProfile() async {
-    String newUsername = widget._usernameController.text;
-    String newEmail = widget._emailController.text;
+  void _updateProfile() async {
+    String newUsername = _usernameController.text;
+    String newEmail = _emailController.text;
 
     var payload = UserUpdate(
       username: newUsername.isEmpty ? null : newUsername,
@@ -37,7 +37,10 @@ class _ProfileScreenWidgetState extends State<ProfileScreenWidget> {
     await _userProvider.updateLoggeduser(payload).then((result) async {
       switch (result) {
         case Success<User>():
-          await _authProvider.storeLogin(user: result.data);
+          await _authProvider.storeLogin(user: result.data).then(
+                (result) => showSnackbar(
+                    context: context, content: "Succesfully updated profile!"),
+              );
         case Failure<User>():
           showErrorDialog(
               context: context, content: Text(result.exception.toString()));
@@ -71,11 +74,15 @@ class _ProfileScreenWidgetState extends State<ProfileScreenWidget> {
   }
 
   @override
+  void initState() {
+    _userProvider = context.read<UserProvider>();
+    _authProvider = context.read<AuthProvider>();
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     if (AuthProvider.loggedUser == null) return const Placeholder();
-
-    _userProvider = Provider.of<UserProvider>(context);
-    _authProvider = Provider.of<AuthProvider>(context);
 
     return SingleChildScrollView(
       child: Padding(
@@ -92,14 +99,14 @@ class _ProfileScreenWidgetState extends State<ProfileScreenWidget> {
             ProfileInfoFieldWidget(
               labelText: "Username",
               valueText: AuthProvider.loggedUser!.username,
-              controller: widget._usernameController,
+              controller: _usernameController,
               callbackFunction: _updateProfile,
             ),
             SizedBox(height: SizeConfig.safeBlockVertical * 1.5),
             ProfileInfoFieldWidget(
               labelText: "Email",
               valueText: AuthProvider.loggedUser!.email,
-              controller: widget._emailController,
+              controller: _emailController,
               callbackFunction: _updateProfile,
             )
           ],
