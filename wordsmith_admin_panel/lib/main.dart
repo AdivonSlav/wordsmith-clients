@@ -27,39 +27,23 @@ void main() async {
     await windowManager.focus();
   });
 
-  await dotenv.load();
-  BaseProvider.apiUrl =
-      dotenv.get("API_URL", fallback: "https://localhost:6443/");
-
   if (kReleaseMode) {
     LogManager.init(LogLevel.WARNING);
   } else {
     LogManager.init(LogLevel.INFO);
   }
 
-  final mainLogger = LogManager.getLogger("Main");
-
-  FlutterError.onError = (FlutterErrorDetails details) {
-    mainLogger.severe(details.exception);
-  };
+  await dotenv.load();
+  BaseProvider.apiUrl =
+      dotenv.get("API_URL", fallback: "https://localhost:6443/");
 
   runApp(MultiProvider(
     providers: [
-      ChangeNotifierProvider(
-        create: (_) => AuthProvider(),
-      ),
-      ChangeNotifierProvider(
-        create: (_) => UserLoginProvider(),
-      ),
-      ChangeNotifierProvider(
-        create: (_) => UserProvider(),
-      ),
-      ChangeNotifierProvider(
-        create: (_) => UserReportsProvider(),
-      ),
-      ChangeNotifierProvider(
-        create: (_) => EbookReportsProvider(),
-      )
+      ChangeNotifierProvider(create: (_) => AuthProvider()),
+      ChangeNotifierProvider(create: (_) => UserLoginProvider()),
+      ChangeNotifierProvider(create: (_) => UserProvider()),
+      ChangeNotifierProvider(create: (_) => UserReportsProvider()),
+      ChangeNotifierProvider(create: (_) => EbookReportsProvider())
     ],
     child: const Application(),
   ));
