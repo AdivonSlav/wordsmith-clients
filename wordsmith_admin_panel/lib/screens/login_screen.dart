@@ -42,7 +42,7 @@ class _LoginScreenWidgetState extends State<LoginScreenWidget> {
     _logger.info("Attempting login with $username:$password");
 
     await _userLoginProvider
-        .getUserLogin(username, password)
+        .getUserLogin(username, password, "admin.client")
         .then((result) async {
       ProgressIndicatorDialog().dismiss();
       switch (result) {
