@@ -33,11 +33,11 @@ class _DashboardWidgetState extends State<DashboardWidget> {
 
   String _loadAppBarTitle(int index) {
     switch (index) {
-      case 1:
+      case 0:
         return "Profile";
-      case 2:
+      case 1:
         return "Reports";
-      case 3:
+      case 2:
         return "Ebooks";
       default:
         return "Wordsmith";
@@ -96,10 +96,6 @@ class _DashboardWidgetState extends State<DashboardWidget> {
             extended: _extended,
             destinations: _loadNavDestinations(),
             onDestinationSelected: (index) {
-              // Only allow navigation to index 0 if the user isn't logged in
-              if (index > 0 && AuthProvider.loggedUser == null) {
-                return;
-              }
               setState(() {
                 _selectedIndex = index;
               });
