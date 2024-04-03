@@ -87,22 +87,27 @@ class _DashboardWidgetState extends State<DashboardWidget> {
       return Container();
     }
 
-    return SafeArea(
-      child: NavigationRail(
-        selectedIndex: _selectedIndex,
-        labelType: _labelType,
-        extended: _extended,
-        destinations: _loadNavDestinations(),
-        onDestinationSelected: (index) {
-          // Only allow navigation to index 0 if the user isn't logged in
-          if (index > 0 && AuthProvider.loggedUser == null) {
-            return;
-          }
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-      ),
+    return Row(
+      children: [
+        const VerticalDivider(),
+        SafeArea(
+          child: NavigationRail(
+            selectedIndex: _selectedIndex,
+            labelType: _labelType,
+            extended: _extended,
+            destinations: _loadNavDestinations(),
+            onDestinationSelected: (index) {
+              // Only allow navigation to index 0 if the user isn't logged in
+              if (index > 0 && AuthProvider.loggedUser == null) {
+                return;
+              }
+              setState(() {
+                _selectedIndex = index;
+              });
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -156,7 +161,6 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                 body: Row(
                   children: <Widget>[
                     Builder(builder: (context) => _buildNavigationRail()),
-                    const VerticalDivider(),
                     Expanded(child: _page),
                   ],
                 ),
