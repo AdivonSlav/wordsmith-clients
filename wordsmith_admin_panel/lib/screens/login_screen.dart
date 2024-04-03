@@ -1,8 +1,11 @@
+import "dart:convert";
+
 import "package:flutter/material.dart";
 import "package:provider/provider.dart";
 import "package:wordsmith_utils/dialogs/progress_indicator_dialog.dart";
 import "package:wordsmith_utils/dialogs/show_error_dialog.dart";
 import "package:wordsmith_utils/models/result.dart";
+import "package:wordsmith_utils/models/user/user_login_request.dart";
 import "package:wordsmith_utils/providers/auth_provider.dart";
 import "package:wordsmith_admin_panel/widgets/input_field.dart";
 import "package:wordsmith_utils/logger.dart";
@@ -36,14 +39,30 @@ class _LoginScreenWidgetState extends State<LoginScreenWidget> {
   Future<void> _submitLogin() async {
     ProgressIndicatorDialog().show(context, text: "Logging in...");
 
-    var username = _usernameController.text;
-    var password = _passwordController.text;
+    String username = "";
+    String password = "";
+
+    try {
+      username = base64Encode(utf8.encode(_usernameController.text));
+      password = base64Encode(utf8.encode(_passwordController.text));
+    } catch (error, stackTrace) {
+      ProgressIndicatorDialog().dismiss();
+      _logger.severe("Could not login!", error, stackTrace);
+      showErrorDialog(
+          context: context,
+          content: const Text("Failed to login due to internal error!"));
+      return;
+    }
+
+    final loginRequest = UserLoginRequest(
+      username: username,
+      password: password,
+      clientId: "admin.client",
+    );
 
     _logger.info("Attempting login with $username:$password");
 
-    await _userLoginProvider
-        .getUserLogin(username, password, "admin.client")
-        .then((result) async {
+    await _userLoginProvider.getUserLogin(loginRequest).then((result) async {
       ProgressIndicatorDialog().dismiss();
       switch (result) {
         case Success(data: final d):
