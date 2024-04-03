@@ -3,7 +3,7 @@ import "package:provider/provider.dart";
 import "package:wordsmith_admin_panel/widgets/input_field.dart";
 import "package:wordsmith_admin_panel/widgets/loading.dart";
 import "package:wordsmith_admin_panel/widgets/pagination_nav.dart";
-import "package:wordsmith_admin_panel/widgets/reports_list.dart";
+import "package:wordsmith_admin_panel/widgets/reports/reports_list.dart";
 import "package:wordsmith_utils/logger.dart";
 import "package:wordsmith_utils/models/ebook_report/ebook_report.dart";
 import "package:wordsmith_utils/models/query_result.dart";

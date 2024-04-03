@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 import "package:wordsmith_admin_panel/widgets/loading.dart";
-import "package:wordsmith_admin_panel/widgets/report_dialog.dart";
+import "package:wordsmith_admin_panel/widgets/reports/report_dialog.dart";
 import "package:wordsmith_utils/formatters/datetime_formatter.dart";
 import "package:wordsmith_utils/models/ebook_report/ebook_report.dart";
 import "package:wordsmith_utils/models/query_result.dart";

@@ -5,7 +5,7 @@ import "package:flutter_dotenv/flutter_dotenv.dart";
 import "package:provider/provider.dart";
 import "package:window_manager/window_manager.dart";
 import "package:wordsmith_admin_panel/utils/themes.dart";
-import "package:wordsmith_admin_panel/widgets/dashboard.dart";
+import "package:wordsmith_admin_panel/widgets/dashboard/dashboard.dart";
 import "package:wordsmith_utils/dialogs/progress_indicator_dialog.dart";
 import "package:wordsmith_utils/logger.dart";
 import "package:wordsmith_utils/providers/auth_provider.dart";

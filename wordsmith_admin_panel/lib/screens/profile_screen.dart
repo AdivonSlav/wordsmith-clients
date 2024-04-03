@@ -1,8 +1,8 @@
 import "package:file_selector/file_selector.dart";
 import "package:flutter/material.dart";
 import "package:provider/provider.dart";
-import "package:wordsmith_admin_panel/widgets/profile_image.dart";
-import "package:wordsmith_admin_panel/widgets/profile_info_field.dart";
+import "package:wordsmith_admin_panel/widgets/profile/profile_image.dart";
+import "package:wordsmith_admin_panel/widgets/profile/profile_info_field.dart";
 import "package:wordsmith_utils/dialogs/show_error_dialog.dart";
 import "package:wordsmith_utils/models/result.dart";
 import "package:wordsmith_utils/models/user/user.dart";
