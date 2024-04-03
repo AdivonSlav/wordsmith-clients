@@ -1,8 +1,10 @@
 import "package:wordsmith_utils/exceptions/base_exception.dart";
+import "package:wordsmith_utils/exceptions/exception_types.dart";
 import "package:wordsmith_utils/logger.dart";
 import "package:wordsmith_utils/models/query_result.dart";
 import "package:wordsmith_utils/models/result.dart";
 import "package:wordsmith_utils/models/user_report/user_report.dart";
+import "package:wordsmith_utils/models/user_report/user_report_search.dart";
 import "package:wordsmith_utils/providers/base_provider.dart";
 import "package:wordsmith_utils/secure_store.dart";
 
@@ -12,27 +14,20 @@ class UserReportsProvider extends BaseProvider<UserReport> {
   UserReportsProvider() : super("user-reports");
 
   Future<Result<QueryResult<UserReport>>> getUserReports(
-      {required int page,
-      required int pageSize,
-      String? reason,
-      DateTime? reportDate}) async {
+    UserReportSearch search, {
+    int? page,
+    int? pageSize,
+    String? orderBy,
+  }) async {
+    var accessToken = await SecureStore.getValue("access_token");
+
     try {
-      Map<String, String> queries = {
-        "page": page.toString(),
-        "pageSize": pageSize.toString(),
-      };
-
-      if (reason != null && reason.isNotEmpty) {
-        queries["reason"] = reason;
-      }
-      if (reportDate != null) {
-        queries["reportDate"] = reportDate.toIso8601String();
-      }
-
-      var accessToken = await SecureStore.getValue("access_token");
+      var map = search.toJson();
+      map["page"] = page;
+      map["pageSize"] = pageSize;
 
       var result = await get(
-        filter: queries,
+        filter: map,
         bearerToken: accessToken ?? "",
         retryForRefresh: true,
       );
@@ -41,6 +36,10 @@ class UserReportsProvider extends BaseProvider<UserReport> {
     } on BaseException catch (error) {
       _logger.severe(error);
       return Failure(error);
+    } catch (error, stackTrace) {
+      _logger.severe(error, stackTrace);
+      return Failure(BaseException("Internal app error",
+          type: ExceptionType.internalAppError));
     }
   }
 

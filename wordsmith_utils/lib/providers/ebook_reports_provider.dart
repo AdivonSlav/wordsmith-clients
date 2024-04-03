@@ -1,6 +1,8 @@
 import "package:wordsmith_utils/exceptions/base_exception.dart";
+import "package:wordsmith_utils/exceptions/exception_types.dart";
 import "package:wordsmith_utils/logger.dart";
 import "package:wordsmith_utils/models/ebook_report/ebook_report.dart";
+import "package:wordsmith_utils/models/ebook_report/ebook_report_search.dart";
 import "package:wordsmith_utils/models/query_result.dart";
 import "package:wordsmith_utils/models/result.dart";
 import "package:wordsmith_utils/providers/base_provider.dart";
@@ -12,26 +14,19 @@ class EbookReportsProvider extends BaseProvider<EbookReport> {
   EbookReportsProvider() : super("ebook-reports");
 
   Future<Result<QueryResult<EbookReport>>> getEBookReports(
-      {required int page,
-      required int pageSize,
-      String? reason,
-      DateTime? reportDate}) async {
+    EbookReportSearch search, {
+    int? page,
+    int? pageSize,
+  }) async {
     var accessToken = await SecureStore.getValue("access_token");
-    try {
-      Map<String, String> queries = {
-        "page": page.toString(),
-        "pageSize": pageSize.toString(),
-      };
 
-      if (reason != null && reason.isNotEmpty) {
-        queries["reason"] = reason;
-      }
-      if (reportDate != null) {
-        queries["reportDate"] = reportDate.toIso8601String();
-      }
+    try {
+      var map = search.toJson();
+      map["page"] = page;
+      map["pageSize"] = pageSize;
 
       var result = await get(
-        filter: queries,
+        filter: map,
         bearerToken: accessToken ?? "",
         retryForRefresh: true,
       );
@@ -40,6 +35,10 @@ class EbookReportsProvider extends BaseProvider<EbookReport> {
     } on BaseException catch (error) {
       _logger.severe(error);
       return Failure(error);
+    } catch (error, stackTrace) {
+      _logger.severe(error, stackTrace);
+      return Failure(BaseException("Internal app error",
+          type: ExceptionType.internalAppError));
     }
   }
 
