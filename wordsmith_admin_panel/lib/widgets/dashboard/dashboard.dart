@@ -89,7 +89,6 @@ class _DashboardWidgetState extends State<DashboardWidget> {
 
     return Row(
       children: [
-        const VerticalDivider(),
         SafeArea(
           child: NavigationRail(
             selectedIndex: _selectedIndex,
@@ -107,6 +106,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
             },
           ),
         ),
+        const VerticalDivider(),
       ],
     );
   }
