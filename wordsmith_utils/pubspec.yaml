@@ -11,15 +11,15 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  http:
+  http: ^1.2.1
   json_annotation: ^4.8.1
   flutter_secure_storage: ^9.0.0
-  file_selector: ^1.0.1
-  mime: ^1.0.4
+  file_selector: ^1.0.3
+  mime: ^1.0.5
   logging: ^1.2.0
   intl: ^0.19.0
   http_parser: ^4.0.2
-  provider: ^6.0.5
+  provider: ^6.1.2
 
 # Temporary override due to flutter_secure_storage breaking Linux support
 dependency_overrides:
@@ -32,8 +32,8 @@ dependency_overrides:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^2.0.0
-  build_runner: ^2.4.6
+  flutter_lints: ^3.0.2
+  build_runner: ^2.4.9
   json_serializable: ^6.7.1
 
 flutter:

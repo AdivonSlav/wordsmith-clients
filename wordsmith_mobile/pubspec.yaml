@@ -10,16 +10,15 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  file_selector: ^1.0.1
+  file_selector: ^1.0.3
   logging: ^1.2.0
   adaptive_theme: ^3.6.0
   carousel_slider: ^4.2.1
   flutter_animate: ^4.5.0
   flutter_dotenv: ^5.1.0
   path_provider: ^2.1.2
-  sqflite: ^2.3.2
-  currency_text_input_formatter: ^2.1.13
-  mime: ^1.0.4
+  sqflite: ^2.3.3
+  currency_text_input_formatter: ^2.1.14
   font_awesome_flutter: ^10.7.0
   webview_flutter: ^4.7.0
   cupertino_icons: ^1.0.2
@@ -38,7 +37,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^2.0.0
+  flutter_lints: ^3.0.2
 
 flutter:
   uses-material-design: true
