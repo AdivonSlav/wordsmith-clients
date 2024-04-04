@@ -9,6 +9,7 @@ class InputField extends StatelessWidget {
   final Widget? suffixIcon;
   final String? helperText;
   final String? Function(String? value)? validator;
+  final void Function(String? value)? onChanged;
   final bool? enabled;
 
   const InputField({
@@ -20,6 +21,7 @@ class InputField extends StatelessWidget {
     this.suffixIcon,
     this.helperText,
     this.validator,
+    this.onChanged,
     this.enabled,
   });
 
@@ -36,6 +38,7 @@ class InputField extends StatelessWidget {
         controller: controller,
         obscureText: obscureText,
         autovalidateMode: AutovalidateMode.onUserInteraction,
+        onChanged: onChanged,
         decoration: InputDecoration(
           filled: true,
           fillColor: theme.inputDecorationTheme.fillColor,

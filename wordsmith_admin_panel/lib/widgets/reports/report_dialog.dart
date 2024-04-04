@@ -1,5 +1,4 @@
 import "package:flutter/material.dart";
-import "package:intl/intl.dart";
 import "package:wordsmith_admin_panel/widgets/text_field.dart";
 import "package:wordsmith_utils/dialogs/show_error_dialog.dart";
 import "package:wordsmith_utils/formatters/datetime_formatter.dart";
@@ -87,7 +86,7 @@ Future<dynamic> showReportDialog(
               text: formatDateTime(
                 date: userReport?.reportDetails.submissionDate ??
                     eBookReport!.reportDetails.submissionDate,
-                format: DateFormat.yMd().add_jm().pattern!,
+                format: "yMMMd",
               ),
             ),
           ),

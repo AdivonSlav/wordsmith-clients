@@ -4,9 +4,11 @@ import "package:flutter/material.dart";
 import "package:flutter_dotenv/flutter_dotenv.dart";
 import "package:provider/provider.dart";
 import "package:window_manager/window_manager.dart";
+import "package:wordsmith_admin_panel/utils/reports_filter_values.dart";
 import "package:wordsmith_admin_panel/utils/themes.dart";
 import "package:wordsmith_admin_panel/widgets/dashboard/dashboard.dart";
 import "package:wordsmith_utils/dialogs/progress_indicator_dialog.dart";
+import "package:wordsmith_utils/formatters/datetime_formatter.dart";
 import "package:wordsmith_utils/logger.dart";
 import "package:wordsmith_utils/providers/auth_provider.dart";
 import "package:wordsmith_utils/providers/base_provider.dart";
@@ -40,13 +42,16 @@ void main() async {
   BaseProvider.apiUrl =
       dotenv.get("API_URL", fallback: "https://localhost:6443/");
 
+  initializeDateFormattingForLocale();
+
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (_) => AuthProvider()),
       ChangeNotifierProvider(create: (_) => UserLoginProvider()),
       ChangeNotifierProvider(create: (_) => UserProvider()),
       ChangeNotifierProvider(create: (_) => UserReportsProvider()),
-      ChangeNotifierProvider(create: (_) => EbookReportsProvider())
+      ChangeNotifierProvider(create: (_) => EbookReportsProvider()),
+      ChangeNotifierProvider(create: (_) => ReportFilterValuesProvider()),
     ],
     child: const Application(),
   ));

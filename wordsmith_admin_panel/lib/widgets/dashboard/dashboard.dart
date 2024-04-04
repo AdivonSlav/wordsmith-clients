@@ -102,7 +102,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
             },
           ),
         ),
-        const VerticalDivider(),
+        const VerticalDivider(width: 0.0),
       ],
     );
   }
