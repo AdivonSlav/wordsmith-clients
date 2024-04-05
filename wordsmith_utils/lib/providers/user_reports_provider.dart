@@ -44,6 +44,27 @@ class UserReportsProvider extends BaseProvider<UserReport> {
     }
   }
 
+  Future<Result<QueryResult<UserReport>>> getUserReport(int id) async {
+    var accessToken = await SecureStore.getValue("access_token");
+
+    try {
+      var result = await get(
+        additionalRoute: "/$id",
+        bearerToken: accessToken ?? "",
+        retryForRefresh: true,
+      );
+
+      return Success(result);
+    } on BaseException catch (error) {
+      _logger.severe(error);
+      return Failure(error);
+    } catch (error, stackTrace) {
+      _logger.severe(error, stackTrace);
+      return Failure(BaseException("Internal app error",
+          type: ExceptionType.internalAppError));
+    }
+  }
+
   @override
   UserReport fromJson(data) {
     return UserReport.fromJson(data);

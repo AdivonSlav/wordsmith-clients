@@ -13,7 +13,7 @@ class EbookReportsProvider extends BaseProvider<EbookReport> {
 
   EbookReportsProvider() : super("ebook-reports");
 
-  Future<Result<QueryResult<EbookReport>>> getEBookReports(
+  Future<Result<QueryResult<EbookReport>>> getEbookReports(
     EbookReportSearch search, {
     int? page,
     int? pageSize,
@@ -29,6 +29,27 @@ class EbookReportsProvider extends BaseProvider<EbookReport> {
 
       var result = await get(
         filter: map,
+        bearerToken: accessToken ?? "",
+        retryForRefresh: true,
+      );
+
+      return Success(result);
+    } on BaseException catch (error) {
+      _logger.severe(error);
+      return Failure(error);
+    } catch (error, stackTrace) {
+      _logger.severe(error, stackTrace);
+      return Failure(BaseException("Internal app error",
+          type: ExceptionType.internalAppError));
+    }
+  }
+
+  Future<Result<QueryResult<EbookReport>>> getEbookReport(int id) async {
+    var accessToken = await SecureStore.getValue("access_token");
+
+    try {
+      var result = await get(
+        additionalRoute: "/$id",
         bearerToken: accessToken ?? "",
         retryForRefresh: true,
       );

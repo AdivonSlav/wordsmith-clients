@@ -3,6 +3,8 @@ import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
 import 'package:wordsmith_admin_panel/screens/reports_screen.dart';
 import 'package:wordsmith_admin_panel/utils/reports_filter_values.dart';
+import 'package:wordsmith_admin_panel/widgets/reports/ebook_report_dialog.dart';
+import 'package:wordsmith_admin_panel/widgets/reports/user_report_dialog.dart';
 import 'package:wordsmith_utils/formatters/datetime_formatter.dart';
 import 'package:wordsmith_utils/models/ebook_report/ebook_report.dart';
 import 'package:wordsmith_utils/models/ebook_report/ebook_report_search.dart';
@@ -72,6 +74,13 @@ class _ReportsListWidgetState extends State<ReportsListWidget> {
 
                   return Card(
                     child: ListTile(
+                      onTap: () async {
+                        await showDialog(
+                          context: context,
+                          builder: (context) =>
+                              UserReportDialogWidget(reportId: report.id),
+                        );
+                      },
                       title: Text(report.reportDetails.reportReason.reason),
                       leading: report.reportDetails.isClosed
                           ? const Icon(Icons.check)
@@ -142,6 +151,13 @@ class _ReportsListWidgetState extends State<ReportsListWidget> {
 
                   return Card(
                     child: ListTile(
+                      onTap: () async {
+                        await showDialog(
+                          context: context,
+                          builder: (context) =>
+                              EbookReportDialogWidget(reportId: report.id),
+                        );
+                      },
                       title: Text(report.reportDetails.reportReason.reason),
                       leading: report.reportDetails.isClosed
                           ? const Icon(Icons.check)
@@ -299,7 +315,7 @@ class _ReportsListWidgetState extends State<ReportsListWidget> {
     var sort = _filterValuesProvider.filterValues.sort;
     var direction = _filterValuesProvider.filterValues.sortDirection;
     var search = _getEbookReportSearch();
-    _ebookReportsFuture = _ebookReportsProvider.getEBookReports(
+    _ebookReportsFuture = _ebookReportsProvider.getEbookReports(
       search,
       page: _page,
       pageSize: _pageSize,
