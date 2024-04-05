@@ -17,6 +17,7 @@ class EbookReportsProvider extends BaseProvider<EbookReport> {
     EbookReportSearch search, {
     int? page,
     int? pageSize,
+    String? orderBy,
   }) async {
     var accessToken = await SecureStore.getValue("access_token");
 
@@ -24,6 +25,7 @@ class EbookReportsProvider extends BaseProvider<EbookReport> {
       var map = search.toJson();
       map["page"] = page;
       map["pageSize"] = pageSize;
+      map["orderBy"] = orderBy;
 
       var result = await get(
         filter: map,

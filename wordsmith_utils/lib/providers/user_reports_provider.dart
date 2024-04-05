@@ -25,6 +25,7 @@ class UserReportsProvider extends BaseProvider<UserReport> {
       var map = search.toJson();
       map["page"] = page;
       map["pageSize"] = pageSize;
+      map["orderBy"] = orderBy;
 
       var result = await get(
         filter: map,

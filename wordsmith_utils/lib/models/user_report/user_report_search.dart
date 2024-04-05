@@ -7,13 +7,15 @@ class UserReportSearch {
   final int? reportedUserId;
   final bool? isClosed;
   final String? reason;
-  final DateTime? reportDate;
+  final DateTime? startDate;
+  final DateTime? endDate;
 
   const UserReportSearch({
     this.reportedUserId,
     this.isClosed,
     this.reason,
-    this.reportDate,
+    this.startDate,
+    this.endDate,
   });
 
   Map<String, dynamic> toJson() => _$UserReportSearchToJson(this);

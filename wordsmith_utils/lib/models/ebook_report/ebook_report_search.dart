@@ -7,13 +7,15 @@ class EbookReportSearch {
   final int? reportedEBookId;
   final bool? isClosed;
   final String? reason;
-  final DateTime? reportDate;
+  final DateTime? startDate;
+  final DateTime? endDate;
 
   const EbookReportSearch({
     this.reportedEBookId,
     this.isClosed,
     this.reason,
-    this.reportDate,
+    this.startDate,
+    this.endDate,
   });
 
   Map<String, dynamic> toJson() => _$EbookReportSearchToJson(this);

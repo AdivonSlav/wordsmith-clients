@@ -4,7 +4,9 @@ import "package:flutter/material.dart";
 import "package:provider/provider.dart";
 import "package:wordsmith_admin_panel/utils/reports_filter_values.dart";
 import "package:wordsmith_admin_panel/widgets/input_field.dart";
-import "package:wordsmith_admin_panel/widgets/reports/user_reports_list.dart";
+import "package:wordsmith_admin_panel/widgets/reports/reports_list.dart";
+
+enum ReportType { user, ebook, app }
 
 class ReportsScreenWidget extends StatefulWidget {
   const ReportsScreenWidget({super.key});
@@ -75,18 +77,7 @@ class _ReportsScreenWidgetState extends State<ReportsScreenWidget> {
             const SizedBox(width: 12.0),
             IconButton(
               icon: const Icon(Icons.edit_calendar),
-              onPressed: () async {
-                var selectedDate = await showDatePicker(
-                  context: context,
-                  firstDate: DateTime(1970),
-                  lastDate: DateTime.now(),
-                );
-
-                setState(() {
-                  _filterValuesProvider.updateFilterValueProperties(
-                      reportDate: selectedDate?.toUtc());
-                });
-              },
+              onPressed: () async => _pickDate(),
             ),
             const SizedBox(width: 12.0),
             Wrap(
@@ -155,10 +146,45 @@ class _ReportsScreenWidgetState extends State<ReportsScreenWidget> {
   Widget _buildReportList() {
     switch (_selectedSegment) {
       case 0:
-        return const UserReportsListWidget();
+        return const ReportsListWidget(type: ReportType.user);
+      case 1:
+        return const ReportsListWidget(type: ReportType.ebook);
+      case 2:
+        return const ReportsListWidget(type: ReportType.app);
       default:
         return const Placeholder();
     }
+  }
+
+  void _pickDate() async {
+    var picked = await showDateRangePicker(
+        context: context,
+        currentDate: DateTime.now(),
+        initialDateRange: _filterValuesProvider.filterValues.startDate != null
+            ? DateTimeRange(
+                start: _filterValuesProvider.filterValues.startDate!,
+                end: _filterValuesProvider.filterValues.endDate!,
+              )
+            : null,
+        firstDate: DateTime(2012),
+        lastDate: DateTime.now(),
+        builder: (context, child) {
+          return Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxWidth: 450.0,
+              ),
+              child: child,
+            ),
+          );
+        });
+
+    setState(() {
+      _filterValuesProvider.updateFilterValueProperties(
+        startDate: picked?.start,
+        endDate: picked?.end,
+      );
+    });
   }
 
   @override

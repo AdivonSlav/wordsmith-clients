@@ -7,10 +7,10 @@ part "ebook_report.g.dart";
 @JsonSerializable()
 class EbookReport {
   final int id;
-  final Ebook reportedEbook;
+  final Ebook reportedEBook;
   final ReportDetails reportDetails;
 
-  EbookReport(this.id, this.reportedEbook, this.reportDetails);
+  EbookReport(this.id, this.reportedEBook, this.reportDetails);
 
   factory EbookReport.fromJson(Map<String, dynamic> json) =>
       _$EbookReportFromJson(json);

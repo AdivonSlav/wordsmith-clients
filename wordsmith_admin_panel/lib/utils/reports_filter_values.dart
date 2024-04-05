@@ -9,7 +9,7 @@ extension ReportSortsExtension on ReportSorts {
   String get apiValue {
     switch (this) {
       case ReportSorts.mostRecent:
-        return "ReportDate";
+        return "ReportDetails.SubmissionDate";
     }
   }
 
@@ -25,29 +25,36 @@ class ReportFilterValues {
   ReportSorts sort;
   SortDirections sortDirection;
   String? reason;
-  DateTime? reportDate;
+  DateTime? startDate;
+  DateTime? endDate;
   bool? isClosed;
 
   ReportFilterValues({
     this.sort = ReportSorts.mostRecent,
     this.sortDirection = SortDirections.descending,
     this.reason,
-    this.reportDate,
+    this.startDate,
+    this.endDate,
     this.isClosed,
   });
 
   ReportFilterValues copyWith(
-      {String? reason, DateTime? reportDate, bool? isClosed}) {
+      {String? reason,
+      DateTime? startDate,
+      DateTime? endDate,
+      bool? isClosed}) {
     return ReportFilterValues(
-      reason: reason ?? this.reason,
-      reportDate: reportDate ?? this.reportDate,
+      reason: (reason != null || this.reason != null) ? reason : this.reason,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
       isClosed: isClosed ?? this.isClosed,
     );
   }
 
   void clearFilters() {
     reason = null;
-    reportDate = null;
+    startDate = null;
+    endDate = null;
     isClosed = null;
   }
 }
@@ -66,12 +73,14 @@ class ReportFilterValuesProvider extends ChangeNotifier {
 
   void updateFilterValueProperties({
     bool? isClosed,
-    DateTime? reportDate,
+    DateTime? startDate,
+    DateTime? endDate,
     String? reason,
   }) {
     _filterValues = _filterValues.copyWith(
       isClosed: isClosed,
-      reportDate: reportDate,
+      startDate: startDate,
+      endDate: endDate,
       reason: reason,
     );
 

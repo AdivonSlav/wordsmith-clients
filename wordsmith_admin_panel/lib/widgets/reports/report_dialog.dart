@@ -68,7 +68,7 @@ Future<dynamic> showReportDialog(
                       child: TextFieldWidget(
                         controller: TextEditingController(
                           text: userReport?.reportedUser.username ??
-                              eBookReport!.reportedEbook.title,
+                              eBookReport!.reportedEBook.title,
                         ),
                       ),
                     ),

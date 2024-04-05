@@ -11,5 +11,6 @@ Map<String, dynamic> _$UserReportSearchToJson(UserReportSearch instance) =>
       'reportedUserId': instance.reportedUserId,
       'isClosed': instance.isClosed,
       'reason': instance.reason,
-      'reportDate': instance.reportDate?.toIso8601String(),
+      'startDate': instance.startDate?.toIso8601String(),
+      'endDate': instance.endDate?.toIso8601String(),
     };
