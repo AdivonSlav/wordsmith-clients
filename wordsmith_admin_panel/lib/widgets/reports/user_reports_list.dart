@@ -54,41 +54,45 @@ class _UserReportsListWidgetState extends State<UserReportsListWidget> {
           return const Center(child: Text("No reports found!"));
         }
 
-        return Expanded(
-          child: ListView.builder(
-            itemCount: reports.length,
-            itemBuilder: (context, index) {
-              var report = reports[index];
+        return Column(
+          children: [
+            Expanded(
+              child: ListView.builder(
+                itemCount: reports.length,
+                itemBuilder: (context, index) {
+                  var report = reports[index];
 
-              return Card(
-                child: ListTile(
-                  title: Text(report.reportDetails.reportReason.reason),
-                  leading: report.reportDetails.isClosed
-                      ? const Icon(Icons.check)
-                      : const Icon(Icons.warning),
-                  isThreeLine: true,
-                  subtitle: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                          "Submitted by ${report.reportDetails.reporter.username}"),
-                      Text(
-                        formatDateTime(
-                          date: report.reportDetails.submissionDate,
-                          format: "MMM d, y H:mm",
-                        ),
-                        style: const TextStyle(
-                          fontSize: 12.0,
-                          color: Colors.grey,
-                        ),
+                  return Card(
+                    child: ListTile(
+                      title: Text(report.reportDetails.reportReason.reason),
+                      leading: report.reportDetails.isClosed
+                          ? const Icon(Icons.check)
+                          : const Icon(Icons.warning),
+                      isThreeLine: true,
+                      subtitle: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                              "Submitted by ${report.reportDetails.reporter.username}"),
+                          Text(
+                            formatDateTime(
+                              date: report.reportDetails.submissionDate,
+                              format: "MMM d, y H:mm",
+                            ),
+                            style: const TextStyle(
+                              fontSize: 12.0,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
         );
       },
     );
