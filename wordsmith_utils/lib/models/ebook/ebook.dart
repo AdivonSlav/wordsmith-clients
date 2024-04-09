@@ -20,6 +20,8 @@ class Ebook {
   Image coverArt;
   final String genres;
   final MaturityRating maturityRating;
+  final bool isHidden;
+  final DateTime? hiddenDate;
 
   Ebook(
     this.id,
@@ -35,6 +37,8 @@ class Ebook {
     this.coverArt,
     this.genres,
     this.maturityRating,
+    this.isHidden,
+    this.hiddenDate,
   );
 
   factory Ebook.fromJson(Map<String, dynamic> json) => _$EbookFromJson(json);

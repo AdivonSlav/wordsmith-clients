@@ -1,4 +1,5 @@
 import 'package:wordsmith_utils/exceptions/base_exception.dart';
+import 'package:wordsmith_utils/exceptions/exception_types.dart';
 import 'package:wordsmith_utils/logger.dart';
 import 'package:wordsmith_utils/models/ebook/ebook.dart';
 import 'package:wordsmith_utils/models/ebook/ebook_insert.dart';
@@ -34,6 +35,10 @@ class EbookProvider extends BaseProvider<Ebook> {
     } on BaseException catch (error) {
       _logger.severe(error);
       return Failure(error);
+    } catch (error, stackTrace) {
+      _logger.severe(error, stackTrace);
+      return Failure(BaseException("Internal app error",
+          type: ExceptionType.internalAppError));
     }
   }
 
@@ -51,6 +56,10 @@ class EbookProvider extends BaseProvider<Ebook> {
     } on BaseException catch (error) {
       _logger.severe(error);
       return Failure(error);
+    } catch (error, stackTrace) {
+      _logger.severe(error, stackTrace);
+      return Failure(BaseException("Internal app error",
+          type: ExceptionType.internalAppError));
     }
   }
 
@@ -83,7 +92,60 @@ class EbookProvider extends BaseProvider<Ebook> {
 
       return Success(result.result!);
     } on BaseException catch (error) {
+      _logger.severe(error);
       return Failure(error);
+    } catch (error, stackTrace) {
+      _logger.severe(error, stackTrace);
+      return Failure(BaseException("Internal app error",
+          type: ExceptionType.internalAppError));
+    }
+  }
+
+  Future<Result<Ebook>> hideEbook(
+      {required int ebookId, bool notify = false}) async {
+    var accessToken = await SecureStore.getValue("access_token");
+
+    try {
+      var result = await put(
+        additionalRoute: "/$ebookId/hide",
+        bearerToken: accessToken ?? "",
+        retryForRefresh: true,
+      );
+
+      if (notify) notifyListeners();
+
+      return Success(result.result!);
+    } on BaseException catch (error) {
+      _logger.severe(error);
+      return Failure(error);
+    } catch (error, stackTrace) {
+      _logger.severe(error, stackTrace);
+      return Failure(BaseException("Internal app error",
+          type: ExceptionType.internalAppError));
+    }
+  }
+
+  Future<Result<Ebook>> unhideEbook(
+      {required int ebookId, bool notify = false}) async {
+    var accessToken = await SecureStore.getValue("access_token");
+
+    try {
+      var result = await put(
+        additionalRoute: "/$ebookId/unhide",
+        bearerToken: accessToken ?? "",
+        retryForRefresh: true,
+      );
+
+      if (notify) notifyListeners();
+
+      return Success(result.result!);
+    } on BaseException catch (error) {
+      _logger.severe(error);
+      return Failure(error);
+    } catch (error, stackTrace) {
+      _logger.severe(error, stackTrace);
+      return Failure(BaseException("Internal app error",
+          type: ExceptionType.internalAppError));
     }
   }
 

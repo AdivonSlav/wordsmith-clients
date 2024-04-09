@@ -3,9 +3,9 @@ import "package:provider/provider.dart";
 import "package:wordsmith_admin_panel/screens/login_screen.dart";
 import "package:wordsmith_admin_panel/screens/profile_screen.dart";
 import "package:wordsmith_admin_panel/screens/reports_screen.dart";
-import "package:wordsmith_admin_panel/widgets/dashboard_error.dart";
-import "package:wordsmith_admin_panel/widgets/dashboard_loading.dart";
-import "package:wordsmith_admin_panel/widgets/dashboard_trailing.dart";
+import "package:wordsmith_admin_panel/widgets/dashboard/dashboard_error.dart";
+import "package:wordsmith_admin_panel/widgets/dashboard/dashboard_loading.dart";
+import "package:wordsmith_admin_panel/widgets/dashboard/dashboard_trailing.dart";
 import "package:wordsmith_utils/exceptions/exception_types.dart";
 import "package:wordsmith_utils/models/result.dart";
 import "package:wordsmith_utils/models/user/user.dart";
@@ -22,14 +22,27 @@ class DashboardWidget extends StatefulWidget {
 }
 
 class _DashboardWidgetState extends State<DashboardWidget> {
+  late Future<void> _checkLoggedUserFuture;
+  late UserProvider _userProvider;
+  late AuthProvider _authProvider;
+
   int _selectedIndex = 0;
   late Widget _page;
   final bool _extended = false;
   final NavigationRailLabelType _labelType = NavigationRailLabelType.selected;
 
-  late Future<void> _checkLoggedUserFuture;
-  late UserProvider _userProvider;
-  late AuthProvider _authProvider;
+  String _loadAppBarTitle(int index) {
+    switch (index) {
+      case 0:
+        return "Profile";
+      case 1:
+        return "Reports";
+      case 2:
+        return "Ebooks";
+      default:
+        return "Wordsmith";
+    }
+  }
 
   List<NavigationRailDestination> _loadNavDestinations() {
     return <NavigationRailDestination>[
@@ -38,7 +51,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
       const NavigationRailDestination(
           icon: Icon(Icons.report), label: Text("Reports")),
       const NavigationRailDestination(
-          icon: Icon(Icons.book_online), label: Text("eBooks"))
+          icon: Icon(Icons.book_online), label: Text("Ebooks"))
     ];
   }
 
@@ -55,6 +68,45 @@ class _DashboardWidgetState extends State<DashboardWidget> {
     });
   }
 
+  PreferredSizeWidget? _buildAppBar() {
+    final String appBarTitle = _loadAppBarTitle(_selectedIndex);
+
+    return AuthProvider.loggedUser == null
+        ? null
+        : AppBar(
+            title: Text(appBarTitle),
+            actions: const <Widget>[
+              DashboardTrailingWidget(),
+            ],
+          );
+  }
+
+  Widget _buildNavigationRail() {
+    // Don't show the nav rail if the user isn't logged in
+    if (AuthProvider.loggedUser == null) {
+      return Container();
+    }
+
+    return Row(
+      children: [
+        SafeArea(
+          child: NavigationRail(
+            selectedIndex: _selectedIndex,
+            labelType: _labelType,
+            extended: _extended,
+            destinations: _loadNavDestinations(),
+            onDestinationSelected: (index) {
+              setState(() {
+                _selectedIndex = index;
+              });
+            },
+          ),
+        ),
+        const VerticalDivider(width: 0.0),
+      ],
+    );
+  }
+
   @override
   void initState() {
     _userProvider = context.read<UserProvider>();
@@ -68,25 +120,26 @@ class _DashboardWidgetState extends State<DashboardWidget> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<dynamic>(
-        future: _checkLoggedUserFuture,
-        builder: (context, AsyncSnapshot<dynamic> snapshot) {
-          if (snapshot.connectionState != ConnectionState.done) {
-            return DashboardLoadingWidget(title: widget.title);
-          }
+      future: _checkLoggedUserFuture,
+      builder: (context, AsyncSnapshot<dynamic> snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return DashboardLoadingWidget(title: widget.title);
+        }
 
-          if (snapshot.hasError) {
-            return DashboardErrorWidget(title: widget.title);
-          }
+        if (snapshot.hasError) {
+          return DashboardErrorWidget(title: widget.title);
+        }
 
-          return Consumer<AuthProvider>(builder: (context, provider, child) {
+        return Consumer<AuthProvider>(
+          builder: (context, provider, child) {
             return LayoutBuilder(builder: (context, constraints) {
               if (AuthProvider.loggedUser != null) {
                 switch (_selectedIndex) {
                   case 0:
-                    _page = ProfileScreenWidget();
+                    _page = const ProfileScreenWidget();
                     break;
                   case 1:
-                    _page = ReportsScreenWidget();
+                    _page = const ReportsScreenWidget();
                     break;
                   case 2:
                     _page = const Placeholder();
@@ -100,38 +153,18 @@ class _DashboardWidgetState extends State<DashboardWidget> {
               }
 
               return Scaffold(
-                appBar: AppBar(
-                  title: widget.title,
-                  actions: const <Widget>[
-                    DashboardTrailingWidget(),
-                  ],
-                ),
+                appBar: _buildAppBar(),
                 body: Row(
                   children: <Widget>[
-                    SafeArea(
-                      child: NavigationRail(
-                        selectedIndex: _selectedIndex,
-                        labelType: _labelType,
-                        extended: _extended,
-                        destinations: _loadNavDestinations(),
-                        onDestinationSelected: (index) {
-                          // Only allow navigation to index 0 if the user isn't logged in
-                          if (index > 0 && AuthProvider.loggedUser == null) {
-                            return;
-                          }
-                          setState(() {
-                            _selectedIndex = index;
-                          });
-                        },
-                      ),
-                    ),
-                    const VerticalDivider(),
+                    Builder(builder: (context) => _buildNavigationRail()),
                     Expanded(child: _page),
                   ],
                 ),
               );
             });
-          });
-        });
+          },
+        );
+      },
+    );
   }
 }

@@ -15,9 +15,31 @@ class _DashboardTrailingState extends State<DashboardTrailingWidget> {
   late AuthProvider _authProvider;
 
   @override
-  Widget build(BuildContext context) {
+  void initState() {
     _authProvider = context.read<AuthProvider>();
+    super.initState();
+  }
 
+  List<PopupMenuItem> _buildMenuItems() {
+    return <PopupMenuItem>[
+      PopupMenuItem(
+        value: "logout",
+        child: const Row(
+          children: [
+            Icon(Icons.logout),
+            SizedBox(width: 8.0),
+            Text("Logout"),
+          ],
+        ),
+        onTap: () {
+          _authProvider.eraseLogin();
+        },
+      ),
+    ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Consumer<UserLoginProvider>(
       builder: (context, provider, child) {
         return Padding(
@@ -30,17 +52,8 @@ class _DashboardTrailingState extends State<DashboardTrailingWidget> {
                       width: 8.0,
                     ),
                     IconButton(
-                      onPressed: () {
-                        showPopupMenu(context, [
-                          PopupMenuItem(
-                            value: "logout",
-                            child: const Text("Logout"),
-                            onTap: () {
-                              _authProvider.eraseLogin();
-                            },
-                          )
-                        ]);
-                      },
+                      onPressed: () =>
+                          showPopupMenu(context, _buildMenuItems()),
                       icon: const Icon(Icons.person),
                       padding: const EdgeInsets.all(0.0),
                     )

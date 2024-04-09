@@ -1,10 +1,12 @@
+import "dart:convert";
+
 import "package:flutter/material.dart";
-import "package:logging/logging.dart";
 import "package:provider/provider.dart";
+import "package:wordsmith_utils/dialogs/progress_indicator_dialog.dart";
 import "package:wordsmith_utils/dialogs/show_error_dialog.dart";
 import "package:wordsmith_utils/models/result.dart";
+import "package:wordsmith_utils/models/user/user_login_request.dart";
 import "package:wordsmith_utils/providers/auth_provider.dart";
-import "package:wordsmith_utils/size_config.dart";
 import "package:wordsmith_admin_panel/widgets/input_field.dart";
 import "package:wordsmith_utils/logger.dart";
 import "package:wordsmith_utils/providers/user_login_provider.dart";
@@ -18,18 +20,15 @@ class LoginScreenWidget extends StatefulWidget {
 }
 
 class _LoginScreenWidgetState extends State<LoginScreenWidget> {
-  final Logger _logger = LogManager.getLogger("LoginScreen");
+  final _logger = LogManager.getLogger("LoginScreen");
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _usernameController =
-      TextEditingController(text: "");
-  final TextEditingController _passwordController =
-      TextEditingController(text: "");
+  final _usernameController = TextEditingController(text: "");
+  final _passwordController = TextEditingController(text: "");
 
   late UserLoginProvider _userLoginProvider;
   late AuthProvider _authProvider;
 
   bool _obscuredPassword = true;
-  bool _loginInProgress = false;
 
   void _togglePasswordVisibility() {
     setState(() {
@@ -37,23 +36,34 @@ class _LoginScreenWidgetState extends State<LoginScreenWidget> {
     });
   }
 
-  void _toggleLoginInProgress() {
-    setState(() {
-      _loginInProgress = !_loginInProgress;
-    });
-  }
-
   Future<void> _submitLogin() async {
-    _toggleLoginInProgress();
+    ProgressIndicatorDialog().show(context, text: "Logging in...");
 
-    var username = _usernameController.text;
-    var password = _passwordController.text;
+    String username = "";
+    String password = "";
+
+    try {
+      username = base64Encode(utf8.encode(_usernameController.text));
+      password = base64Encode(utf8.encode(_passwordController.text));
+    } catch (error, stackTrace) {
+      ProgressIndicatorDialog().dismiss();
+      _logger.severe("Could not login!", error, stackTrace);
+      showErrorDialog(
+          context: context,
+          content: const Text("Failed to login due to internal error!"));
+      return;
+    }
+
+    final loginRequest = UserLoginRequest(
+      username: username,
+      password: password,
+      clientId: "admin.client",
+    );
 
     _logger.info("Attempting login with $username:$password");
 
-    await _userLoginProvider
-        .getUserLogin(username, password)
-        .then((result) async {
+    await _userLoginProvider.getUserLogin(loginRequest).then((result) async {
+      ProgressIndicatorDialog().dismiss();
       switch (result) {
         case Success(data: final d):
           _logger.info("Logged in with access token ${d.accessToken}");
@@ -62,88 +72,100 @@ class _LoginScreenWidgetState extends State<LoginScreenWidget> {
           showErrorDialog(context: context, content: Text(e.toString()));
       }
     });
+  }
 
-    _toggleLoginInProgress();
+  Widget _buildLoginForm() {
+    return SizedBox(
+      width: 400.0,
+      height: 250.0,
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Form(
+            key: _formKey,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: <Widget>[
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        InputField(
+                          labelText: "Username",
+                          controller: _usernameController,
+                          validator: validateRequired,
+                          width: constraints.maxWidth * 0.9,
+                        ),
+                        const SizedBox(height: 30.0),
+                        InputField(
+                          labelText: "Password",
+                          controller: _passwordController,
+                          obscureText: _obscuredPassword,
+                          width: constraints.maxWidth * 0.9,
+                          suffixIcon: IconButton(
+                            onPressed: () => _togglePasswordVisibility(),
+                            icon: Icon(
+                              _obscuredPassword
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                            ),
+                          ),
+                          validator: validateRequired,
+                        ),
+                      ],
+                    ),
+                    SizedBox(
+                      width: 100.0,
+                      height: 40.0,
+                      child: FilledButton(
+                        onPressed: () async {
+                          if (_formKey.currentState!.validate()) {
+                            await _submitLogin();
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text("Please fill all the inputs!")),
+                            );
+                          }
+                        },
+                        child: const Text("Login"),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _userLoginProvider = context.read<UserLoginProvider>();
+    _authProvider = context.read<AuthProvider>();
   }
 
   @override
   Widget build(BuildContext context) {
-    var theme = Theme.of(context);
-    _userLoginProvider = context.read<UserLoginProvider>();
-    _authProvider = context.read<AuthProvider>();
-
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text(
-                "Login to your admin account",
-                style: theme.textTheme.headlineSmall,
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            const Text(
+              "Login to your admin account",
+              style: TextStyle(
+                fontSize: 26.0,
               ),
-              const SizedBox(height: 20.0),
-              Form(
-                key: _formKey,
-                child: Column(
-                  children: <Widget>[
-                    InputField(
-                      labelText: "Username",
-                      controller: _usernameController,
-                      validator: validateRequired,
-                    ),
-                    SizedBox(height: SizeConfig.safeBlockVertical * 0.9),
-                    InputField(
-                      labelText: "Password",
-                      controller: _passwordController,
-                      obscureText: _obscuredPassword,
-                      suffixIcon: IconButton(
-                        onPressed: () => _togglePasswordVisibility(),
-                        icon: Icon(
-                          _obscuredPassword
-                              ? Icons.visibility_off
-                              : Icons.visibility,
-                        ),
-                      ),
-                      validator: validateRequired,
-                    ),
-                    const SizedBox(height: 20.0),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        SizedBox(
-                          width: 100.0,
-                          height: 30.0,
-                          child: ElevatedButton(
-                            onPressed: () async {
-                              if (_formKey.currentState!.validate() &&
-                                  !_loginInProgress) {
-                                await _submitLogin();
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content:
-                                          Text("Please fill all the inputs!")),
-                                );
-                              }
-                            },
-                            child: !_loginInProgress
-                                ? const Text("Submit")
-                                : const SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(),
-                                  ),
-                          ),
-                        ),
-                      ],
-                    )
-                  ],
-                ),
-              )
-            ],
-          ),
+            ),
+            const SizedBox(height: 30.0),
+            Builder(builder: (context) => _buildLoginForm()),
+          ],
         ),
       ),
     );

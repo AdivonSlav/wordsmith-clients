@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wordsmith_mobile/utils/indexers/user_index_provider.dart';
@@ -9,6 +11,7 @@ import 'package:wordsmith_utils/models/result.dart';
 import 'package:wordsmith_utils/models/user/user.dart';
 import 'package:wordsmith_utils/models/user/user_insert.dart';
 import 'package:wordsmith_utils/models/user/user_login.dart';
+import 'package:wordsmith_utils/models/user/user_login_request.dart';
 import 'package:wordsmith_utils/providers/auth_provider.dart';
 import 'package:wordsmith_utils/providers/user_login_provider.dart';
 import 'package:wordsmith_utils/providers/user_provider.dart';
@@ -36,7 +39,6 @@ class _RegistrationScreenWidgetState extends State<RegistrationScreenWidget> {
   late UserIndexProvider _userIndexProvider;
 
   bool _obscuredPassword = true;
-  bool _registrationInProgress = false;
 
   String? _validatePasswordConfirmation(String? value) {
     if (value == null || value.isEmpty) {
@@ -54,11 +56,31 @@ class _RegistrationScreenWidgetState extends State<RegistrationScreenWidget> {
     ProgressIndicatorDialog()
         .show(context, text: "Registration in progress...");
 
+    String registerUsername = "";
+    String registerPassword = "";
+    String registerConfirmPassword = "";
+    String registerEmail = "";
+
+    try {
+      registerUsername = base64Encode(utf8.encode(_usernameController.text));
+      registerPassword = base64Encode(utf8.encode(_passwordController.text));
+      registerConfirmPassword =
+          base64Encode(utf8.encode(_confirmPasswordController.text));
+      registerEmail = base64Encode(utf8.encode(_emailController.text));
+    } catch (error, stackTrace) {
+      ProgressIndicatorDialog().dismiss();
+      _logger.severe("Could not register!", error, stackTrace);
+      showErrorDialog(
+          context: context,
+          content: const Text("Failed to register due to internal error!"));
+      return;
+    }
+
     var userInsert = UserInsert(
-      _usernameController.text,
-      _emailController.text,
-      _passwordController.text,
-      _confirmPasswordController.text,
+      registerUsername,
+      registerEmail,
+      registerPassword,
+      registerConfirmPassword,
       null,
     );
 
@@ -76,8 +98,13 @@ class _RegistrationScreenWidgetState extends State<RegistrationScreenWidget> {
 
     if (registerResult != null) {
       await Future.delayed(const Duration(milliseconds: 500), () async {
+        final loginRequest = UserLoginRequest(
+          username: registerUsername,
+          password: registerPassword,
+        );
+
         await _userLoginProvider
-            .getUserLogin(registerResult!.username, userInsert.password)
+            .getUserLogin(loginRequest)
             .then((result) async {
           switch (result) {
             case Success<UserLogin>(data: final d):
@@ -160,10 +187,6 @@ class _RegistrationScreenWidgetState extends State<RegistrationScreenWidget> {
                         validator: validatePassword,
                         suffixIcon: IconButton(
                           onPressed: () {
-                            if (_registrationInProgress) {
-                              return;
-                            }
-
                             setState(() {
                               _obscuredPassword = !_obscuredPassword;
                             });
@@ -193,25 +216,18 @@ class _RegistrationScreenWidgetState extends State<RegistrationScreenWidget> {
                             width: SizeConfig.safeBlockHorizontal * 40.0,
                             height: SizeConfig.safeBlockVertical * 6.0,
                             child: FilledButton(
-                              onPressed: () async {
-                                if (_formKey.currentState!.validate()) {
-                                  await _submitRegistration();
-                                } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                        content: Text(
-                                            "Please fill all the inputs!")),
-                                  );
-                                }
-                              },
-                              child: !_registrationInProgress
-                                  ? const Text("Register")
-                                  : const SizedBox(
-                                      width: 20.0,
-                                      height: 20.0,
-                                      child: CircularProgressIndicator(),
-                                    ),
-                            ),
+                                onPressed: () async {
+                                  if (_formKey.currentState!.validate()) {
+                                    await _submitRegistration();
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                          content: Text(
+                                              "Please fill all the inputs!")),
+                                    );
+                                  }
+                                },
+                                child: const Text("Register")),
                           ),
                           SizedBox(
                             width: SizeConfig.safeBlockHorizontal * 6.0,

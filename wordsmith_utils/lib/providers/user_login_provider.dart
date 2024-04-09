@@ -2,6 +2,7 @@ import "package:wordsmith_utils/exceptions/base_exception.dart";
 import "package:wordsmith_utils/logger.dart";
 import "package:wordsmith_utils/models/result.dart";
 import "package:wordsmith_utils/models/user/user_login.dart";
+import "package:wordsmith_utils/models/user/user_login_request.dart";
 import "package:wordsmith_utils/providers/base_provider.dart";
 
 class UserLoginProvider extends BaseProvider<UserLogin> {
@@ -9,15 +10,9 @@ class UserLoginProvider extends BaseProvider<UserLogin> {
 
   UserLoginProvider() : super("users/login");
 
-  Future<Result<UserLogin>> getUserLogin(
-      String username, String password) async {
+  Future<Result<UserLogin>> getUserLogin(UserLoginRequest loginRequest) async {
     try {
-      Map<String, String> request = {
-        "username": username,
-        "password": password,
-      };
-
-      var result = await post(request: request);
+      var result = await post(request: loginRequest);
 
       if (result.result?.accessToken != null &&
           result.result?.refreshToken != null) {

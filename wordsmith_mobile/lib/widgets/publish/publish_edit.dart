@@ -53,7 +53,7 @@ class _PublishEditWidgetState extends State<PublishEditWidget> {
     maxValue: 100.00,
   );
 
-  bool _uploadInProgress = false;
+  final bool _uploadInProgress = false;
   bool _enteringPrice = false;
 
   List<Genre> _selectedGenres = [];

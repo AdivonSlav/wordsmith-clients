@@ -52,7 +52,7 @@ class _ReaderScreenWidgetState extends State<ReaderScreenWidget> {
         //     );
         //   },
         // ),
-        actions: <Widget>[
+        actions: const <Widget>[
           BackButton(),
         ],
       );

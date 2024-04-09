@@ -1,4 +1,5 @@
 import 'package:wordsmith_utils/models/user/user.dart';
+import 'package:wordsmith_utils/models/user/user_status.dart';
 
 class UserIndexModel {
   int id;
@@ -22,7 +23,8 @@ class UserIndexModel {
   });
 
   User toUser() {
-    var user = User(id, username, email, null, registrationDate);
+    var user =
+        User(id, username, email, null, registrationDate, UserStatus.active);
 
     return user;
   }
