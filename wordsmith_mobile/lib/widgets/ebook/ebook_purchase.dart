@@ -183,8 +183,6 @@ class _EbookPurchaseWidgetState extends State<EbookPurchaseWidget> {
               return Center(child: Text(e.toString()));
           }
 
-          var size = MediaQuery.of(context).size;
-
           return Padding(
             padding: const EdgeInsets.all(8.0),
             child: Column(
