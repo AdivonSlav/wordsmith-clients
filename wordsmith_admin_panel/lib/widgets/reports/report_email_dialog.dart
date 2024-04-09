@@ -85,8 +85,8 @@ class _ReportEmailDialogWidgetState extends State<ReportEmailDialogWidget> {
           reportId: widget.reportId, body: _bodyController.text);
 
       await _ebookReportsProvider.sendEmail(emailSend).then((result) {
-        _sendingInProgress = false;
         _dialogKey.currentState!.toggleProgressLine();
+        _sendingInProgress = false;
         switch (result) {
           case Success():
             showSnackbar(context: context, content: result.data.message!);
@@ -100,6 +100,11 @@ class _ReportEmailDialogWidgetState extends State<ReportEmailDialogWidget> {
         }
       });
     }
+  }
+
+  void dismiss() {
+    if (_sendingInProgress) return;
+    Navigator.of(context).pop();
   }
 
   @override
@@ -124,7 +129,7 @@ class _ReportEmailDialogWidgetState extends State<ReportEmailDialogWidget> {
         ),
         actions: <Widget>[
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => dismiss(),
             child: const Text("Cancel"),
           ),
           TextButton(

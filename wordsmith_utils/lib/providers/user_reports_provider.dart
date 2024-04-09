@@ -7,6 +7,7 @@ import "package:wordsmith_utils/models/result.dart";
 import "package:wordsmith_utils/models/user_report/user_report.dart";
 import "package:wordsmith_utils/models/user_report/user_report_email_send.dart";
 import "package:wordsmith_utils/models/user_report/user_report_search.dart";
+import "package:wordsmith_utils/models/user_report/user_report_update.dart";
 import "package:wordsmith_utils/providers/base_provider.dart";
 import "package:wordsmith_utils/secure_store.dart";
 
@@ -52,6 +53,29 @@ class UserReportsProvider extends BaseProvider<UserReport> {
     try {
       var result = await get(
         additionalRoute: "/$id",
+        bearerToken: accessToken ?? "",
+        retryForRefresh: true,
+      );
+
+      return Success(result);
+    } on BaseException catch (error) {
+      _logger.severe(error);
+      return Failure(error);
+    } catch (error, stackTrace) {
+      _logger.severe(error, stackTrace);
+      return Failure(BaseException("Internal app error",
+          type: ExceptionType.internalAppError));
+    }
+  }
+
+  Future<Result<EntityResult<UserReport>>> updateReport(
+      {required int id, required UserReportUpdate request}) async {
+    var accessToken = await SecureStore.getValue("access_token");
+
+    try {
+      var result = await put(
+        id: id,
+        request: request,
         bearerToken: accessToken ?? "",
         retryForRefresh: true,
       );
