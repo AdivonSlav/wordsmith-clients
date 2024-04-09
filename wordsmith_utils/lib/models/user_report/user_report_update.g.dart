@@ -8,7 +8,7 @@ part of 'user_report_update.dart';
 
 UserReportUpdate _$UserReportUpdateFromJson(Map<String, dynamic> json) =>
     UserReportUpdate(
-      json['isClosed'] as bool,
+      isClosed: json['isClosed'] as bool,
     );
 
 Map<String, dynamic> _$UserReportUpdateToJson(UserReportUpdate instance) =>

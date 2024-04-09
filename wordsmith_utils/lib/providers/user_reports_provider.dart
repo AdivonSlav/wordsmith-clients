@@ -69,7 +69,9 @@ class UserReportsProvider extends BaseProvider<UserReport> {
   }
 
   Future<Result<EntityResult<UserReport>>> updateReport(
-      {required int id, required UserReportUpdate request}) async {
+      {required int id,
+      required UserReportUpdate request,
+      bool notify = false}) async {
     var accessToken = await SecureStore.getValue("access_token");
 
     try {
@@ -79,6 +81,8 @@ class UserReportsProvider extends BaseProvider<UserReport> {
         bearerToken: accessToken ?? "",
         retryForRefresh: true,
       );
+
+      if (notify) notifyListeners();
 
       return Success(result);
     } on BaseException catch (error) {

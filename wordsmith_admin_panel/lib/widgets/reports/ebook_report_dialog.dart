@@ -1,16 +1,21 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:wordsmith_admin_panel/screens/reports_screen.dart';
 import 'package:wordsmith_admin_panel/widgets/reports/report_email_dialog.dart';
 import 'package:wordsmith_admin_panel/widgets/users/ban_user_dialog.dart';
+import 'package:wordsmith_utils/dialogs/progress_indicator_dialog.dart';
 import 'package:wordsmith_utils/formatters/datetime_formatter.dart';
 import 'package:wordsmith_utils/models/ebook_report/ebook_report.dart';
+import 'package:wordsmith_utils/models/ebook_report/ebook_report_update.dart';
 import 'package:wordsmith_utils/models/query_result.dart';
 import 'package:wordsmith_utils/models/result.dart';
 import 'package:wordsmith_utils/models/user/user.dart';
 import 'package:wordsmith_utils/models/user/user_status.dart';
 import 'package:wordsmith_utils/providers/ebook_reports_provider.dart';
 import 'package:wordsmith_utils/providers/user_provider.dart';
+import 'package:wordsmith_utils/show_snackbar.dart';
 
 class EbookReportDialogWidget extends StatefulWidget {
   final int reportId;
@@ -27,6 +32,8 @@ class _EbookReportDialogWidgetState extends State<EbookReportDialogWidget> {
   late UserProvider _userProvider;
 
   late Future<Result<QueryResult<EbookReport>>> _ebookReportFuture;
+
+  bool _closingReportInProgress = false;
 
   final _labelStyle = const TextStyle(
     fontWeight: FontWeight.bold,
@@ -204,17 +211,24 @@ class _EbookReportDialogWidgetState extends State<EbookReportDialogWidget> {
           children: [
             Expanded(
               child: FilledButton.icon(
-                onPressed: () => _openSendEmailDialog(report.id),
+                onPressed: report.reportDetails.isClosed
+                    ? null
+                    : () => _openSendEmailDialog(report.id),
                 icon: const Icon(Icons.email),
-                label: const Text("Send email to author"),
+                label: const Text("Send email to user"),
               ),
             ),
             const SizedBox(width: 10.0),
             Expanded(
               child: FilledButton.icon(
-                onPressed: () {},
-                icon: const Icon(Icons.close),
-                label: const Text("Close report"),
+                onPressed:
+                    report.reportDetails.isClosed ? null : () => _closeReport(),
+                icon: report.reportDetails.isClosed
+                    ? const Icon(Icons.check)
+                    : const Icon(Icons.close),
+                label: report.reportDetails.isClosed
+                    ? const Text("Closed")
+                    : const Text("Close report"),
               ),
             ),
           ],
@@ -223,41 +237,47 @@ class _EbookReportDialogWidgetState extends State<EbookReportDialogWidget> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Expanded(
-              child: FilledButton.icon(
-                onPressed: () {},
-                icon: const Icon(
-                  Icons.visibility_off,
-                  color: Colors.white,
-                ),
-                label: const Text(
-                  "Hide ebook",
-                  style: TextStyle(color: Colors.white),
-                ),
-                style: FilledButton.styleFrom(
-                  backgroundColor: Colors.red[700],
+            Visibility(
+              visible: !report.reportDetails.isClosed,
+              child: Expanded(
+                child: FilledButton.icon(
+                  onPressed: () {},
+                  icon: const Icon(
+                    Icons.visibility_off,
+                    color: Colors.white,
+                  ),
+                  label: const Text(
+                    "Hide ebook",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.red[700],
+                  ),
                 ),
               ),
             ),
             const SizedBox(width: 10.0),
-            Expanded(
-              child: FilledButton.icon(
-                onPressed:
+            Visibility(
+              visible: !report.reportDetails.isClosed,
+              child: Expanded(
+                child: FilledButton.icon(
+                  onPressed: report.reportedEBook.author.status !=
+                          UserStatus.active
+                      ? null
+                      : () => _openBanUserDialog(report.reportedEBook.author),
+                  icon: const Icon(
+                    Icons.block_flipped,
+                    color: Colors.white,
+                  ),
+                  label: Text(
                     report.reportedEBook.author.status != UserStatus.active
-                        ? null
-                        : () => _openBanUserDialog(report.reportedEBook.author),
-                icon: const Icon(
-                  Icons.block_flipped,
-                  color: Colors.white,
-                ),
-                label: Text(
-                  report.reportedEBook.author.status != UserStatus.active
-                      ? "Already banned"
-                      : "Ban author",
-                  style: const TextStyle(color: Colors.white),
-                ),
-                style: FilledButton.styleFrom(
-                  backgroundColor: Colors.red[700],
+                        ? "Already banned"
+                        : "Ban author",
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.red[700],
+                  ),
                 ),
               ),
             ),
@@ -343,10 +363,34 @@ class _EbookReportDialogWidgetState extends State<EbookReportDialogWidget> {
   List<Widget> _buildActions() {
     return <Widget>[
       TextButton(
-        onPressed: () => Navigator.of(context).pop(),
+        onPressed: () => _dismiss(),
         child: const Text("Close"),
       ),
     ];
+  }
+
+  void _closeReport() async {
+    if (_closingReportInProgress) return;
+    _closingReportInProgress = true;
+    ProgressIndicatorDialog().show(context, text: "Closing...");
+
+    var update = const EbookReportUpdate(isClosed: true);
+
+    await _ebookReportsProvider
+        .updateReport(id: widget.reportId, request: update, notify: true)
+        .then((result) {
+      ProgressIndicatorDialog().dismiss();
+      _closingReportInProgress = false;
+      switch (result) {
+        case Success():
+          showSnackbar(context: context, content: "Succesfully closed report");
+        case Failure():
+          showSnackbar(
+              context: context,
+              content: result.exception.message,
+              backgroundColor: Colors.red);
+      }
+    });
   }
 
   void _openSendEmailDialog(int reportId) {
@@ -371,15 +415,22 @@ class _EbookReportDialogWidgetState extends State<EbookReportDialogWidget> {
     });
   }
 
+  void _dismiss() {
+    if (_closingReportInProgress) return;
+    Navigator.of(context).pop();
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _userProvider.addListener(_refresh);
+    _ebookReportsProvider.addListener(_refresh);
   }
 
   @override
   void dispose() {
     _userProvider.removeListener(_refresh);
+    _ebookReportsProvider.removeListener(_refresh);
     super.dispose();
   }
 

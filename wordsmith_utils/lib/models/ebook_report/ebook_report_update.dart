@@ -6,7 +6,7 @@ part "ebook_report_update.g.dart";
 class EbookReportUpdate {
   final bool isClosed;
 
-  const EbookReportUpdate(this.isClosed);
+  const EbookReportUpdate({required this.isClosed});
 
   factory EbookReportUpdate.fromJson(Map<String, dynamic> json) =>
       _$EbookReportUpdateFromJson(json);
