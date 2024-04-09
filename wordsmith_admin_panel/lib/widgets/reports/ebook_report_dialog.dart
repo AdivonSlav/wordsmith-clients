@@ -1,6 +1,4 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:wordsmith_admin_panel/screens/reports_screen.dart';
 import 'package:wordsmith_admin_panel/widgets/reports/report_email_dialog.dart';
@@ -289,73 +287,80 @@ class _EbookReportDialogWidgetState extends State<EbookReportDialogWidget> {
 
   Widget _buildContent() {
     return SingleChildScrollView(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          FutureBuilder(
-            future: _ebookReportFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState != ConnectionState.done) {
-                return const Center(child: CircularProgressIndicator());
-              }
+      child: SizedBox(
+        width: 500.0,
+        height: 550.0,
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            FutureBuilder(
+              future: _ebookReportFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState != ConnectionState.done) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-              if (snapshot.hasError || snapshot.data == null) {
-                return Center(
-                    child: Text(snapshot.error?.toString() ?? "Error"));
-              }
+                if (snapshot.hasError || snapshot.data == null) {
+                  return Center(
+                      child: Text(snapshot.error?.toString() ?? "Error"));
+                }
 
-              late EbookReport report;
+                late EbookReport report;
 
-              switch (snapshot.data!) {
-                case Success(data: final d):
-                  report = d.result.first;
-                case Failure(exception: final e):
-                  return Center(child: Text(e.message));
-              }
+                switch (snapshot.data!) {
+                  case Success(data: final d):
+                    report = d.result.first;
+                  case Failure(exception: final e):
+                    return Center(child: Text(e.message));
+                }
 
-              return SizedBox(
-                width: 500.0,
-                height: 550.0,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Flexible(
-                      flex: 1,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          Builder(
-                              builder: (context) => _buildReporterCard(report)),
-                          Builder(
+                return SizedBox(
+                  width: 500.0,
+                  height: 550.0,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Flexible(
+                        flex: 1,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Builder(
+                                builder: (context) =>
+                                    _buildReporterCard(report)),
+                            Builder(
+                                builder: (context) =>
+                                    _buildReportReasonCard(report)),
+                            Builder(
                               builder: (context) =>
-                                  _buildReportReasonCard(report)),
-                          Builder(
-                            builder: (context) =>
-                                _buildSubmissionDateCard(report),
-                          ),
-                        ],
+                                  _buildSubmissionDateCard(report),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    Flexible(
-                      flex: 2,
-                      child: Builder(
-                          builder: (context) =>
-                              _buildReportedEbookCard(report)),
-                    ),
-                    Flexible(
-                      flex: 3,
-                      child: Builder(
-                          builder: (context) =>
-                              _buildReportContentCard(report)),
-                    ),
-                    const Divider(),
-                    Builder(builder: (context) => _buildReportActions(report)),
-                  ],
-                ),
-              );
-            },
-          ),
-        ],
+                      Flexible(
+                        flex: 2,
+                        child: Builder(
+                            builder: (context) =>
+                                _buildReportedEbookCard(report)),
+                      ),
+                      Flexible(
+                        flex: 3,
+                        child: Builder(
+                            builder: (context) =>
+                                _buildReportContentCard(report)),
+                      ),
+                      const Divider(),
+                      Builder(
+                          builder: (context) => _buildReportActions(report)),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
