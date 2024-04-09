@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wordsmith_admin_panel/screens/reports_screen.dart';
 import 'package:wordsmith_admin_panel/widgets/reports/report_email_dialog.dart';
+import 'package:wordsmith_admin_panel/widgets/users/ban_user_dialog.dart';
+import 'package:wordsmith_utils/dialogs/progress_line_dialog.dart';
 import 'package:wordsmith_utils/formatters/datetime_formatter.dart';
 import 'package:wordsmith_utils/models/query_result.dart';
 import 'package:wordsmith_utils/models/result.dart';
+import 'package:wordsmith_utils/models/user/user.dart';
 import 'package:wordsmith_utils/models/user_report/user_report.dart';
 import 'package:wordsmith_utils/providers/user_reports_provider.dart';
 
@@ -186,7 +189,7 @@ class _UserReportDialogWidgetState extends State<UserReportDialogWidget> {
           children: <Widget>[
             Expanded(
               child: FilledButton.icon(
-                onPressed: () {},
+                onPressed: () => _openBanUserDialog(report.reportedUser),
                 icon: const Icon(
                   Icons.block_flipped,
                   color: Colors.white,
@@ -298,6 +301,13 @@ class _UserReportDialogWidgetState extends State<UserReportDialogWidget> {
       context: context,
       builder: (context) =>
           ReportEmailDialogWidget(reportId: reportId, type: ReportType.user),
+    );
+  }
+
+  void _openBanUserDialog(User user) {
+    showDialog(
+      context: context,
+      builder: (context) => BanUserDialogWidget(user: user),
     );
   }
 
