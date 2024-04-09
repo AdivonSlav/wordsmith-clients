@@ -3,12 +3,13 @@ import 'package:provider/provider.dart';
 import 'package:wordsmith_admin_panel/screens/reports_screen.dart';
 import 'package:wordsmith_admin_panel/widgets/reports/report_email_dialog.dart';
 import 'package:wordsmith_admin_panel/widgets/users/ban_user_dialog.dart';
-import 'package:wordsmith_utils/dialogs/progress_line_dialog.dart';
 import 'package:wordsmith_utils/formatters/datetime_formatter.dart';
 import 'package:wordsmith_utils/models/query_result.dart';
 import 'package:wordsmith_utils/models/result.dart';
 import 'package:wordsmith_utils/models/user/user.dart';
+import 'package:wordsmith_utils/models/user/user_status.dart';
 import 'package:wordsmith_utils/models/user_report/user_report.dart';
+import 'package:wordsmith_utils/providers/user_provider.dart';
 import 'package:wordsmith_utils/providers/user_reports_provider.dart';
 
 class UserReportDialogWidget extends StatefulWidget {
@@ -22,6 +23,7 @@ class UserReportDialogWidget extends StatefulWidget {
 
 class _UserReportDialogWidgetState extends State<UserReportDialogWidget> {
   late UserReportsProvider _userReportsProvider;
+  late UserProvider _userProvider;
 
   late Future<Result<QueryResult<UserReport>>> _userReportFuture;
 
@@ -189,14 +191,18 @@ class _UserReportDialogWidgetState extends State<UserReportDialogWidget> {
           children: <Widget>[
             Expanded(
               child: FilledButton.icon(
-                onPressed: () => _openBanUserDialog(report.reportedUser),
+                onPressed: report.reportedUser.status != UserStatus.active
+                    ? null
+                    : () => _openBanUserDialog(report.reportedUser),
                 icon: const Icon(
                   Icons.block_flipped,
                   color: Colors.white,
                 ),
-                label: const Text(
-                  "Ban user",
-                  style: TextStyle(color: Colors.white),
+                label: Text(
+                  report.reportedUser.status != UserStatus.active
+                      ? "Already banned"
+                      : "Ban user",
+                  style: const TextStyle(color: Colors.white),
                 ),
                 style: FilledButton.styleFrom(
                   backgroundColor: Colors.red[700],
@@ -304,17 +310,36 @@ class _UserReportDialogWidgetState extends State<UserReportDialogWidget> {
     );
   }
 
-  void _openBanUserDialog(User user) {
+  void _openBanUserDialog(User user) async {
     showDialog(
       context: context,
       builder: (context) => BanUserDialogWidget(user: user),
     );
   }
 
+  void _refresh() {
+    setState(() {
+      _userReportFuture = _userReportsProvider.getUserReport(widget.reportId);
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _userProvider.addListener(_refresh);
+  }
+
+  @override
+  void dispose() {
+    _userProvider.removeListener(_refresh);
+    super.dispose();
+  }
+
   @override
   void initState() {
     _userReportsProvider = context.read<UserReportsProvider>();
-    _userReportFuture = _userReportsProvider.getUserReport(widget.reportId);
+    _userProvider = context.read<UserProvider>();
+    _refresh();
     super.initState();
   }
 

@@ -14,6 +14,7 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
           ? null
           : Image.fromJson(json['profileImage'] as Map<String, dynamic>),
       DateTime.parse(json['registrationDate'] as String),
+      $enumDecode(_$UserStatusEnumMap, json['status']),
     );
 
 Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
@@ -22,4 +23,11 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
       'email': instance.email,
       'profileImage': instance.profileImage,
       'registrationDate': instance.registrationDate.toIso8601String(),
+      'status': _$UserStatusEnumMap[instance.status]!,
     };
+
+const _$UserStatusEnumMap = {
+  UserStatus.active: 'Active',
+  UserStatus.temporarilyBanned: 'TemporarilyBanned',
+  UserStatus.banned: 'Banned',
+};

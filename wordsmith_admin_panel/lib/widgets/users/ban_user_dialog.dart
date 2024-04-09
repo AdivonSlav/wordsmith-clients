@@ -39,14 +39,18 @@ class _BanUserDialogWidgetState extends State<BanUserDialogWidget> {
     );
 
     await _userProvider
-        .changeUserAccess(userId: widget.user.id, request: changeAccessRequest)
+        .changeUserAccess(
+      userId: widget.user.id,
+      request: changeAccessRequest,
+      notify: true,
+    )
         .then((result) {
       _dialogKey.currentState!.toggleProgressLine();
       _banInProgress = false;
       switch (result) {
         case Success():
           showSnackbar(context: context, content: "Succesfully banned user");
-          Navigator.of(context).pop();
+          Navigator.of(context).pop(true);
         case Failure():
           showSnackbar(
               context: context,

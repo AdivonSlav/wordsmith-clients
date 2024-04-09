@@ -77,6 +77,7 @@ class UserProvider extends BaseProvider<User> {
   Future<Result<EntityResult<User>>> changeUserAccess({
     required int userId,
     required UserChangeAccess request,
+    bool notify = false,
   }) async {
     var accessToken = await SecureStore.getValue("access_token");
 
@@ -87,6 +88,8 @@ class UserProvider extends BaseProvider<User> {
         bearerToken: accessToken ?? "",
         retryForRefresh: true,
       );
+
+      if (notify) notifyListeners();
 
       return Success(result);
     } on BaseException catch (error) {

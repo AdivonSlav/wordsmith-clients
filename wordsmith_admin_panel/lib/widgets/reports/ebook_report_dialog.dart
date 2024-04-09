@@ -2,11 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wordsmith_admin_panel/screens/reports_screen.dart';
 import 'package:wordsmith_admin_panel/widgets/reports/report_email_dialog.dart';
+import 'package:wordsmith_admin_panel/widgets/users/ban_user_dialog.dart';
 import 'package:wordsmith_utils/formatters/datetime_formatter.dart';
 import 'package:wordsmith_utils/models/ebook_report/ebook_report.dart';
 import 'package:wordsmith_utils/models/query_result.dart';
 import 'package:wordsmith_utils/models/result.dart';
+import 'package:wordsmith_utils/models/user/user.dart';
+import 'package:wordsmith_utils/models/user/user_status.dart';
 import 'package:wordsmith_utils/providers/ebook_reports_provider.dart';
+import 'package:wordsmith_utils/providers/user_provider.dart';
 
 class EbookReportDialogWidget extends StatefulWidget {
   final int reportId;
@@ -20,6 +24,7 @@ class EbookReportDialogWidget extends StatefulWidget {
 
 class _EbookReportDialogWidgetState extends State<EbookReportDialogWidget> {
   late EbookReportsProvider _ebookReportsProvider;
+  late UserProvider _userProvider;
 
   late Future<Result<QueryResult<EbookReport>>> _ebookReportFuture;
 
@@ -237,14 +242,19 @@ class _EbookReportDialogWidgetState extends State<EbookReportDialogWidget> {
             const SizedBox(width: 10.0),
             Expanded(
               child: FilledButton.icon(
-                onPressed: () {},
+                onPressed:
+                    report.reportedEBook.author.status != UserStatus.active
+                        ? null
+                        : () => _openBanUserDialog(report.reportedEBook.author),
                 icon: const Icon(
                   Icons.block_flipped,
                   color: Colors.white,
                 ),
-                label: const Text(
-                  "Ban author",
-                  style: TextStyle(color: Colors.white),
+                label: Text(
+                  report.reportedEBook.author.status != UserStatus.active
+                      ? "Already banned"
+                      : "Ban author",
+                  style: const TextStyle(color: Colors.white),
                 ),
                 style: FilledButton.styleFrom(
                   backgroundColor: Colors.red[700],
@@ -347,9 +357,36 @@ class _EbookReportDialogWidgetState extends State<EbookReportDialogWidget> {
     );
   }
 
+  void _openBanUserDialog(User user) async {
+    showDialog(
+      context: context,
+      builder: (context) => BanUserDialogWidget(user: user),
+    );
+  }
+
+  void _refresh() {
+    setState(() {
+      _ebookReportFuture =
+          _ebookReportsProvider.getEbookReport(widget.reportId);
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _userProvider.addListener(_refresh);
+  }
+
+  @override
+  void dispose() {
+    _userProvider.removeListener(_refresh);
+    super.dispose();
+  }
+
   @override
   void initState() {
     _ebookReportsProvider = context.read<EbookReportsProvider>();
+    _userProvider = context.read<UserProvider>();
     _ebookReportFuture = _ebookReportsProvider.getEbookReport(widget.reportId);
     super.initState();
   }
