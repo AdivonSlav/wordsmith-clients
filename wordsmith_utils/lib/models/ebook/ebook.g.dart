@@ -20,6 +20,10 @@ Ebook _$EbookFromJson(Map<String, dynamic> json) => Ebook(
       Image.fromJson(json['coverArt'] as Map<String, dynamic>),
       json['genres'] as String,
       MaturityRating.fromJson(json['maturityRating'] as Map<String, dynamic>),
+      json['isHidden'] as bool,
+      json['hiddenDate'] == null
+          ? null
+          : DateTime.parse(json['hiddenDate'] as String),
     );
 
 Map<String, dynamic> _$EbookToJson(Ebook instance) => <String, dynamic>{
@@ -36,4 +40,6 @@ Map<String, dynamic> _$EbookToJson(Ebook instance) => <String, dynamic>{
       'coverArt': instance.coverArt,
       'genres': instance.genres,
       'maturityRating': instance.maturityRating,
+      'isHidden': instance.isHidden,
+      'hiddenDate': instance.hiddenDate?.toIso8601String(),
     };

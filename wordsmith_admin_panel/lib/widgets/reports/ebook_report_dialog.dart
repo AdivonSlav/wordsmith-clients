@@ -11,6 +11,7 @@ import 'package:wordsmith_utils/models/query_result.dart';
 import 'package:wordsmith_utils/models/result.dart';
 import 'package:wordsmith_utils/models/user/user.dart';
 import 'package:wordsmith_utils/models/user/user_status.dart';
+import 'package:wordsmith_utils/providers/ebook_provider.dart';
 import 'package:wordsmith_utils/providers/ebook_reports_provider.dart';
 import 'package:wordsmith_utils/providers/user_provider.dart';
 import 'package:wordsmith_utils/show_snackbar.dart';
@@ -28,10 +29,12 @@ class EbookReportDialogWidget extends StatefulWidget {
 class _EbookReportDialogWidgetState extends State<EbookReportDialogWidget> {
   late EbookReportsProvider _ebookReportsProvider;
   late UserProvider _userProvider;
+  late EbookProvider _ebookProvider;
 
   late Future<Result<QueryResult<EbookReport>>> _ebookReportFuture;
 
   bool _closingReportInProgress = false;
+  bool _hidingEbookInProgress = false;
 
   final _labelStyle = const TextStyle(
     fontWeight: FontWeight.bold,
@@ -236,17 +239,27 @@ class _EbookReportDialogWidgetState extends State<EbookReportDialogWidget> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Visibility(
-              visible: !report.reportDetails.isClosed,
+              visible: !report.reportDetails.isClosed &&
+                  report.reportedEBook.author.status == UserStatus.active,
               child: Expanded(
                 child: FilledButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(
-                    Icons.visibility_off,
-                    color: Colors.white,
-                  ),
-                  label: const Text(
-                    "Hide ebook",
-                    style: TextStyle(color: Colors.white),
+                  onPressed: report.reportedEBook.isHidden
+                      ? () => _unhideEbook(report)
+                      : () => _hideEbook(report),
+                  icon: report.reportedEBook.isHidden
+                      ? const Icon(
+                          Icons.visibility,
+                          color: Colors.white,
+                        )
+                      : const Icon(
+                          Icons.visibility_off,
+                          color: Colors.white,
+                        ),
+                  label: Text(
+                    report.reportedEBook.isHidden
+                        ? "Unhide ebook"
+                        : "Hide ebook",
+                    style: const TextStyle(color: Colors.white),
                   ),
                   style: FilledButton.styleFrom(
                     backgroundColor: Colors.red[700],
@@ -398,6 +411,52 @@ class _EbookReportDialogWidgetState extends State<EbookReportDialogWidget> {
     });
   }
 
+  void _hideEbook(EbookReport report) async {
+    if (_hidingEbookInProgress) return;
+    _hidingEbookInProgress = true;
+    ProgressIndicatorDialog().show(context, text: "Processing...");
+
+    await _ebookProvider
+        .hideEbook(ebookId: report.reportedEBook.id, notify: true)
+        .then((result) {
+      ProgressIndicatorDialog().dismiss();
+      _hidingEbookInProgress = false;
+      switch (result) {
+        case Success():
+          showSnackbar(context: context, content: "Succesfully hid ebook");
+        case Failure():
+          showSnackbar(
+              context: context,
+              content: result.exception.message,
+              backgroundColor: Colors.red);
+      }
+    });
+  }
+
+  void _unhideEbook(EbookReport report) async {
+    if (_hidingEbookInProgress) return;
+    _hidingEbookInProgress = true;
+    ProgressIndicatorDialog().show(context, text: "Processing...");
+
+    await _ebookProvider
+        .unhideEbook(ebookId: report.reportedEBook.id, notify: true)
+        .then((result) {
+      ProgressIndicatorDialog().dismiss();
+      _hidingEbookInProgress = false;
+      switch (result) {
+        case Success():
+          showSnackbar(
+              context: context,
+              content: "Succesfully made the ebook visible again");
+        case Failure():
+          showSnackbar(
+              context: context,
+              content: result.exception.message,
+              backgroundColor: Colors.red);
+      }
+    });
+  }
+
   void _openSendEmailDialog(int reportId) {
     showDialog(
       context: context,
@@ -430,12 +489,14 @@ class _EbookReportDialogWidgetState extends State<EbookReportDialogWidget> {
     super.didChangeDependencies();
     _userProvider.addListener(_refresh);
     _ebookReportsProvider.addListener(_refresh);
+    _ebookProvider.addListener(_refresh);
   }
 
   @override
   void dispose() {
     _userProvider.removeListener(_refresh);
     _ebookReportsProvider.removeListener(_refresh);
+    _ebookProvider.removeListener(_refresh);
     super.dispose();
   }
 
@@ -443,7 +504,8 @@ class _EbookReportDialogWidgetState extends State<EbookReportDialogWidget> {
   void initState() {
     _ebookReportsProvider = context.read<EbookReportsProvider>();
     _userProvider = context.read<UserProvider>();
-    _ebookReportFuture = _ebookReportsProvider.getEbookReport(widget.reportId);
+    _ebookProvider = context.read<EbookProvider>();
+    _refresh();
     super.initState();
   }
 
