@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
+import 'package:wordsmith_admin_panel/screens/reports_screen.dart';
+import 'package:wordsmith_admin_panel/widgets/reports/report_email_dialog.dart';
 import 'package:wordsmith_utils/formatters/datetime_formatter.dart';
 import 'package:wordsmith_utils/models/ebook_report/ebook_report.dart';
 import 'package:wordsmith_utils/models/query_result.dart';
@@ -180,7 +181,7 @@ class _EbookReportDialogWidgetState extends State<EbookReportDialogWidget> {
     );
   }
 
-  Widget _buildReportActions() {
+  Widget _buildReportActions(EbookReport report) {
     return Column(
       children: <Widget>[
         const Align(
@@ -198,7 +199,7 @@ class _EbookReportDialogWidgetState extends State<EbookReportDialogWidget> {
           children: [
             Expanded(
               child: FilledButton.icon(
-                onPressed: () {},
+                onPressed: () => _openSendEmailDialog(report.id),
                 icon: const Icon(Icons.email),
                 label: const Text("Send email to author"),
               ),
@@ -318,7 +319,7 @@ class _EbookReportDialogWidgetState extends State<EbookReportDialogWidget> {
                               _buildReportContentCard(report)),
                     ),
                     const Divider(),
-                    Builder(builder: (context) => _buildReportActions()),
+                    Builder(builder: (context) => _buildReportActions(report)),
                   ],
                 ),
               );
@@ -338,6 +339,14 @@ class _EbookReportDialogWidgetState extends State<EbookReportDialogWidget> {
     ];
   }
 
+  void _openSendEmailDialog(int reportId) {
+    showDialog(
+      context: context,
+      builder: (context) =>
+          ReportEmailDialogWidget(reportId: reportId, type: ReportType.ebook),
+    );
+  }
+
   @override
   void initState() {
     _ebookReportsProvider = context.read<EbookReportsProvider>();
@@ -347,10 +356,13 @@ class _EbookReportDialogWidgetState extends State<EbookReportDialogWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text("Ebook report"),
-      content: _buildContent(),
-      actions: _buildActions(),
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: AlertDialog(
+        title: const Text("Ebook report"),
+        content: _buildContent(),
+        actions: _buildActions(),
+      ),
     );
   }
 }

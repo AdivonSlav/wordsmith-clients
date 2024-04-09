@@ -10,12 +10,14 @@ void showSnackbar({
   required BuildContext context,
   required String content,
   SnackBarBehavior behaviour = SnackBarBehavior.floating,
+  Color? backgroundColor,
 }) {
   if (context.mounted) {
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       behavior: behaviour,
       content: Text(content),
+      backgroundColor: backgroundColor,
     ));
   }
 }

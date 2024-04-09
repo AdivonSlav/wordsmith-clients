@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:wordsmith_admin_panel/screens/reports_screen.dart';
+import 'package:wordsmith_admin_panel/widgets/reports/report_email_dialog.dart';
 import 'package:wordsmith_utils/formatters/datetime_formatter.dart';
 import 'package:wordsmith_utils/models/query_result.dart';
 import 'package:wordsmith_utils/models/result.dart';
@@ -145,7 +147,7 @@ class _UserReportDialogWidgetState extends State<UserReportDialogWidget> {
     );
   }
 
-  Widget _buildReportActions() {
+  Widget _buildReportActions(UserReport report) {
     return Column(
       children: <Widget>[
         const Align(
@@ -163,7 +165,7 @@ class _UserReportDialogWidgetState extends State<UserReportDialogWidget> {
           children: [
             Expanded(
               child: FilledButton.icon(
-                onPressed: () {},
+                onPressed: () => _openSendEmailDialog(report.id),
                 icon: const Icon(Icons.email),
                 label: const Text("Send email to user"),
               ),
@@ -271,7 +273,7 @@ class _UserReportDialogWidgetState extends State<UserReportDialogWidget> {
                               _buildReportContentCard(report)),
                     ),
                     const Divider(),
-                    Builder(builder: (context) => _buildReportActions()),
+                    Builder(builder: (context) => _buildReportActions(report)),
                   ],
                 ),
               );
@@ -291,6 +293,14 @@ class _UserReportDialogWidgetState extends State<UserReportDialogWidget> {
     ];
   }
 
+  void _openSendEmailDialog(int reportId) {
+    showDialog(
+      context: context,
+      builder: (context) =>
+          ReportEmailDialogWidget(reportId: reportId, type: ReportType.user),
+    );
+  }
+
   @override
   void initState() {
     _userReportsProvider = context.read<UserReportsProvider>();
@@ -300,10 +310,13 @@ class _UserReportDialogWidgetState extends State<UserReportDialogWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text("User report"),
-      content: _buildContent(),
-      actions: _buildActions(),
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: AlertDialog(
+        title: const Text("User report"),
+        content: _buildContent(),
+        actions: _buildActions(),
+      ),
     );
   }
 }

@@ -73,6 +73,7 @@ class UserReportsProvider extends BaseProvider<UserReport> {
 
     try {
       var result = await post(
+        request: request,
         additionalRoute: "/email",
         bearerToken: accessToken ?? "",
         retryForRefresh: true,
