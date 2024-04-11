@@ -17,9 +17,7 @@ import 'package:wordsmith_utils/providers/user_provider.dart';
 import 'package:wordsmith_utils/show_snackbar.dart';
 
 class PersonalProfileScreenWidget extends StatefulWidget {
-  final User user;
-
-  const PersonalProfileScreenWidget({super.key, required this.user});
+  const PersonalProfileScreenWidget({super.key});
 
   @override
   State<StatefulWidget> createState() => _PersonalProfileScreenWidgetState();
@@ -32,6 +30,8 @@ class _PersonalProfileScreenWidgetState
   late AuthProvider _authProvider;
   late UserProvider _userProvider;
 
+  late Future<Result<User>> _userFuture;
+
   bool _updatingProfileImage = false;
 
   final _labelStyle = const TextStyle(
@@ -39,15 +39,15 @@ class _PersonalProfileScreenWidgetState
     fontSize: 11.0,
   );
 
-  String? _getUserProfileImage() {
-    if (widget.user.profileImage?.imagePath != null) {
-      return widget.user.profileImage!.imagePath;
+  String? _getUserProfileImage(User user) {
+    if (user.profileImage?.imagePath != null) {
+      return user.profileImage!.imagePath;
     }
 
     return null;
   }
 
-  Widget _buildUsernameEmailCard() {
+  Widget _buildUsernameEmailCard(User user) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -68,17 +68,17 @@ class _PersonalProfileScreenWidgetState
                   style: const ButtonStyle(
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
-                  onPressed: () => _openEditUsernameEmailDialog(),
+                  onPressed: () => _openEditUsernameEmailDialog(user),
                   icon: const Icon(Icons.edit),
                 ),
               ],
             ),
             Text(
-              widget.user.username,
+              user.username,
               softWrap: true,
             ),
             Text(
-              widget.user.email,
+              user.email,
               softWrap: true,
             ),
           ],
@@ -87,7 +87,7 @@ class _PersonalProfileScreenWidgetState
     );
   }
 
-  Widget _buildMemberDateCard() {
+  Widget _buildMemberDateCard(User user) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -99,7 +99,7 @@ class _PersonalProfileScreenWidgetState
               style: _labelStyle,
             ),
             Text(formatDateTime(
-              date: widget.user.registrationDate,
+              date: user.registrationDate,
               format: "yMMMMd",
             )),
           ],
@@ -108,7 +108,7 @@ class _PersonalProfileScreenWidgetState
     );
   }
 
-  Widget _buildAboutCard() {
+  Widget _buildAboutCard(User user) {
     return SizedBox(
       width: double.infinity,
       height: 150.0,
@@ -132,7 +132,7 @@ class _PersonalProfileScreenWidgetState
                     style: const ButtonStyle(
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
-                    onPressed: () => _openEditAboutDialog(),
+                    onPressed: () => _openEditAboutDialog(user),
                     icon: const Icon(Icons.edit),
                   ),
                 ],
@@ -140,7 +140,7 @@ class _PersonalProfileScreenWidgetState
               Expanded(
                 child: SingleChildScrollView(
                   child: Text(
-                    widget.user.about,
+                    user.about,
                     softWrap: true,
                   ),
                 ),
@@ -153,47 +153,70 @@ class _PersonalProfileScreenWidgetState
   }
 
   Widget _buildPersonalInfoCards() {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.start,
+    return FutureBuilder(
+      future: _userFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (!snapshot.hasData || snapshot.hasError) {
+          return Center(child: Text(snapshot.error.toString()));
+        }
+
+        late User user;
+
+        switch (snapshot.data!) {
+          case Success<User>(data: final d):
+            user = d;
+          case Failure<User>(exception: final e):
+            return Center(child: Text(e.message));
+        }
+
+        return Column(
           children: [
-            ProfileImageWidget(
-              profileImagePath: _getUserProfileImage(),
-              editCallback: _editProfileImage,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                ProfileImageWidget(
+                  profileImagePath: _getUserProfileImage(user),
+                  editCallback: _editProfileImage,
+                ),
+                const SizedBox(width: 10.0),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Builder(
+                          builder: (context) => _buildUsernameEmailCard(user)),
+                      Builder(builder: (context) => _buildMemberDateCard(user)),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 10.0),
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Builder(builder: (context) => _buildUsernameEmailCard()),
-                  Builder(builder: (context) => _buildMemberDateCard()),
-                ],
-              ),
-            ),
+            Builder(builder: (context) => _buildAboutCard(user)),
           ],
-        ),
-        Builder(builder: (context) => _buildAboutCard()),
-      ],
+        );
+      },
     );
   }
 
-  void _openEditUsernameEmailDialog() {
+  void _openEditUsernameEmailDialog(User user) {
     showDialog(
       context: context,
       builder: (context) => EditUsernameEmailDialogWidget(
-        user: widget.user,
+        user: user,
       ),
     );
   }
 
-  void _openEditAboutDialog() {
+  void _openEditAboutDialog(User user) {
     showDialog(
       context: context,
       builder: (context) => EditAboutDialogWidget(
-        user: widget.user,
+        user: user,
       ),
     );
   }
@@ -253,6 +276,7 @@ class _PersonalProfileScreenWidgetState
   void initState() {
     _authProvider = context.read<AuthProvider>();
     _userProvider = context.read<UserProvider>();
+    _userFuture = _userProvider.getLoggedUser();
     super.initState();
   }
 
