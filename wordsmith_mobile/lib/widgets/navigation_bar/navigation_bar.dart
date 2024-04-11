@@ -86,6 +86,10 @@ class _NavigationBarWidgetState extends State<NavigationBarWidget> {
           if (e.type == ExceptionType.internalAppError) {
             return Future.error(e);
           }
+          if (e.type == ExceptionType.unauthorizedException) {
+            await _authProvider.eraseLogin();
+            return;
+          }
 
           return await _storeUserFromIndex();
       }
