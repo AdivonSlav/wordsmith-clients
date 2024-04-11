@@ -23,8 +23,15 @@ class UserIndexModel {
   });
 
   User toUser() {
-    var user =
-        User(id, username, email, null, registrationDate, UserStatus.active);
+    var user = User(
+      id,
+      username,
+      email,
+      null,
+      registrationDate,
+      UserStatus.active,
+      "",
+    );
 
     return user;
   }

@@ -12,9 +12,10 @@ class User {
   final Image? profileImage;
   final DateTime registrationDate;
   final UserStatus status;
+  final String about;
 
   User(this.id, this.username, this.email, this.profileImage,
-      this.registrationDate, this.status);
+      this.registrationDate, this.status, this.about);
 
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 

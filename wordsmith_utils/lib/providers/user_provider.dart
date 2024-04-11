@@ -2,6 +2,7 @@ import "package:wordsmith_utils/exceptions/base_exception.dart";
 import "package:wordsmith_utils/exceptions/exception_types.dart";
 import "package:wordsmith_utils/logger.dart";
 import "package:wordsmith_utils/models/entity_result.dart";
+import "package:wordsmith_utils/models/image/image_insert.dart";
 import "package:wordsmith_utils/models/result.dart";
 import "package:wordsmith_utils/models/user/user.dart";
 import "package:wordsmith_utils/models/user/user_change_access.dart";
@@ -59,6 +60,28 @@ class UserProvider extends BaseProvider<User> {
       var result = await put(
         request: update,
         additionalRoute: "/profile",
+        bearerToken: accessToken ?? "",
+        retryForRefresh: true,
+      );
+
+      return Success(result.result!);
+    } on BaseException catch (error) {
+      _logger.severe(error);
+      return Failure(error);
+    } catch (error, stackTrace) {
+      _logger.severe(error, stackTrace);
+      return Failure(BaseException("Internal app error",
+          type: ExceptionType.internalAppError));
+    }
+  }
+
+  Future<Result<User>> updateProfileImage(ImageInsert request) async {
+    String? accessToken = await SecureStore.getValue("access_token");
+
+    try {
+      var result = await put(
+        request: request,
+        additionalRoute: "/profile/image",
         bearerToken: accessToken ?? "",
         retryForRefresh: true,
       );

@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:wordsmith_mobile/screens/home_screen.dart';
 import 'package:wordsmith_mobile/screens/intro_screen.dart';
 import 'package:wordsmith_mobile/screens/library_screen.dart';
-import 'package:wordsmith_mobile/screens/profile_screen.dart';
+import 'package:wordsmith_mobile/screens/personal_profile_screen.dart';
 import 'package:wordsmith_mobile/utils/indexers/models/user_index_model.dart';
 import 'package:wordsmith_mobile/utils/indexers/user_index_provider.dart';
 import 'package:wordsmith_mobile/widgets/navigation_bar/app_bar_settings_trailing.dart';
@@ -45,9 +45,11 @@ class _NavigationBarWidgetState extends State<NavigationBarWidget> {
 
   String _loadAppBarTitle(int index) {
     switch (index) {
+      case 0:
+        return "Home";
       case 1:
         return "Library";
-      case 2:
+      case 3:
         return "Profile";
       default:
         return "";
@@ -136,7 +138,8 @@ class _NavigationBarWidgetState extends State<NavigationBarWidget> {
                   _page = const Placeholder();
                   break;
                 case 3:
-                  _page = ProfileScreenWidget(user: AuthProvider.loggedUser!);
+                  _page = PersonalProfileScreenWidget(
+                      user: AuthProvider.loggedUser!);
                   break;
                 default:
                   throw UnimplementedError("No widget for $_selectedIndex");
@@ -152,7 +155,7 @@ class _NavigationBarWidgetState extends State<NavigationBarWidget> {
                   ? null
                   : AppBar(
                       title: Text(appBarTitle),
-                      actions: _page is ProfileScreenWidget
+                      actions: _page is PersonalProfileScreenWidget
                           ? [const AppBarSettingsTrailingWidget()]
                           : null,
                     ),

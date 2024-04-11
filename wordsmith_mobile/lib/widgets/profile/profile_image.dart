@@ -11,7 +11,7 @@ class ProfileImageWidget extends StatefulWidget {
   final String? profileImagePath;
   final double? scale;
   final double? radius;
-  final Future<void> Function(XFile file)? editCallback;
+  final void Function(XFile file)? editCallback;
 
   const ProfileImageWidget(
       {super.key,
