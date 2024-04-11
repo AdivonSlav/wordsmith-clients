@@ -335,7 +335,7 @@ class _EbookReportDialogWidgetState extends State<EbookReportDialogWidget> {
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       Flexible(
-                        flex: 1,
+                        flex: 2,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: <Widget>[
