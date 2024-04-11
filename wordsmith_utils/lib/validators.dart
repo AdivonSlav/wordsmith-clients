@@ -78,6 +78,14 @@ String? validateRequired(String? value) {
   return null;
 }
 
+String? validateRequiredNumeric(int? value) {
+  if (value == null) {
+    return "This field is required";
+  }
+
+  return null;
+}
+
 String? validateCategoryName(String? value) {
   if (value == null || value.isEmpty) {
     return "You must provide a category name";

@@ -3,6 +3,7 @@ import "package:wordsmith_utils/exceptions/exception_types.dart";
 import "package:wordsmith_utils/logger.dart";
 import "package:wordsmith_utils/models/ebook_report/ebook_report.dart";
 import "package:wordsmith_utils/models/ebook_report/ebook_report_email_send.dart";
+import "package:wordsmith_utils/models/ebook_report/ebook_report_insert.dart";
 import "package:wordsmith_utils/models/ebook_report/ebook_report_search.dart";
 import "package:wordsmith_utils/models/ebook_report/ebook_report_update.dart";
 import "package:wordsmith_utils/models/entity_result.dart";
@@ -76,6 +77,28 @@ class EbookReportsProvider extends BaseProvider<EbookReport> {
       var result = await post(
         request: request,
         additionalRoute: "/email",
+        bearerToken: accessToken ?? "",
+        retryForRefresh: true,
+      );
+
+      return Success(result);
+    } on BaseException catch (error) {
+      _logger.severe(error);
+      return Failure(error);
+    } catch (error, stackTrace) {
+      _logger.severe(error, stackTrace);
+      return Failure(BaseException("Internal app error",
+          type: ExceptionType.internalAppError));
+    }
+  }
+
+  Future<Result<EntityResult<EbookReport>>> postReport(
+      EbookReportInsert request) async {
+    var accessToken = await SecureStore.getValue("access_token");
+
+    try {
+      var result = await post(
+        request: request,
         bearerToken: accessToken ?? "",
         retryForRefresh: true,
       );

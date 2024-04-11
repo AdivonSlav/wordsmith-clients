@@ -1,4 +1,5 @@
 import "package:json_annotation/json_annotation.dart";
+import "package:wordsmith_utils/models/report/report_type.dart";
 
 part "report_reason.g.dart";
 
@@ -6,9 +7,9 @@ part "report_reason.g.dart";
 class ReportReason {
   final int id;
   final String reason;
-  final String subject;
+  final ReportType type;
 
-  ReportReason(this.id, this.reason, this.subject);
+  ReportReason(this.id, this.reason, this.type);
 
   factory ReportReason.fromJson(Map<String, dynamic> json) =>
       _$ReportReasonFromJson(json);

@@ -163,29 +163,29 @@ class _EbookPurchaseWidgetState extends State<EbookPurchaseWidget> {
         ),
         centerTitle: true,
       ),
-      body: FutureBuilder(
-        future: _orderFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState != ConnectionState.done) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: FutureBuilder(
+          future: _orderFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState != ConnectionState.done) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          var data = snapshot.data;
+            var data = snapshot.data;
 
-          if (data == null || snapshot.hasError) {
-            return Center(child: Text(snapshot.error.toString()));
-          }
+            if (data == null || snapshot.hasError) {
+              return Center(child: Text(snapshot.error.toString()));
+            }
 
-          switch (data) {
-            case Success<EntityResult<Order>>():
-              _createdOrder = data.data.result!;
-            case Failure<EntityResult<Order>>(exception: final e):
-              return Center(child: Text(e.toString()));
-          }
+            switch (data) {
+              case Success<EntityResult<Order>>():
+                _createdOrder = data.data.result!;
+              case Failure<EntityResult<Order>>(exception: final e):
+                return Center(child: Text(e.toString()));
+            }
 
-          return Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
+            return Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Center(
@@ -226,9 +226,9 @@ class _EbookPurchaseWidgetState extends State<EbookPurchaseWidget> {
                   label: const Text("Pay with PayPal"),
                 ),
               ],
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }

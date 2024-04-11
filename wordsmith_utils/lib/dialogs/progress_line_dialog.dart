@@ -42,13 +42,15 @@ class ProgressLineDialogState extends State<ProgressLineDialog> {
           const Divider(height: 0.0),
         ],
       ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          widget.content,
-          const Divider(height: 0.0),
-          const SizedBox(height: 15.0),
-        ],
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            widget.content,
+            const Divider(height: 0.0),
+            const SizedBox(height: 15.0),
+          ],
+        ),
       ),
       actions: widget.actions,
     );

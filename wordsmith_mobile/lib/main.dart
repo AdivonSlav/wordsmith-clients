@@ -22,13 +22,16 @@ import 'package:wordsmith_utils/providers/ebook_parse_provider.dart';
 import 'package:wordsmith_utils/providers/ebook_provider.dart';
 import 'package:wordsmith_utils/providers/ebook_rating_provider.dart';
 import 'package:wordsmith_utils/providers/ebook_rating_statistics_provider.dart';
+import 'package:wordsmith_utils/providers/ebook_reports_provider.dart';
 import 'package:wordsmith_utils/providers/genre_provider.dart';
 import 'package:wordsmith_utils/providers/maturity_ratings_provider.dart';
 import 'package:wordsmith_utils/providers/order_provider.dart';
+import 'package:wordsmith_utils/providers/report_reason_provider.dart';
 import 'package:wordsmith_utils/providers/user_library_category_provider.dart';
 import 'package:wordsmith_utils/providers/user_library_provider.dart';
 import 'package:wordsmith_utils/providers/user_login_provider.dart';
 import 'package:wordsmith_utils/providers/user_provider.dart';
+import 'package:wordsmith_utils/providers/user_reports_provider.dart';
 import 'package:wordsmith_utils/size_config.dart';
 
 Future<void> main() async {
@@ -68,6 +71,9 @@ Future<void> main() async {
       ChangeNotifierProvider(create: (_) => EbookRatingStatisticsProvider()),
       ChangeNotifierProvider(create: (_) => CommentProvider()),
       ChangeNotifierProvider(create: (_) => EbookChapterProvider()),
+      ChangeNotifierProvider(create: (_) => UserReportsProvider()),
+      ChangeNotifierProvider(create: (_) => EbookReportsProvider()),
+      ChangeNotifierProvider(create: (_) => ReportReasonProvider()),
     ],
     child: const Application(),
   ));

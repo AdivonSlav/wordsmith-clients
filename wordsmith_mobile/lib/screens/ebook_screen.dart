@@ -5,6 +5,7 @@ import 'package:wordsmith_mobile/widgets/ebook/ebook_image.dart';
 import 'package:wordsmith_mobile/widgets/ebook/ebook_purchase.dart';
 import 'package:wordsmith_mobile/widgets/ebook/ebook_rating_display.dart';
 import 'package:wordsmith_mobile/widgets/ebook/ebook_rating_minimal_display.dart';
+import 'package:wordsmith_mobile/widgets/report/ebook_report_dialog.dart';
 import 'package:wordsmith_utils/dialogs/progress_indicator_dialog.dart';
 import 'package:wordsmith_utils/formatters/datetime_formatter.dart';
 import 'package:wordsmith_utils/formatters/number_formatter.dart';
@@ -32,12 +33,66 @@ class _EbookScreenWidget extends State<EbookScreenWidget> {
   late Future<Result<QueryResult<Ebook>>> _ebookFuture;
   UserLibrary? _userLibrary;
 
+  Widget _buildActionsMenu(Ebook ebook) {
+    return Wrap(
+      alignment: WrapAlignment.end,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(right: 8.0),
+          child: IconButton(
+            onPressed: () => _showEbookReportDialog(ebook),
+            icon: const Icon(Icons.report),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(right: 8.0),
+          child: IconButton(
+            onPressed: () {},
+            icon: const Icon(Icons.favorite_outline),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(right: 8.0),
+          child: IconButton(
+            onPressed: () => _showRatingDialog(ebook),
+            icon: const Icon(Icons.star),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(right: 8.0),
+          child: IconButton(
+            onPressed: () => _showCommentsScreen(ebook),
+            icon: const Icon(Icons.comment),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(right: 8.0),
+          child: IconButton.filled(
+            icon: _userLibrary == null
+                ? const Icon(Icons.add_circle_outline)
+                : const Icon(Icons.check_circle),
+            onPressed: () => _showAddToLibraryDialog(ebook),
+          ),
+        ),
+      ],
+    );
+  }
+
   String _formatPrice(double? price) {
     if (price == null) {
       return "Free";
     }
 
     return NumberFormatter.formatCurrency(price);
+  }
+
+  void _showEbookReportDialog(Ebook ebook) async {
+    await showDialog(
+      context: context,
+      builder: (context) => EbookReportDialogWidget(
+        ebookId: ebook.id,
+      ),
+    );
   }
 
   void _showRatingDialog(Ebook ebook) async {
@@ -231,45 +286,8 @@ class _EbookScreenWidget extends State<EbookScreenWidget> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: <Widget>[
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(right: 12.0),
-                                child: IconButton(
-                                  onPressed: () {},
-                                  icon: const Icon(Icons.favorite_outline),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(right: 12.0),
-                                child: IconButton(
-                                  onPressed: () => _showRatingDialog(ebook),
-                                  icon: const Icon(Icons.star),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(right: 12.0),
-                                child: IconButton(
-                                  onPressed: () => _showCommentsScreen(ebook),
-                                  icon: const Icon(Icons.comment),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(right: 12.0),
-                                child: ElevatedButton.icon(
-                                  label: _userLibrary == null
-                                      ? const Text("Add to library")
-                                      : const Text("Added"),
-                                  icon: _userLibrary == null
-                                      ? const Icon(Icons.add_circle_outline)
-                                      : const Icon(Icons.check_circle),
-                                  onPressed: () =>
-                                      _showAddToLibraryDialog(ebook),
-                                ),
-                              ),
-                            ],
-                          ),
+                          Builder(
+                              builder: (context) => _buildActionsMenu(ebook)),
                           Container(
                             padding: const EdgeInsets.only(
                                 right: 32.0, left: 32.0, bottom: 16.0),
