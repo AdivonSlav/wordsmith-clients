@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wordsmith_mobile/widgets/profile/edit_password_dialog.dart';
 import 'package:wordsmith_mobile/widgets/settings/settings_logout.dart';
 import 'package:wordsmith_mobile/widgets/settings/settings_theme.dart';
 
@@ -10,6 +11,61 @@ class SettingsScreenWidget extends StatefulWidget {
 }
 
 class _SettingsScreenWidgetState extends State<SettingsScreenWidget> {
+  final _labelStyle = const TextStyle(
+    fontWeight: FontWeight.bold,
+    fontSize: 11.0,
+  );
+
+  Widget _buildAppSettings() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: Text(
+            "App Settings",
+            style: _labelStyle,
+          ),
+        ),
+        const Card(
+          child: SettingsThemeWidget(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAccountSettings() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: Text(
+            "Account Settings",
+            style: _labelStyle,
+          ),
+        ),
+        Card(
+          child: ListTile(
+            title: const Text("Change password"),
+            leading: const Icon(Icons.password),
+            onTap: () => _openChangePasswordDialog(),
+          ),
+        ),
+        const Card(
+          child: SettingsLogoutWidget(),
+        ),
+      ],
+    );
+  }
+
+  void _openChangePasswordDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => EditPasswordDialogWidget(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
@@ -34,33 +90,9 @@ class _SettingsScreenWidgetState extends State<SettingsScreenWidget> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Text(
-                "App Settings",
-                style: theme.textTheme.labelSmall,
-              ),
-            ),
-            const Card(
-              child: Column(children: <Widget>[
-                SettingsThemeWidget(),
-              ]),
-            ),
-            const SizedBox(
-              height: 12.0,
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Text(
-                "Account Settings",
-                style: theme.textTheme.labelSmall,
-              ),
-            ),
-            const Card(
-              child: Column(children: <Widget>[
-                SettingsLogoutWidget(),
-              ]),
-            ),
+            Builder(builder: (context) => _buildAppSettings()),
+            const SizedBox(height: 12.0),
+            Builder(builder: (context) => _buildAccountSettings()),
           ],
         ),
       ),

@@ -1,6 +1,5 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:wordsmith_mobile/widgets/settings/settings_tile_button.dart';
 
 class SettingsThemeWidget extends StatefulWidget {
   const SettingsThemeWidget({super.key});
@@ -20,19 +19,19 @@ class _SettingsThemeWidgetState extends State<SettingsThemeWidget> {
       _currentTheme = "Light";
     }
 
-    return SettingsTileButtonWidget(
-      title: "Theme",
+    return ListTile(
+      title: const Text("Theme"),
       leading: const Icon(Icons.brush),
       trailing: Text(_currentTheme),
-      onTapCallback: () async {
+      onTap: () async {
         return await showDialog(
           context: context,
           builder: (BuildContext context) => AlertDialog(
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                SettingsTileButtonWidget(
-                  title: "Dark",
+                ListTile(
+                  title: const Text("Dark"),
                   leading: Radio<String>(
                     value: "Dark",
                     groupValue: _currentTheme,
@@ -45,8 +44,8 @@ class _SettingsThemeWidgetState extends State<SettingsThemeWidget> {
                     },
                   ),
                 ),
-                SettingsTileButtonWidget(
-                  title: "Light",
+                ListTile(
+                  title: const Text("Light"),
                   leading: Radio<String>(
                     value: "Light",
                     groupValue: _currentTheme,
