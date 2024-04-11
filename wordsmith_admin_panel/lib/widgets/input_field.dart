@@ -11,7 +11,7 @@ class InputField extends StatelessWidget {
   final String? Function(String? value)? validator;
   final void Function(String? value)? onChanged;
   final bool? enabled;
-  final int? maxLines;
+  final int maxLines;
   final int? maxLength;
 
   const InputField({
@@ -25,7 +25,7 @@ class InputField extends StatelessWidget {
     this.validator,
     this.onChanged,
     this.enabled,
-    this.maxLines,
+    this.maxLines = 1,
     this.maxLength,
   });
 
