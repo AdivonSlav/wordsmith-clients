@@ -136,7 +136,9 @@ class _DashboardWidgetState extends State<DashboardWidget> {
               if (AuthProvider.loggedUser != null) {
                 switch (_selectedIndex) {
                   case 0:
-                    _page = const ProfileScreenWidget();
+                    _page = ProfileScreenWidget(
+                      user: AuthProvider.loggedUser!,
+                    );
                     break;
                   case 1:
                     _page = const ReportsScreenWidget();

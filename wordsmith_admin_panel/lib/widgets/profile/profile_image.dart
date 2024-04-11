@@ -5,21 +5,17 @@ import "package:wordsmith_utils/providers/base_provider.dart";
 import "package:wordsmith_utils/size_config.dart";
 
 class ProfileImageWidget extends StatefulWidget {
-  final String placeholderImage =
-      "assets/images/profile_image_placeholder.jpeg";
   final String? profileImagePath;
-  final double? width;
-  final double? height;
   final double? scale;
-  final Future<void> Function(XFile file) callbackFunction;
+  final double? radius;
+  final void Function(XFile file)? editCallback;
 
   const ProfileImageWidget({
     super.key,
     this.profileImagePath,
-    this.width,
-    this.height,
     this.scale,
-    required this.callbackFunction,
+    this.editCallback,
+    this.radius,
   });
 
   @override
@@ -27,26 +23,40 @@ class ProfileImageWidget extends StatefulWidget {
 }
 
 class _ProfileImageWidgetState extends State<ProfileImageWidget> {
+  final String _placeholderImage =
+      "assets/images/profile_image_placeholder.jpeg";
   final String _apiUrl = BaseProvider.apiUrl;
+
+  final _defaultAvatarRadius = 64.0;
+
   bool _isHovered = false;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () async {
-        var file = await ImageHelper.pickImage();
+    final defaultPlaceholderImage = AssetImage(_placeholderImage);
+    final profileImage = widget.profileImagePath != null
+        ? NetworkImage("$_apiUrl${widget.profileImagePath!}")
+        : null;
 
-        if (file != null) {
-          widget.callbackFunction(file);
-        }
-      },
+    return GestureDetector(
+      onTap: widget.editCallback != null
+          ? () async {
+              var file = await ImageHelper.pickImage();
+
+              if (file != null) {
+                widget.editCallback!(file);
+              }
+            }
+          : null,
       child: MouseRegion(
         onEnter: (details) {
+          if (widget.editCallback == null) return;
           setState(() {
             _isHovered = true;
           });
         },
         onExit: (details) {
+          if (widget.editCallback == null) return;
           setState(() {
             _isHovered = false;
           });
@@ -56,25 +66,14 @@ class _ProfileImageWidgetState extends State<ProfileImageWidget> {
           children: <Widget>[
             ColorFiltered(
                 colorFilter: ColorFilter.mode(
-                  Colors.black.withOpacity(_isHovered ? 0.5 : 1.0),
-                  BlendMode.dstATop,
+                  Colors.black.withOpacity(_isHovered ? 0.4 : 0.0),
+                  BlendMode.srcATop,
                 ),
-                child: widget.profileImagePath == null
-                    ? Image.asset(
-                        widget.placeholderImage,
-                        scale: widget.scale ?? 1.0,
-                        width: widget.width ??
-                            SizeConfig.safeBlockHorizontal * 25.0,
-                        height: widget.height ??
-                            SizeConfig.safeBlockVertical * 25.0,
-                      )
-                    : Image.network(
-                        "$_apiUrl${widget.profileImagePath}",
-                        width: widget.width ??
-                            SizeConfig.safeBlockHorizontal * 25.0,
-                        height: widget.height ??
-                            SizeConfig.safeBlockVertical * 25.0,
-                      )),
+                child: CircleAvatar(
+                  foregroundImage: profileImage,
+                  backgroundImage: defaultPlaceholderImage,
+                  radius: widget.radius ?? _defaultAvatarRadius,
+                )),
             Positioned(
               child: Visibility(
                 visible: _isHovered,
