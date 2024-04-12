@@ -32,6 +32,7 @@ import 'package:wordsmith_utils/providers/user_library_provider.dart';
 import 'package:wordsmith_utils/providers/user_login_provider.dart';
 import 'package:wordsmith_utils/providers/user_provider.dart';
 import 'package:wordsmith_utils/providers/user_reports_provider.dart';
+import 'package:wordsmith_utils/providers/user_statistics_provider.dart';
 import 'package:wordsmith_utils/size_config.dart';
 
 Future<void> main() async {
@@ -74,6 +75,7 @@ Future<void> main() async {
       ChangeNotifierProvider(create: (_) => UserReportsProvider()),
       ChangeNotifierProvider(create: (_) => EbookReportsProvider()),
       ChangeNotifierProvider(create: (_) => ReportReasonProvider()),
+      ChangeNotifierProvider(create: (_) => UserStatisticsProvider()),
     ],
     child: const Application(),
   ));

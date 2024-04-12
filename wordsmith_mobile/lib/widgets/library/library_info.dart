@@ -1,6 +1,8 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wordsmith_mobile/screens/ebook_screen.dart';
+import 'package:wordsmith_mobile/screens/profile_screen.dart';
 import 'package:wordsmith_mobile/screens/reader_screen.dart';
 import 'package:wordsmith_mobile/utils/indexers/ebook_index_provider.dart';
 import 'package:wordsmith_mobile/utils/indexers/models/ebook_index_model.dart';
@@ -37,6 +39,53 @@ class _LibraryInfoWidgetState extends State<LibraryInfoWidget> {
 
   EbookIndexModel? _indexModel;
 
+  Widget _buildEbookInfo() {
+    return Flexible(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            widget.libraryEntry.eBook.title,
+            style: const TextStyle(
+              fontSize: 18.0,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          RichText(
+            text: TextSpan(text: "by ", children: <TextSpan>[
+              TextSpan(
+                text: widget.libraryEntry.eBook.author.username,
+                recognizer: TapGestureRecognizer()
+                  ..onTap = () => _showAuthorProfileScreen(),
+                style: const TextStyle(
+                  color: Colors.blue,
+                ),
+              )
+            ]),
+          ),
+          const SizedBox(height: 24.0),
+          Text(
+            "Added to library: ${formatDateTime(date: widget.libraryEntry.syncDate, format: "yMMMMd")}",
+            style: const TextStyle(
+              fontSize: 12.0,
+            ),
+          ),
+          Text(
+            "Read progress: ${widget.libraryEntry.readProgress}",
+            style: const TextStyle(
+              fontSize: 12.0,
+            ),
+          ),
+          const SizedBox(height: 14.0),
+          IconButton.outlined(
+            onPressed: _openBookPage,
+            icon: const Icon(Icons.open_in_new),
+          )
+        ],
+      ),
+    );
+  }
+
   void _showRemoveDialog() async {
     await showDialog(
         context: context,
@@ -49,6 +98,12 @@ class _LibraryInfoWidgetState extends State<LibraryInfoWidget> {
         if (result == true) Navigator.of(context).pop(true);
       },
     );
+  }
+
+  void _showAuthorProfileScreen() {
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) =>
+            ProfileScreenWidget(userId: widget.libraryEntry.eBook.author.id)));
   }
 
   void _openReaderPage() {
@@ -200,44 +255,7 @@ class _LibraryInfoWidgetState extends State<LibraryInfoWidget> {
                     ),
                   ),
                   const SizedBox(width: 10.0),
-                  Flexible(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text(
-                          widget.libraryEntry.eBook.title,
-                          style: const TextStyle(
-                            fontSize: 18.0,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          "by ${widget.libraryEntry.eBook.author.username}",
-                          style: const TextStyle(
-                            fontSize: 12.0,
-                          ),
-                        ),
-                        const SizedBox(height: 24.0),
-                        Text(
-                          "Added to library: ${formatDateTime(date: widget.libraryEntry.syncDate, format: "yMMMMd")}",
-                          style: const TextStyle(
-                            fontSize: 12.0,
-                          ),
-                        ),
-                        Text(
-                          "Read progress: ${widget.libraryEntry.readProgress}",
-                          style: const TextStyle(
-                            fontSize: 12.0,
-                          ),
-                        ),
-                        const SizedBox(height: 34.0),
-                        IconButton.outlined(
-                          onPressed: _openBookPage,
-                          icon: const Icon(Icons.open_in_new),
-                        )
-                      ],
-                    ),
-                  ),
+                  Builder(builder: (context) => _buildEbookInfo()),
                 ],
               );
             },

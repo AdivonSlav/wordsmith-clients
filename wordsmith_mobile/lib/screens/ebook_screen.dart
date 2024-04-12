@@ -1,6 +1,8 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wordsmith_mobile/screens/ebook_comments_screen.dart';
+import 'package:wordsmith_mobile/screens/profile_screen.dart';
 import 'package:wordsmith_mobile/widgets/ebook/ebook_image.dart';
 import 'package:wordsmith_mobile/widgets/ebook/ebook_purchase.dart';
 import 'package:wordsmith_mobile/widgets/ebook/ebook_rating_display.dart';
@@ -12,6 +14,7 @@ import 'package:wordsmith_utils/formatters/number_formatter.dart';
 import 'package:wordsmith_utils/models/ebook/ebook.dart';
 import 'package:wordsmith_utils/models/query_result.dart';
 import 'package:wordsmith_utils/models/result.dart';
+import 'package:wordsmith_utils/models/user/user.dart';
 import 'package:wordsmith_utils/models/user_library/user_library.dart';
 import 'package:wordsmith_utils/providers/ebook_provider.dart';
 import 'package:wordsmith_utils/providers/user_library_provider.dart';
@@ -78,6 +81,25 @@ class _EbookScreenWidget extends State<EbookScreenWidget> {
     );
   }
 
+  Widget _buildAuthorInfo(User author) {
+    return RichText(
+      text: TextSpan(
+          text: "by ",
+          style: const TextStyle(fontSize: 18.0),
+          children: <TextSpan>[
+            TextSpan(
+              text: author.username,
+              recognizer: TapGestureRecognizer()
+                ..onTap = () => _showAuthorProfileScreen(author),
+              style: const TextStyle(
+                fontSize: 18.0,
+                color: Colors.blue,
+              ),
+            )
+          ]),
+    );
+  }
+
   String _formatPrice(double? price) {
     if (price == null) {
       return "Free";
@@ -105,11 +127,16 @@ class _EbookScreenWidget extends State<EbookScreenWidget> {
     );
   }
 
-  void _showCommentsScreen(Ebook ebook) async {
+  void _showCommentsScreen(Ebook ebook) {
     Navigator.of(context).push(MaterialPageRoute(
       builder: (context) => EbookCommentsScreenWidget(
           ebookId: ebook.id, isInLibrary: _userLibrary != null),
     ));
+  }
+
+  void _showAuthorProfileScreen(User author) {
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => ProfileScreenWidget(userId: author.id)));
   }
 
   void _showAddToLibraryDialog(Ebook ebook) async {
@@ -190,7 +217,7 @@ class _EbookScreenWidget extends State<EbookScreenWidget> {
     _userLibraryProvider = context.read<UserLibraryProvider>();
     _ebookProvider = context.read<EbookProvider>();
 
-    _ebookFuture = _ebookProvider.getById(widget.ebookId);
+    _ebookFuture = _ebookProvider.getEbook(widget.ebookId);
     _getLibraryEntry();
   }
 
@@ -302,24 +329,9 @@ class _EbookScreenWidget extends State<EbookScreenWidget> {
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                RichText(
-                                  text: TextSpan(
-                                      text: "by ",
-                                      style: TextStyle(
-                                          fontSize: 18.0,
-                                          color: theme
-                                              .textTheme.labelMedium!.color),
-                                      children: <TextSpan>[
-                                        TextSpan(
-                                            text: ebook.author.username,
-                                            style: TextStyle(
-                                                fontSize: 18.0,
-                                                color: theme.textTheme
-                                                    .labelMedium!.color,
-                                                decoration:
-                                                    TextDecoration.underline))
-                                      ]),
-                                ),
+                                Builder(
+                                    builder: (context) =>
+                                        _buildAuthorInfo(ebook.author)),
                                 Padding(
                                   padding:
                                       const EdgeInsets.symmetric(vertical: 8.0),

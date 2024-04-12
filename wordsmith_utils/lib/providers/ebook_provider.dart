@@ -3,6 +3,7 @@ import 'package:wordsmith_utils/exceptions/exception_types.dart';
 import 'package:wordsmith_utils/logger.dart';
 import 'package:wordsmith_utils/models/ebook/ebook.dart';
 import 'package:wordsmith_utils/models/ebook/ebook_insert.dart';
+import 'package:wordsmith_utils/models/ebook/ebook_search.dart';
 import 'package:wordsmith_utils/models/query_result.dart';
 import 'package:wordsmith_utils/models/result.dart';
 import 'package:wordsmith_utils/models/transfer_file.dart';
@@ -42,7 +43,34 @@ class EbookProvider extends BaseProvider<Ebook> {
     }
   }
 
-  Future<Result<QueryResult<Ebook>>> getById(int ebookId) async {
+  Future<Result<QueryResult<Ebook>>> getEbooks(EbookSearch search,
+      {int? page, int? pageSize, String? orderBy}) async {
+    var accessToken = await SecureStore.getValue("access_token");
+
+    try {
+      var query = search.toJson();
+      query["page"] = page;
+      query["pageSize"] = pageSize;
+      query["orderBy"] = orderBy;
+
+      var result = await get(
+        filter: query,
+        bearerToken: accessToken ?? "",
+        retryForRefresh: true,
+      );
+
+      return Success(result);
+    } on BaseException catch (error) {
+      _logger.severe(error);
+      return Failure(error);
+    } catch (error, stackTrace) {
+      _logger.severe(error, stackTrace);
+      return Failure(BaseException("Internal app error",
+          type: ExceptionType.internalAppError));
+    }
+  }
+
+  Future<Result<QueryResult<Ebook>>> getEbook(int ebookId) async {
     var accessToken = await SecureStore.getValue("access_token");
 
     try {
