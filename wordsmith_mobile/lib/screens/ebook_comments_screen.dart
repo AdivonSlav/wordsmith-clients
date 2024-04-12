@@ -1,8 +1,12 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
+import 'package:wordsmith_mobile/screens/profile_screen.dart';
 import 'package:wordsmith_mobile/utils/filters/comment_filter_values.dart';
 import 'package:wordsmith_mobile/widgets/input_field.dart';
+import 'package:wordsmith_mobile/widgets/profile/profile_image.dart';
 import 'package:wordsmith_utils/dialogs/progress_indicator_dialog.dart';
 import 'package:wordsmith_utils/dialogs/show_error_dialog.dart';
 import 'package:wordsmith_utils/formatters/datetime_formatter.dart';
@@ -14,6 +18,7 @@ import 'package:wordsmith_utils/models/ebook_chapter/ebook_chapter.dart';
 import 'package:wordsmith_utils/models/ebook_chapter/ebook_chapter_search.dart';
 import 'package:wordsmith_utils/models/result.dart';
 import 'package:wordsmith_utils/models/sorting_directions.dart';
+import 'package:wordsmith_utils/models/user/user.dart';
 import 'package:wordsmith_utils/providers/auth_provider.dart';
 import 'package:wordsmith_utils/providers/comment_provider.dart';
 import 'package:wordsmith_utils/providers/ebook_chapter_provider.dart';
@@ -228,12 +233,31 @@ class _EbookCommentsScreenWidgetState extends State<EbookCommentsScreenWidget> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      comment.user?.username ?? "Unknown",
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14.0,
-                      ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        GestureDetector(
+                          onTap: () => _showAuthorProfileScreen(comment.user),
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 8.0),
+                            child: ProfileImageWidget(
+                              profileImagePath:
+                                  comment.user?.profileImage?.imagePath,
+                              radius: 12.0,
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () => _showAuthorProfileScreen(comment.user),
+                          child: Text(
+                            comment.user?.username ?? "Unknown",
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14.0,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     Text(
                       comment.eBookChapter?.chapterName ?? "",
@@ -479,6 +503,12 @@ class _EbookCommentsScreenWidgetState extends State<EbookCommentsScreenWidget> {
           showErrorDialog(context: context, content: Text(e.toString()));
       }
     });
+  }
+
+  void _showAuthorProfileScreen(User? user) {
+    if (user == null) return;
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => ProfileScreenWidget(userId: user.id)));
   }
 
   Future _refresh() async {
