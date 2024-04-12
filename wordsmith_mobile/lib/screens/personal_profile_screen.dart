@@ -292,7 +292,6 @@ class _PersonalProfileScreenWidgetState
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Builder(builder: (context) => _buildPersonalInfoCards()),
-            const Divider(),
           ],
         ),
       ),
