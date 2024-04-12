@@ -36,14 +36,35 @@ class _EbookImageWidgetState extends State<EbookImageWidget> {
 
   final _defaultWidth = double.maxFinite;
   final _defaultHeight = SizeConfig.safeBlockVertical * 40.0;
+  final _darkThemeShadowColor = const Color(0xFFF5F5F5);
+  final _whiteThemeShadowColor = const Color(0XFF333333);
 
   Uint8List _toByteArray(String encodedImage) {
     return base64Decode(encodedImage);
   }
 
+  BoxShadow _buildBoxShadow() {
+    var adaptiveTheme = AdaptiveTheme.of(context);
+
+    if (adaptiveTheme.mode == AdaptiveThemeMode.dark) {
+      return BoxShadow(
+        color: _darkThemeShadowColor.withOpacity(0.2),
+        spreadRadius: 2.0,
+        blurRadius: 4.0,
+        offset: const Offset(0.0, 3.0),
+      );
+    }
+
+    return BoxShadow(
+      color: _whiteThemeShadowColor.withOpacity(0.6),
+      spreadRadius: 4.0,
+      blurRadius: 8.0,
+      offset: const Offset(0.0, 3.0),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    var adaptiveTheme = AdaptiveTheme.of(context);
     Uint8List? coverArtBytes;
 
     try {
@@ -79,14 +100,7 @@ class _EbookImageWidgetState extends State<EbookImageWidget> {
                 fit: widget.fit ?? BoxFit.contain,
               ),
               boxShadow: [
-                BoxShadow(
-                  color: adaptiveTheme.mode == AdaptiveThemeMode.dark
-                      ? Colors.black.withOpacity(0.6)
-                      : Colors.grey.withOpacity(0.6),
-                  spreadRadius: 4.0,
-                  blurRadius: 8.0,
-                  offset: const Offset(0.0, 3.0),
-                )
+                _buildBoxShadow(),
               ],
             ),
           ),
