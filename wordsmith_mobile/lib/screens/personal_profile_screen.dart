@@ -178,11 +178,14 @@ class _PersonalProfileScreenWidgetState
             Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                ProfileImageWidget(
-                  profileImagePath: _getUserProfileImage(user),
-                  editCallback: _editProfileImage,
+                Padding(
+                  padding: const EdgeInsets.only(right: 4.0, bottom: 4.0),
+                  child: ProfileImageWidget(
+                    profileImagePath: _getUserProfileImage(user),
+                    editCallback: _editProfileImage,
+                    radius: 72.0,
+                  ),
                 ),
-                const SizedBox(width: 10.0),
                 Expanded(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
