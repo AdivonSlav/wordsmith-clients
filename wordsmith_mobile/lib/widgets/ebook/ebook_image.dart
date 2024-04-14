@@ -14,6 +14,7 @@ class EbookImageWidget extends StatefulWidget {
   final double? scale;
   final BoxFit? fit;
   final Alignment? imageAlignment;
+  final bool addShadow;
 
   const EbookImageWidget({
     super.key,
@@ -24,6 +25,7 @@ class EbookImageWidget extends StatefulWidget {
     this.scale,
     this.fit,
     this.imageAlignment,
+    this.addShadow = true,
   });
 
   @override
@@ -99,9 +101,11 @@ class _EbookImageWidgetState extends State<EbookImageWidget> {
                 image: imageProvider,
                 fit: widget.fit ?? BoxFit.contain,
               ),
-              boxShadow: [
-                _buildBoxShadow(),
-              ],
+              boxShadow: widget.addShadow
+                  ? [
+                      _buildBoxShadow(),
+                    ]
+                  : null,
             ),
           ),
         ),

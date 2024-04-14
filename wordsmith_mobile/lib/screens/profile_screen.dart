@@ -1,6 +1,7 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:wordsmith_mobile/screens/author_publications_screen.dart';
 import 'package:wordsmith_mobile/screens/ebook_screen.dart';
 import 'package:wordsmith_mobile/widgets/ebook/ebook_image.dart';
 import 'package:wordsmith_mobile/widgets/profile/profile_image.dart';
@@ -196,7 +197,7 @@ class _ProfileScreenWidgetState extends State<ProfileScreenWidget> {
               child: Card(
                 clipBehavior: Clip.antiAlias,
                 child: InkResponse(
-                  onTap: () {},
+                  onTap: () => _openAuthorPublicationsScreen(),
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Column(
@@ -262,7 +263,9 @@ class _ProfileScreenWidgetState extends State<ProfileScreenWidget> {
                   fontSize: 18.0,
                 ),
               ),
-              TextButton(onPressed: () {}, child: const Text("View all")),
+              TextButton(
+                  onPressed: () => _openAuthorPublicationsScreen(),
+                  child: const Text("View all")),
             ],
           ),
           FutureBuilder(
@@ -320,6 +323,14 @@ class _ProfileScreenWidgetState extends State<ProfileScreenWidget> {
           ),
         ],
       ),
+    );
+  }
+
+  void _openAuthorPublicationsScreen() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+          builder: (context) =>
+              AuthorPublicationsScreenWidget(userId: widget.userId)),
     );
   }
 
