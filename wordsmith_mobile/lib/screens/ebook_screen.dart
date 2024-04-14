@@ -159,13 +159,13 @@ class _EbookScreenWidget extends State<EbookScreenWidget> {
             content:
                 const Text("Do you want to add this book to your library?"),
             actions: <Widget>[
+              FilledButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text("Cancel"),
+              ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
                 child: const Text("Add"),
-              ),
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: const Text("Cancel"),
               ),
             ],
           );
