@@ -14,6 +14,7 @@ import 'package:wordsmith_mobile/widgets/navigation_bar/navigation_bar.dart';
 import 'package:wordsmith_utils/dialogs/progress_indicator_dialog.dart';
 import 'package:wordsmith_utils/formatters/datetime_formatter.dart';
 import 'package:wordsmith_utils/logger.dart';
+import 'package:wordsmith_utils/providers/app_report_provider.dart';
 import 'package:wordsmith_utils/providers/auth_provider.dart';
 import 'package:wordsmith_utils/providers/base_provider.dart';
 import 'package:wordsmith_utils/providers/comment_provider.dart';
@@ -78,6 +79,7 @@ Future<void> main() async {
       ChangeNotifierProvider(create: (_) => ReportReasonProvider()),
       ChangeNotifierProvider(create: (_) => UserStatisticsProvider()),
       ChangeNotifierProvider(create: (_) => EbookFilterValuesProvider()),
+      ChangeNotifierProvider(create: (_) => AppReportProvider()),
     ],
     child: const Application(),
   ));

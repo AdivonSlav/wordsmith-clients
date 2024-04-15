@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:wordsmith_mobile/widgets/profile/edit_password_dialog.dart';
+import 'package:wordsmith_mobile/widgets/report/app_report_dialog.dart';
 import 'package:wordsmith_mobile/widgets/settings/settings_logout.dart';
 import 'package:wordsmith_mobile/widgets/settings/settings_theme.dart';
 
@@ -59,10 +60,40 @@ class _SettingsScreenWidgetState extends State<SettingsScreenWidget> {
     );
   }
 
+  Widget _buildMoreSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: Text(
+            "More",
+            style: _labelStyle,
+          ),
+        ),
+        Card(
+          child: ListTile(
+            title: const Text("Report"),
+            leading: const Icon(Icons.report),
+            subtitle: const Text("File a report for an app issue"),
+            onTap: () => _openAppReportDialog(),
+          ),
+        ),
+      ],
+    );
+  }
+
   void _openChangePasswordDialog() {
     showDialog(
       context: context,
-      builder: (context) => EditPasswordDialogWidget(),
+      builder: (context) => const EditPasswordDialogWidget(),
+    );
+  }
+
+  void _openAppReportDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => const AppReportDialogWidget(),
     );
   }
 
@@ -93,6 +124,8 @@ class _SettingsScreenWidgetState extends State<SettingsScreenWidget> {
             Builder(builder: (context) => _buildAppSettings()),
             const SizedBox(height: 12.0),
             Builder(builder: (context) => _buildAccountSettings()),
+            const SizedBox(height: 12.0),
+            Builder(builder: (context) => _buildMoreSection()),
           ],
         ),
       ),

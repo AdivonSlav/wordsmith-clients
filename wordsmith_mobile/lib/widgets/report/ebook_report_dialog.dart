@@ -159,9 +159,7 @@ class _EbookReportDialogWidgetState extends State<EbookReportDialogWidget> {
       _toggleReportingInProgress();
       switch (result) {
         case Success():
-          showSnackbar(
-              context: context,
-              content: result.data.message ?? "Succesfully reported ebook");
+          showSnackbar(context: context, content: "Succesfully reported ebook");
           _dismiss();
         case Failure():
           showSnackbar(
