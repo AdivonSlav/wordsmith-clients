@@ -40,8 +40,13 @@ class _ProfileScreenWidgetState extends State<ProfileScreenWidget> {
   );
 
   PreferredSizeWidget _buildAppBar() {
+    var theme = Theme.of(context);
+
     return AppBar(
-      title: const Text("User"),
+      title: Text(
+        "User",
+        style: theme.textTheme.titleMedium,
+      ),
       centerTitle: true,
     );
   }
