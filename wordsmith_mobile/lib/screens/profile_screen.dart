@@ -5,6 +5,7 @@ import 'package:wordsmith_mobile/screens/author_publications_screen.dart';
 import 'package:wordsmith_mobile/screens/ebook_screen.dart';
 import 'package:wordsmith_mobile/widgets/ebook/ebook_image.dart';
 import 'package:wordsmith_mobile/widgets/profile/profile_image.dart';
+import 'package:wordsmith_mobile/widgets/report/user_report_dialog.dart';
 import 'package:wordsmith_utils/formatters/datetime_formatter.dart';
 import 'package:wordsmith_utils/models/ebook/ebook.dart';
 import 'package:wordsmith_utils/models/ebook/ebook_search.dart';
@@ -48,6 +49,19 @@ class _ProfileScreenWidgetState extends State<ProfileScreenWidget> {
         style: theme.textTheme.titleMedium,
       ),
       centerTitle: true,
+      actions: <Widget>[
+        PopupMenuButton(
+          onSelected: (value) => _handleMenuSelect(value),
+          itemBuilder: (context) {
+            return ProfileScreenMenuItems.values.map((item) {
+              return PopupMenuItem<ProfileScreenMenuItems>(
+                value: item,
+                child: Text(item.label),
+              );
+            }).toList();
+          },
+        )
+      ],
     );
   }
 
@@ -339,6 +353,20 @@ class _ProfileScreenWidgetState extends State<ProfileScreenWidget> {
     );
   }
 
+  void _openUserReportDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => UserReportDialogWidget(userId: widget.userId),
+    );
+  }
+
+  void _handleMenuSelect(ProfileScreenMenuItems item) {
+    switch (item) {
+      case ProfileScreenMenuItems.reportUser:
+        _openUserReportDialog();
+    }
+  }
+
   void _getUser() {
     _userFuture = _userProvider.getUser(widget.userId);
   }
@@ -386,5 +414,18 @@ class _ProfileScreenWidgetState extends State<ProfileScreenWidget> {
         ),
       ),
     );
+  }
+}
+
+enum ProfileScreenMenuItems {
+  reportUser,
+}
+
+extension ProfileScreenMenuItemsExtension on ProfileScreenMenuItems {
+  String get label {
+    switch (this) {
+      case ProfileScreenMenuItems.reportUser:
+        return "Report user";
+    }
   }
 }
