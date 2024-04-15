@@ -3,9 +3,12 @@ import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
 import 'package:wordsmith_admin_panel/screens/reports_screen.dart';
 import 'package:wordsmith_admin_panel/utils/reports_filter_values.dart';
+import 'package:wordsmith_admin_panel/widgets/reports/app_report_dialog.dart';
 import 'package:wordsmith_admin_panel/widgets/reports/ebook_report_dialog.dart';
 import 'package:wordsmith_admin_panel/widgets/reports/user_report_dialog.dart';
 import 'package:wordsmith_utils/formatters/datetime_formatter.dart';
+import 'package:wordsmith_utils/models/app_report/app_report.dart';
+import 'package:wordsmith_utils/models/app_report/app_report_search.dart';
 import 'package:wordsmith_utils/models/ebook_report/ebook_report.dart';
 import 'package:wordsmith_utils/models/ebook_report/ebook_report_search.dart';
 import 'package:wordsmith_utils/models/query_result.dart';
@@ -13,6 +16,7 @@ import 'package:wordsmith_utils/models/result.dart';
 import 'package:wordsmith_utils/models/sorting_directions.dart';
 import 'package:wordsmith_utils/models/user_report/user_report.dart';
 import 'package:wordsmith_utils/models/user_report/user_report_search.dart';
+import 'package:wordsmith_utils/providers/app_report_provider.dart';
 import 'package:wordsmith_utils/providers/ebook_reports_provider.dart';
 import 'package:wordsmith_utils/providers/user_reports_provider.dart';
 
@@ -28,10 +32,12 @@ class ReportsListWidget extends StatefulWidget {
 class _ReportsListWidgetState extends State<ReportsListWidget> {
   late UserReportsProvider _userReportsProvider;
   late EbookReportsProvider _ebookReportsProvider;
+  late AppReportProvider _appReportProvider;
   late ReportFilterValuesProvider _filterValuesProvider;
 
   late Future<Result<QueryResult<UserReport>>> _userReportsFuture;
   late Future<Result<QueryResult<EbookReport>>> _ebookReportsFuture;
+  late Future<Result<QueryResult<AppReport>>> _appReportsFuture;
 
   int _page = 1;
   int _pageSize = 10;
@@ -192,6 +198,80 @@ class _ReportsListWidgetState extends State<ReportsListWidget> {
     );
   }
 
+  Widget _buildAppReportsList() {
+    return FutureBuilder(
+      future: _appReportsFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError || snapshot.data == null) {
+          return Center(child: Text(snapshot.error?.toString() ?? "Error"));
+        }
+
+        late List<AppReport> reports;
+
+        switch (snapshot.data!) {
+          case Success(data: final d):
+            _setPaginationDetails(d.totalCount!, d.totalPages!);
+            reports = d.result;
+          case Failure(exception: final e):
+            return Center(child: Text(e.message));
+        }
+
+        if (reports.isEmpty) {
+          return const Center(child: Text("No reports found!"));
+        }
+
+        return Column(
+          children: [
+            Expanded(
+              child: ListView.builder(
+                itemCount: reports.length,
+                itemBuilder: (context, index) {
+                  var report = reports[index];
+
+                  return Card(
+                    child: ListTile(
+                      onTap: () async {
+                        await showDialog(
+                          context: context,
+                          builder: (context) =>
+                              AppReportDialogWidget(reportId: report.id),
+                        );
+                      },
+                      title: Row(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text("Report by ${report.user.username}"),
+                          Text(
+                            formatDateTime(
+                              date: report.submissionDate,
+                              format: "MMM d, y H:mm",
+                            ),
+                            style: const TextStyle(
+                              fontSize: 12.0,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                      leading: report.isClosed
+                          ? const Icon(Icons.check)
+                          : const Icon(Icons.warning),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _buildList() {
     switch (widget.type) {
       case ReportType.user:
@@ -199,7 +279,7 @@ class _ReportsListWidgetState extends State<ReportsListWidget> {
       case ReportType.ebook:
         return _buildEbookReportsList();
       case ReportType.app:
-        return const Placeholder();
+        return _buildAppReportsList();
     }
   }
 
@@ -299,6 +379,14 @@ class _ReportsListWidgetState extends State<ReportsListWidget> {
     );
   }
 
+  AppReportSearch _getAppReportSearch() {
+    return AppReportSearch(
+      isClosed: _filterValuesProvider.filterValues.isClosed,
+      startDate: _filterValuesProvider.filterValues.startDate,
+      endDate: _filterValuesProvider.filterValues.endDate,
+    );
+  }
+
   void _getUserReports() async {
     var sort = _filterValuesProvider.filterValues.sort;
     var direction = _filterValuesProvider.filterValues.sortDirection;
@@ -323,6 +411,24 @@ class _ReportsListWidgetState extends State<ReportsListWidget> {
     );
   }
 
+  void _getAppReports() async {
+    var sort = _filterValuesProvider.filterValues.sort;
+    var direction = _filterValuesProvider.filterValues.sortDirection;
+    var search = _getAppReportSearch();
+    String? sortValue;
+
+    if (sort == ReportSorts.mostRecent) {
+      sortValue = "SubmissionDate";
+    }
+
+    _appReportsFuture = _appReportProvider.getAppReports(
+      search,
+      page: _page,
+      pageSize: _pageSize,
+      orderBy: "${sortValue ?? sort.apiValue}:${direction.apiValue}",
+    );
+  }
+
   void _refresh() async {
     switch (widget.type) {
       case ReportType.user:
@@ -330,7 +436,7 @@ class _ReportsListWidgetState extends State<ReportsListWidget> {
       case ReportType.ebook:
         _getEbookReports();
       case ReportType.app:
-        return;
+        _getAppReports();
     }
   }
 
@@ -371,6 +477,7 @@ class _ReportsListWidgetState extends State<ReportsListWidget> {
   void initState() {
     _userReportsProvider = context.read<UserReportsProvider>();
     _ebookReportsProvider = context.read<EbookReportsProvider>();
+    _appReportProvider = context.read<AppReportProvider>();
     _filterValuesProvider = context.read<ReportFilterValuesProvider>();
     _refresh();
     super.initState();

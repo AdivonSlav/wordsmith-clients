@@ -323,6 +323,9 @@ class _EbookReportDialogWidgetState extends State<EbookReportDialogWidget> {
 
                 switch (snapshot.data!) {
                   case Success(data: final d):
+                    if (d.result.isEmpty) {
+                      return const Center(child: Text("No report found"));
+                    }
                     report = d.result.first;
                   case Failure(exception: final e):
                     return Center(child: Text(e.message));

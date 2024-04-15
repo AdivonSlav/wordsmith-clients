@@ -1,6 +1,7 @@
 import "dart:async";
 
 import "package:flutter/material.dart";
+import "package:flutter/widgets.dart";
 import "package:provider/provider.dart";
 import "package:wordsmith_admin_panel/utils/reports_filter_values.dart";
 import "package:wordsmith_admin_panel/widgets/input_field.dart";
@@ -48,38 +49,43 @@ class _ReportsScreenWidgetState extends State<ReportsScreenWidget> {
       children: <Widget>[
         Row(
           children: [
-            InputField(
-              width: size.width * 0.2,
-              labelText: "Reason",
-              controller: _reasonController,
-              onChanged: (value) {
-                if (_reasonDebounce?.isActive ?? false) {
-                  _reasonDebounce!.cancel();
-                }
+            Visibility(
+              visible: _selectedSegment != 2,
+              child: InputField(
+                width: size.width * 0.2,
+                labelText: "Reason",
+                controller: _reasonController,
+                onChanged: (value) {
+                  if (_reasonDebounce?.isActive ?? false) {
+                    _reasonDebounce!.cancel();
+                  }
 
-                _reasonDebounce = Timer(const Duration(milliseconds: 200), () {
-                  _filterValuesProvider.updateFilterValueProperties(
-                      reason: value);
-                });
-              },
-              suffixIcon: IconButton(
-                icon: const Icon(Icons.clear),
-                onPressed: () {
-                  if (_reasonController.text.isEmpty) return;
-                  setState(() {
-                    _reasonController.clear();
+                  _reasonDebounce =
+                      Timer(const Duration(milliseconds: 200), () {
                     _filterValuesProvider.updateFilterValueProperties(
-                        reason: null);
+                        reason: value);
                   });
                 },
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: () {
+                    if (_reasonController.text.isEmpty) return;
+                    setState(() {
+                      _reasonController.clear();
+                      _filterValuesProvider.updateFilterValueProperties(
+                          reason: null);
+                    });
+                  },
+                ),
               ),
             ),
-            const SizedBox(width: 12.0),
-            IconButton(
-              icon: const Icon(Icons.edit_calendar),
-              onPressed: () async => _pickDate(),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+              child: IconButton(
+                icon: const Icon(Icons.edit_calendar),
+                onPressed: () async => _pickDate(),
+              ),
             ),
-            const SizedBox(width: 12.0),
             Wrap(
               spacing: 5.0,
               children: [
