@@ -2,8 +2,10 @@ import 'dart:io';
 
 import 'package:epub_view/epub_view.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:wordsmith_mobile/screens/ebook_comments_screen.dart';
 import 'package:wordsmith_mobile/utils/indexers/models/ebook_index_model.dart';
+import 'package:wordsmith_mobile/widgets/reader/dictionary_definition_view.dart';
 import 'package:wordsmith_utils/logger.dart';
 
 class ReaderScreenWidget extends StatefulWidget {
@@ -17,9 +19,9 @@ class ReaderScreenWidget extends StatefulWidget {
 
 class _ReaderScreenWidgetState extends State<ReaderScreenWidget> {
   final _logger = LogManager.getLogger("ReaderScreenWidget");
-  final _selectedTextController = TextEditingController();
   late EpubController _epubController;
 
+  String _selectedText = "";
   final bool _showAppBar = true;
 
   void _openEpub() async {
@@ -103,6 +105,39 @@ class _ReaderScreenWidgetState extends State<ReaderScreenWidget> {
     );
   }
 
+  Widget _buildContextMenu(BuildContext context, SelectableRegionState state) {
+    return AdaptiveTextSelectionToolbar.buttonItems(
+      buttonItems: <ContextMenuButtonItem>[
+        if (_isValidSelection())
+          ContextMenuButtonItem(
+            onPressed: () => _showDictionaryDefinitionBottomSheet(),
+            label: "Define",
+          ),
+      ],
+      anchors: state.contextMenuAnchors,
+    );
+  }
+
+  void _showDictionaryDefinitionBottomSheet() {
+    if (_isValidSelection()) {
+      showModalBottomSheet(
+        context: context,
+        builder: (context) =>
+            DictionaryDefinitionViewWidget(selectedText: _selectedText.trim()),
+      );
+    }
+  }
+
+  void _handleContentSelection(SelectedContent? content) {
+    setState(() {
+      _selectedText = content?.plainText ?? "";
+    });
+  }
+
+  bool _isValidSelection() {
+    return _selectedText.trim().isNotEmpty;
+  }
+
   @override
   void initState() {
     _openEpub();
@@ -124,18 +159,11 @@ class _ReaderScreenWidgetState extends State<ReaderScreenWidget> {
         controller: _epubController,
         onDocumentLoaded: (document) =>
             _logger.info("Loaded ${document.Title} for reading"),
-        onSelectedContentChanged: (content) {},
+        onSelectedContentChanged: (content) => _handleContentSelection(content),
         builders: EpubViewBuilders<DefaultBuilderOptions>(
           options: const DefaultBuilderOptions(),
           chapterDividerBuilder: (_) => const Divider(),
-          selectionAreaContextMenuBuilder: (context, selectableRegionState) {
-            return AdaptiveTextSelectionToolbar.buttonItems(
-              buttonItems: <ContextMenuButtonItem>[
-                ContextMenuButtonItem(onPressed: () {}, label: "Define"),
-              ],
-              anchors: selectableRegionState.contextMenuAnchors,
-            );
-          },
+          selectionAreaContextMenuBuilder: _buildContextMenu,
         ),
       ),
     );

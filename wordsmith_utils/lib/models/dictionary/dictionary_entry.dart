@@ -5,7 +5,7 @@ part "dictionary_entry.g.dart";
 
 @JsonSerializable(createToJson: false)
 class DictionaryEntry {
-  final int homograph;
+  final int? homograph;
   final String? date;
   final DictionaryHeadword headword;
   final String? functionalLabel;

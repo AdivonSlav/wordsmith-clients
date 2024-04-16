@@ -8,7 +8,7 @@ part of 'dictionary_entry.dart';
 
 DictionaryEntry _$DictionaryEntryFromJson(Map<String, dynamic> json) =>
     DictionaryEntry(
-      json['homograph'] as int,
+      json['homograph'] as int?,
       json['date'] as String?,
       DictionaryHeadword.fromJson(json['headword'] as Map<String, dynamic>),
       json['functionalLabel'] as String?,
