@@ -46,11 +46,12 @@ class _PublishEditWidgetState extends State<PublishEditWidget> {
   final _descriptionMaxLength = 800;
 
   final String _initialPriceValue = "0.01";
-  final _currencyFormatter = CurrencyTextInputFormatter(
+  final _currencyFormatter = CurrencyTextInputFormatter.currency(
+    enableNegative: false,
     symbol: "\$ ",
     locale: "en",
     decimalDigits: 2,
-    maxValue: 100.00,
+    maxValue: 100,
   );
 
   final bool _uploadInProgress = false;
@@ -118,7 +119,7 @@ class _PublishEditWidgetState extends State<PublishEditWidget> {
 
       if (value) {
         widget._priceController.text =
-            _currencyFormatter.format(_initialPriceValue);
+            _currencyFormatter.formatString(_initialPriceValue);
       } else {
         widget._priceController.clear();
       }
