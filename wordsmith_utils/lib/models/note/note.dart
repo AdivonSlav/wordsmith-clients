@@ -10,6 +10,7 @@ class Note {
   final String content;
   final DateTime dateAdded;
   final String cfi;
+  final String referencedText;
 
   const Note(
     this.id,
@@ -18,6 +19,7 @@ class Note {
     this.content,
     this.dateAdded,
     this.cfi,
+    this.referencedText,
   );
 
   factory Note.fromJson(Map<String, dynamic> json) => _$NoteFromJson(json);

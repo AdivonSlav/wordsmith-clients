@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:wordsmith_mobile/screens/ebook_comments_screen.dart';
 import 'package:wordsmith_mobile/utils/indexers/models/ebook_index_model.dart';
+import 'package:wordsmith_mobile/widgets/reader/add_note_dialog.dart';
 import 'package:wordsmith_mobile/widgets/reader/dictionary_definition_view.dart';
 import 'package:wordsmith_mobile/widgets/reader/translation_view.dart';
 import 'package:wordsmith_utils/logger.dart';
@@ -120,6 +121,11 @@ class _ReaderScreenWidgetState extends State<ReaderScreenWidget> {
             onPressed: () => _showTranslationBottomSheet(),
             label: "Translate",
           ),
+        if (_isValidSelection())
+          ContextMenuButtonItem(
+            onPressed: () => _showAddNoteDialog(),
+            label: "Note",
+          ),
       ],
       anchors: state.contextMenuAnchors,
     );
@@ -145,10 +151,27 @@ class _ReaderScreenWidgetState extends State<ReaderScreenWidget> {
     }
   }
 
+  void _showAddNoteDialog() {
+    final cfi = _epubController.generateEpubCfi();
+
+    if (cfi != null && _isValidSelection()) {
+      showDialog(
+        context: context,
+        builder: (context) => AddNoteDialogWidget(
+          ebookId: widget.indexModel.id,
+          cfi: cfi,
+          selectedText: _selectedText,
+        ),
+      );
+    }
+  }
+
   void _handleContentSelection(SelectedContent? content) {
-    setState(() {
-      _selectedText = content?.plainText ?? "";
-    });
+    var plainText = content?.plainText;
+
+    if (plainText == null) return;
+
+    _selectedText = plainText;
   }
 
   bool _isValidSelection() {

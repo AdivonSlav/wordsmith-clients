@@ -11,4 +11,5 @@ Map<String, dynamic> _$NoteInsertToJson(NoteInsert instance) =>
       'eBookId': instance.eBookId,
       'content': instance.content,
       'cfi': instance.cfi,
+      'referencedText': instance.referencedText,
     };

@@ -13,4 +13,5 @@ Note _$NoteFromJson(Map<String, dynamic> json) => Note(
       json['content'] as String,
       DateTime.parse(json['dateAdded'] as String),
       json['cfi'] as String,
+      json['referencedText'] as String,
     );
