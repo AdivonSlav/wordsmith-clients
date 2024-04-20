@@ -24,6 +24,7 @@ class _ReaderScreenWidgetState extends State<ReaderScreenWidget> {
 
   String _selectedText = "";
   final bool _showAppBar = true;
+  final int _selectionMaxLength = 250;
 
   void _openEpub() async {
     var epubFile = File(widget.indexModel.path);
@@ -151,7 +152,8 @@ class _ReaderScreenWidgetState extends State<ReaderScreenWidget> {
   }
 
   bool _isValidSelection() {
-    return _selectedText.trim().isNotEmpty;
+    return _selectedText.trim().isNotEmpty &&
+        _selectedText.length <= _selectionMaxLength;
   }
 
   @override
