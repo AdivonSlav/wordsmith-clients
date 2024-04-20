@@ -1,17 +1,18 @@
 import 'package:wordsmith_utils/exceptions/base_exception.dart';
 import 'package:wordsmith_utils/exceptions/exception_types.dart';
 import 'package:wordsmith_utils/logger.dart';
+import 'package:wordsmith_utils/models/query_result.dart';
 import 'package:wordsmith_utils/models/result.dart';
-import 'package:wordsmith_utils/models/translate/supported_languages.dart';
+import 'package:wordsmith_utils/models/translate/language.dart';
 import 'package:wordsmith_utils/providers/base_provider.dart';
 import 'package:wordsmith_utils/secure_store.dart';
 
-class TranslationLanguageProvider extends BaseProvider<SupportedLanguages> {
+class TranslationLanguageProvider extends BaseProvider<Language> {
   final _logger = LogManager.getLogger("TranslationLanguageProvider");
 
   TranslationLanguageProvider() : super("translate/languages");
 
-  Future<Result<SupportedLanguages>> getSupportedLanguages() async {
+  Future<Result<QueryResult<Language>>> getSupportedLanguages() async {
     var accessToken = await SecureStore.getValue("access_token");
 
     try {
@@ -20,7 +21,7 @@ class TranslationLanguageProvider extends BaseProvider<SupportedLanguages> {
         retryForRefresh: true,
       );
 
-      return Success(result.result.first);
+      return Success(result);
     } on BaseException catch (error) {
       _logger.severe(error);
       return Failure(error);
@@ -32,7 +33,7 @@ class TranslationLanguageProvider extends BaseProvider<SupportedLanguages> {
   }
 
   @override
-  SupportedLanguages fromJson(data) {
-    return SupportedLanguages.fromJson(data);
+  Language fromJson(data) {
+    return Language.fromJson(data);
   }
 }

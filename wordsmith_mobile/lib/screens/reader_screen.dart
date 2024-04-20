@@ -6,6 +6,7 @@ import 'package:flutter/rendering.dart';
 import 'package:wordsmith_mobile/screens/ebook_comments_screen.dart';
 import 'package:wordsmith_mobile/utils/indexers/models/ebook_index_model.dart';
 import 'package:wordsmith_mobile/widgets/reader/dictionary_definition_view.dart';
+import 'package:wordsmith_mobile/widgets/reader/translation_view.dart';
 import 'package:wordsmith_utils/logger.dart';
 
 class ReaderScreenWidget extends StatefulWidget {
@@ -113,6 +114,11 @@ class _ReaderScreenWidgetState extends State<ReaderScreenWidget> {
             onPressed: () => _showDictionaryDefinitionBottomSheet(),
             label: "Define",
           ),
+        if (_isValidSelection())
+          ContextMenuButtonItem(
+            onPressed: () => _showTranslationBottomSheet(),
+            label: "Translate",
+          ),
       ],
       anchors: state.contextMenuAnchors,
     );
@@ -124,6 +130,16 @@ class _ReaderScreenWidgetState extends State<ReaderScreenWidget> {
         context: context,
         builder: (context) =>
             DictionaryDefinitionViewWidget(selectedText: _selectedText.trim()),
+      );
+    }
+  }
+
+  void _showTranslationBottomSheet() {
+    if (_isValidSelection()) {
+      showModalBottomSheet(
+        context: context,
+        builder: (context) =>
+            TranslationViewWidget(selectedText: _selectedText.trim()),
       );
     }
   }
