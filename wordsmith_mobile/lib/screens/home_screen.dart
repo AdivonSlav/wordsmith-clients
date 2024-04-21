@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:wordsmith_mobile/utils/filters/ebook_filter_values.dart';
 import 'package:wordsmith_mobile/widgets/home/home_ebook_display.dart';
 import 'package:wordsmith_utils/models/ebook/ebook.dart';
+import 'package:wordsmith_utils/models/ebook/ebook_search.dart';
 import 'package:wordsmith_utils/models/query_result.dart';
 import 'package:wordsmith_utils/models/result.dart';
+import 'package:wordsmith_utils/models/sorting_directions.dart';
 import 'package:wordsmith_utils/providers/ebook_provider.dart';
 
 class HomeScreenWidget extends StatefulWidget {
@@ -16,51 +19,119 @@ class HomeScreenWidget extends StatefulWidget {
 class _HomeScreenWidgetState extends State<HomeScreenWidget> {
   late EbookProvider _eBookProvider;
 
-  late Future<Result<QueryResult<Ebook>>> _getNewlyAddedBooks;
+  late Future<Result<QueryResult<Ebook>>> _newlyAddedFuture;
+  late Future<Result<QueryResult<Ebook>>> _mostPopularFuture;
 
   final _page = 1;
-  final _pageSize = 15;
+  final _pageSize = 10;
+
+  Widget _buildNewlyAddedDisplay() {
+    return FutureBuilder(
+      future: _newlyAddedFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (!snapshot.hasData || snapshot.hasError) {
+          return Center(
+            child: Text(snapshot.error.toString()),
+          );
+        }
+
+        late List<Ebook> ebooks;
+
+        switch (snapshot.data!) {
+          case Success(data: final d):
+            ebooks = d.result;
+          case Failure(exception: final e):
+            return Center(child: Text(e.toString()));
+        }
+
+        return HomeEbookDisplayWidget(
+          title: "New",
+          ebooks: ebooks,
+        );
+      },
+    );
+  }
+
+  Widget _buildMostPopularDisplay() {
+    return FutureBuilder(
+      future: _mostPopularFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (!snapshot.hasData || snapshot.hasError) {
+          return Center(
+            child: Text(snapshot.error.toString()),
+          );
+        }
+
+        late List<Ebook> ebooks;
+
+        switch (snapshot.data!) {
+          case Success(data: final d):
+            ebooks = d.result;
+          case Failure(exception: final e):
+            return Center(child: Text(e.toString()));
+        }
+
+        return HomeEbookDisplayWidget(
+          title: "Most popular",
+          ebooks: ebooks,
+        );
+      },
+    );
+  }
+
+  Future<void> _refresh() async {
+    var search = const EbookSearch();
+
+    setState(() {
+      _newlyAddedFuture = _eBookProvider.getEbooks(
+        search,
+        page: _page,
+        pageSize: _pageSize,
+        orderBy:
+            "${EbookSorts.publicationDate.apiValue}:${SortDirections.descending.apiValue}",
+      );
+
+      _mostPopularFuture = _eBookProvider.getEbooks(
+        search,
+        page: _page,
+        pageSize: _pageSize,
+        orderBy:
+            "${EbookSorts.syncCount.apiValue}:${SortDirections.descending.apiValue}",
+      );
+    });
+  }
 
   @override
   void initState() {
-    super.initState();
     _eBookProvider = context.read<EbookProvider>();
-    _getNewlyAddedBooks =
-        _eBookProvider.getNewlyAdded(page: _page, pageSize: _pageSize);
+    _refresh();
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    _eBookProvider = context.read<EbookProvider>();
-
     return Padding(
       padding: const EdgeInsets.only(left: 14.0, right: 14.0),
-      child: Column(
-        children: <Widget>[
-          FutureBuilder(
-            future: _getNewlyAddedBooks,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState != ConnectionState.done) {
-                return const Center(child: CircularProgressIndicator());
-              }
-
-              List<Ebook> ebooks = [];
-
-              switch (snapshot.data!) {
-                case Success(data: final d):
-                  ebooks = d.result;
-                case Failure(exception: final e):
-                  return Center(child: Text(e.toString()));
-              }
-
-              return HomeEBookDisplayWidget(
-                title: "New",
-                ebooks: ebooks,
-              );
-            },
+      child: RefreshIndicator(
+        onRefresh: () => _refresh(),
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Column(
+            children: <Widget>[
+              Builder(builder: (context) => _buildNewlyAddedDisplay()),
+              const Divider(),
+              Builder(builder: (context) => _buildMostPopularDisplay()),
+            ],
           ),
-          const Divider(),
-        ],
+        ),
       ),
     );
   }

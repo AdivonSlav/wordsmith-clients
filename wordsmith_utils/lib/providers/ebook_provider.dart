@@ -15,34 +15,6 @@ class EbookProvider extends BaseProvider<Ebook> {
 
   EbookProvider() : super("ebooks");
 
-  Future<Result<QueryResult<Ebook>>> getNewlyAdded(
-      {required int page, required int pageSize}) async {
-    var accessToken = await SecureStore.getValue("access_token");
-
-    try {
-      Map<String, String> query = {
-        "page": page.toString(),
-        "pageSize": pageSize.toString(),
-        "orderBy": "UpdatedDate:desc"
-      };
-
-      var result = await get(
-        filter: query,
-        bearerToken: accessToken ?? "",
-        retryForRefresh: true,
-      );
-
-      return Success(result);
-    } on BaseException catch (error) {
-      _logger.severe(error);
-      return Failure(error);
-    } catch (error, stackTrace) {
-      _logger.severe(error, stackTrace);
-      return Failure(BaseException("Internal app error",
-          type: ExceptionType.internalAppError));
-    }
-  }
-
   Future<Result<QueryResult<Ebook>>> getEbooks(EbookSearch search,
       {int? page, int? pageSize, String? orderBy}) async {
     var accessToken = await SecureStore.getValue("access_token");

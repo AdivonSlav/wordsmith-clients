@@ -4,6 +4,7 @@ import 'package:wordsmith_utils/models/sorting_directions.dart';
 enum EbookSorts {
   title,
   publicationDate,
+  syncCount;
 }
 
 extension EbookSortsExtension on EbookSorts {
@@ -13,6 +14,8 @@ extension EbookSortsExtension on EbookSorts {
         return "Title";
       case EbookSorts.publicationDate:
         return "PublishedDate";
+      case EbookSorts.syncCount:
+        return "SyncCount";
     }
   }
 
@@ -22,6 +25,8 @@ extension EbookSortsExtension on EbookSorts {
         return "Title";
       case EbookSorts.publicationDate:
         return "Publication date";
+      case EbookSorts.syncCount:
+        return "Sync count";
     }
   }
 }

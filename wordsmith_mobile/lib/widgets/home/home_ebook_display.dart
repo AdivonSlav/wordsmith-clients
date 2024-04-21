@@ -4,11 +4,11 @@ import 'package:wordsmith_mobile/screens/ebook_screen.dart';
 import 'package:wordsmith_mobile/widgets/ebook/ebook_image.dart';
 import 'package:wordsmith_utils/models/ebook/ebook.dart';
 
-class HomeEBookDisplayWidget extends StatelessWidget {
+class HomeEbookDisplayWidget extends StatelessWidget {
   final String title;
   final List<Ebook> ebooks;
 
-  const HomeEBookDisplayWidget(
+  const HomeEbookDisplayWidget(
       {super.key, required this.title, required this.ebooks});
 
   @override
@@ -18,12 +18,12 @@ class HomeEBookDisplayWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Padding(
-          padding: const EdgeInsets.only(bottom: 0.0),
+          padding: const EdgeInsets.only(bottom: 14.0),
           child: Text(
             title,
             style: const TextStyle(
               fontWeight: FontWeight.bold,
-              fontSize: 32.0,
+              fontSize: 28.0,
             ),
           ),
         ),
@@ -31,7 +31,7 @@ class HomeEBookDisplayWidget extends StatelessWidget {
           options: CarouselOptions(
             viewportFraction: 0.50,
             pageSnapping: true,
-            enlargeCenterPage: true,
+            enlargeCenterPage: false,
           ),
           itemCount: ebooks.length,
           itemBuilder:
