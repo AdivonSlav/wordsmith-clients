@@ -1,3 +1,4 @@
+import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:wordsmith_mobile/screens/login_screen.dart';
 import 'package:wordsmith_mobile/screens/registration_screen.dart';
@@ -11,26 +12,51 @@ class IntroScreenWidget extends StatefulWidget {
 }
 
 class _IntroScreenWidgetState extends State<IntroScreenWidget> {
+  Widget _buildLogo() {
+    var adaptiveTheme = AdaptiveTheme.of(context);
+    var logo = adaptiveTheme.brightness == Brightness.dark
+        ? const AssetImage("assets/images/logo_white.png")
+        : const AssetImage("assets/images/logo_black.png");
+
+    return Container(
+      width: 128,
+      height: 128,
+      decoration: BoxDecoration(
+        image: DecorationImage(image: logo),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Column(
+      children: <Widget>[
+        Builder(builder: (context) => _buildLogo()),
+        const Padding(
+          padding: EdgeInsets.symmetric(vertical: 20.0),
+          child: Text(
+            "Welcome to Wordsmith!",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 24.0,
+            ),
+          ),
+        ),
+        const Text(
+          "To start, either login or create a new account",
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    var theme = Theme.of(context);
-
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Text(
-            "Welcome to Wordsmith!",
-            textAlign: TextAlign.center,
-            style: theme.textTheme.titleLarge,
-          ),
-          SizedBox(
-            height: SizeConfig.safeBlockVertical * 2.0,
-          ),
-          const Text(
-            "To start, either login or create a new account",
-            textAlign: TextAlign.center,
-          ),
+          Builder(builder: (context) => _buildHeader()),
           SizedBox(
             height: SizeConfig.safeBlockVertical * 8.0,
           ),
