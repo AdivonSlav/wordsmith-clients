@@ -36,12 +36,14 @@ class EbookFilterValues {
   SortDirections sortDirection;
   int? selectedMaturityRatingId;
   int? selectedGenreId;
+  String? title;
 
   EbookFilterValues({
     this.sort = EbookSorts.title,
     this.sortDirection = SortDirections.ascending,
     this.selectedMaturityRatingId,
     this.selectedGenreId,
+    this.title,
   });
 
   EbookFilterValues copyWith({
@@ -49,6 +51,7 @@ class EbookFilterValues {
     SortDirections sortDirection = SortDirections.ascending,
     int? selectedMaturityRatingId,
     int? selectedGenreId,
+    String? title,
   }) {
     return EbookFilterValues(
       sort: sort,
@@ -56,6 +59,7 @@ class EbookFilterValues {
       selectedMaturityRatingId:
           selectedMaturityRatingId ?? this.selectedMaturityRatingId,
       selectedGenreId: selectedGenreId ?? this.selectedGenreId,
+      title: (title != null || this.title != null) ? title : this.title,
     );
   }
 
@@ -84,12 +88,14 @@ class EbookFilterValuesProvider extends ChangeNotifier {
     SortDirections? sortDirection,
     int? selectedMaturityRatingId,
     int? selectedGenreId,
+    String? title,
   }) {
     _filterValues = _filterValues.copyWith(
       sort: sort ?? _filterValues.sort,
       sortDirection: sortDirection ?? _filterValues.sortDirection,
       selectedMaturityRatingId: selectedMaturityRatingId,
       selectedGenreId: selectedGenreId,
+      title: title,
     );
 
     notifyListeners();

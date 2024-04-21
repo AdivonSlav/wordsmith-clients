@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:wordsmith_mobile/screens/ebook_browse_screen.dart';
 import 'package:wordsmith_mobile/screens/home_screen.dart';
 import 'package:wordsmith_mobile/screens/intro_screen.dart';
 import 'package:wordsmith_mobile/screens/library_screen.dart';
@@ -37,8 +38,7 @@ class _NavigationBarWidgetState extends State<NavigationBarWidget> {
       const NavigationDestination(icon: Icon(Icons.home), label: "Home"),
       const NavigationDestination(
           icon: Icon(Icons.library_books), label: "Library"),
-      const NavigationDestination(
-          icon: Icon(Icons.emergency), label: "Placeholder"),
+      const NavigationDestination(icon: Icon(Icons.search), label: "Browse"),
       const NavigationDestination(icon: Icon(Icons.person), label: "Profile"),
     ];
   }
@@ -49,6 +49,8 @@ class _NavigationBarWidgetState extends State<NavigationBarWidget> {
         return "Home";
       case 1:
         return "Library";
+      case 2:
+        return "Browse";
       case 3:
         return "Profile";
       default:
@@ -135,7 +137,7 @@ class _NavigationBarWidgetState extends State<NavigationBarWidget> {
                   _page = const LibraryScreenWidget();
                   break;
                 case 2:
-                  _page = const Placeholder();
+                  _page = const EbookBrowseScreenWidget();
                   break;
                 case 3:
                   _page = const PersonalProfileScreenWidget();
