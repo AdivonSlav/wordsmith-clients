@@ -1,16 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:wordsmith_mobile/utils/filters/library_filter_values.dart';
 import 'package:wordsmith_utils/models/sorting_directions.dart';
 
-class LibraryViewWidget extends StatelessWidget {
-  final LibraryFilterValues filterValues;
-  final void Function(LibraryFilterValues values) onSelect;
+class LibraryViewWidget extends StatefulWidget {
+  const LibraryViewWidget({super.key});
 
-  const LibraryViewWidget({
-    super.key,
-    required this.filterValues,
-    required this.onSelect,
-  });
+  @override
+  State<LibraryViewWidget> createState() => _LibraryViewWidgetState();
+}
+
+class _LibraryViewWidgetState extends State<LibraryViewWidget> {
+  late LibraryFilterValuesProvider _filterValuesProvider;
+
+  @override
+  void initState() {
+    _filterValuesProvider = context.read<LibraryFilterValuesProvider>();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,11 +39,15 @@ class LibraryViewWidget extends StatelessWidget {
             children: LibrarySorts.values.map<ChoiceChip>((sort) {
               return ChoiceChip(
                 label: Text(sort.label),
-                selected: filterValues.sort == sort,
+                selected: _filterValuesProvider.filterValues.sort == sort,
                 onSelected: (bool selected) {
                   if (selected) {
-                    filterValues.sort = sort;
-                    onSelect(filterValues);
+                    _filterValuesProvider.updateFilterValueProperties(
+                      sort: sort,
+                      selectedCategory:
+                          _filterValuesProvider.filterValues.selectedCategory,
+                    );
+                    Navigator.of(context).pop();
                   }
                 },
               );
@@ -48,23 +59,31 @@ class LibraryViewWidget extends StatelessWidget {
             children: <Widget>[
               ChoiceChip(
                 label: Text(SortDirections.ascending.label),
-                selected:
-                    filterValues.sortDirection == SortDirections.ascending,
+                selected: _filterValuesProvider.filterValues.sortDirection ==
+                    SortDirections.ascending,
                 onSelected: (bool selected) {
                   if (selected) {
-                    filterValues.sortDirection = SortDirections.ascending;
-                    onSelect(filterValues);
+                    _filterValuesProvider.updateFilterValueProperties(
+                      sortDirection: SortDirections.ascending,
+                      selectedCategory:
+                          _filterValuesProvider.filterValues.selectedCategory,
+                    );
+                    Navigator.of(context).pop();
                   }
                 },
               ),
               ChoiceChip(
                 label: Text(SortDirections.descending.label),
-                selected:
-                    filterValues.sortDirection == SortDirections.descending,
+                selected: _filterValuesProvider.filterValues.sortDirection ==
+                    SortDirections.descending,
                 onSelected: (bool selected) {
                   if (selected) {
-                    filterValues.sortDirection = SortDirections.descending;
-                    onSelect(filterValues);
+                    _filterValuesProvider.updateFilterValueProperties(
+                      sortDirection: SortDirections.descending,
+                      selectedCategory:
+                          _filterValuesProvider.filterValues.selectedCategory,
+                    );
+                    Navigator.of(context).pop();
                   }
                 },
               ),

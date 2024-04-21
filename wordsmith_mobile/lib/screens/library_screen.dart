@@ -33,8 +33,10 @@ class LibraryScreenWidget extends StatefulWidget {
 class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
   final _logger = LogManager.getLogger("LibraryScreen");
   final _scrollController = ScrollController();
+
   late UserLibraryProvider _userLibraryProvider;
   late EbookIndexProvider _ebookIndexProvider;
+  late LibraryFilterValuesProvider _filterValuesProvider;
 
   final List<UserLibrary> _userLibraryList = [];
   final List<EbookIndexModel> _indexModelList = [];
@@ -43,8 +45,6 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
   bool _hasMore = true;
   bool _isOffline = false;
   bool _hasDisplayedOfflineMessage = false;
-
-  LibraryFilterValues? _filterValues;
 
   var _isLoading = false;
   var _isSelectingBooks = false;
@@ -61,10 +61,9 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
 
     List<UserLibrary> libraryResult = [];
     List<EbookIndexModel> indexModelResult = [];
+    LibraryFilterValues filterValues = _filterValuesProvider.filterValues;
 
-    await _ebookIndexProvider
-        .getAll(filterValues: _filterValues)
-        .then((result) {
+    await _ebookIndexProvider.getAll(filterValues: filterValues).then((result) {
       switch (result) {
         case Success():
           indexModelResult = result.data;
@@ -75,12 +74,11 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
 
     await _userLibraryProvider
         .getLibraryEntries(
-      maturityRatingId: _filterValues?.selectedMaturityRatingId,
-      isRead: _filterValues?.isRead,
-      orderBy: _filterValues != null
-          ? "${_filterValues!.sort.apiValue}:${_filterValues!.sortDirection.apiValue}"
-          : "${LibrarySorts.title.apiValue}:${SortDirections.ascending.apiValue}",
-      libraryCategoryId: _filterValues?.selectedCategory?.id,
+      maturityRatingId: filterValues.selectedMaturityRatingId,
+      isRead: filterValues.isRead,
+      orderBy:
+          "${filterValues.sort.apiValue}:${filterValues.sortDirection.apiValue}",
+      libraryCategoryId: filterValues.selectedCategory?.id,
       page: _page,
       pageSize: _pageSize,
     )
@@ -124,15 +122,6 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
     });
   }
 
-  Future _buildFilterValues() async {
-    setState(() {
-      _filterValues = LibraryFilterValues(
-        sort: LibrarySorts.title,
-        sortDirection: SortDirections.ascending,
-      );
-    });
-  }
-
   Future _refresh() async {
     setState(() {
       _isLoading = false;
@@ -146,15 +135,10 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
     _getLibraryBooks();
   }
 
-  Future _refreshWithFilters(LibraryFilterValues values) async {
-    setState(() {
-      _filterValues = values;
-      _refresh();
-    });
-  }
-
   Widget _buildCategoryIndicator() {
-    if (_filterValues?.selectedCategory != null) {
+    LibraryFilterValues filterValues = _filterValuesProvider.filterValues;
+
+    if (filterValues.selectedCategory != null) {
       return Column(
         children: [
           Row(
@@ -162,15 +146,16 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
             children: [
               Flexible(
                 child: Text(
-                  "Showing category: ${_filterValues!.selectedCategory!.name}",
+                  "Showing category: ${filterValues.selectedCategory!.name}",
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
               IconButton(
                 onPressed: () {
-                  _filterValues?.selectedCategory = null;
-                  _refresh();
+                  _filterValuesProvider.updateFilterValueProperties(
+                    selectedCategory: null,
+                  );
                 },
                 icon: const Icon(Icons.remove_circle),
               ),
@@ -184,6 +169,8 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
   }
 
   Widget _buildBanner() {
+    LibraryFilterValues filterValues = _filterValuesProvider.filterValues;
+
     if (_isSelectingBooks) {
       return Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -205,15 +192,15 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
                   ),
                 );
               } else if (_selectedBooks.isNotEmpty &&
-                  _filterValues?.selectedCategory == null) {
+                  filterValues.selectedCategory == null) {
                 _openCategoriesAdd();
               } else if (_selectedBooks.isNotEmpty &&
-                  _filterValues?.selectedCategory != null) {
+                  filterValues.selectedCategory != null) {
                 _openCategoriesRemove();
               }
             },
             child: Text(_selectedBooks.isNotEmpty &&
-                    _filterValues?.selectedCategory == null
+                    filterValues.selectedCategory == null
                 ? "Add to category"
                 : "Remove from category"),
           ),
@@ -295,39 +282,18 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
 
   void _openFilters() {
     showModalBottomSheet(
-        context: context,
-        builder: (BuildContext context) {
-          if (_filterValues == null) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-          return LibraryFiltersWidget(
-            filterValues: _filterValues!,
-            onSelect: (values) {
-              _refreshWithFilters(values);
-              Navigator.of(context).pop();
-            },
-          );
-        });
+      context: context,
+      builder: (BuildContext context) {
+        return const LibraryFiltersWidget();
+      },
+    );
   }
 
   void _openSorts() {
     showModalBottomSheet(
         context: context,
         builder: (BuildContext context) {
-          if (_filterValues == null) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-          return LibraryViewWidget(
-            filterValues: _filterValues!,
-            onSelect: (values) {
-              _refreshWithFilters(values);
-              Navigator.of(context).pop();
-            },
-          );
+          return const LibraryViewWidget();
         });
   }
 
@@ -335,19 +301,7 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        if (_filterValues == null) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        }
-
-        return LibraryCategoriesWidget(
-          filterValues: _filterValues!,
-          onChange: (values) {
-            _refreshWithFilters(values);
-            Navigator.of(context).pop();
-          },
-        );
+        return const LibraryCategoriesWidget();
       },
     );
   }
@@ -366,16 +320,13 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
 
   void _openCategoriesRemove() async {
     await showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return LibraryCategoriesRemoveWidget(
-            selectedEntryIds: _selectedBooks.values.toList(),
-            onRemove: () {
-              _filterValues?.selectedCategory = null;
-              _refresh();
-            },
-          );
-        });
+      context: context,
+      builder: (BuildContext context) {
+        return LibraryCategoriesRemoveWidget(
+          selectedEntryIds: _selectedBooks.values.toList(),
+        );
+      },
+    );
   }
 
   void _enterBookSelection() {
@@ -448,13 +399,27 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _filterValuesProvider.addListener(_refresh);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _filterValuesProvider.removeListener(_refresh);
+    _filterValuesProvider.clearFilterValues(notify: false);
+    super.dispose();
+  }
+
+  @override
   void initState() {
     _userLibraryProvider = context.read<UserLibraryProvider>();
     _ebookIndexProvider = context.read<EbookIndexProvider>();
+    _filterValuesProvider = context.read<LibraryFilterValuesProvider>();
     super.initState();
 
     Future.microtask(() {
-      _buildFilterValues();
       _getLibraryBooks();
     });
 
@@ -465,12 +430,6 @@ class _LibraryScreenWidgetState extends State<LibraryScreenWidget> {
         _getLibraryBooks();
       }
     });
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
   }
 
   @override

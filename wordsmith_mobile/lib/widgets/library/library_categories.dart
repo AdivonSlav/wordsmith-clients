@@ -9,14 +9,7 @@ import 'package:wordsmith_utils/providers/user_library_category_provider.dart';
 import 'package:wordsmith_utils/show_snackbar.dart';
 
 class LibraryCategoriesWidget extends StatefulWidget {
-  final LibraryFilterValues filterValues;
-  final void Function(LibraryFilterValues values) onChange;
-
-  const LibraryCategoriesWidget({
-    super.key,
-    required this.filterValues,
-    required this.onChange,
-  });
+  const LibraryCategoriesWidget({super.key});
 
   @override
   State<StatefulWidget> createState() => _LibraryCategoriesWidgetState();
@@ -24,11 +17,14 @@ class LibraryCategoriesWidget extends StatefulWidget {
 
 class _LibraryCategoriesWidgetState extends State<LibraryCategoriesWidget> {
   late UserLibraryCategoryProvider _userLibraryCategoryProvider;
+  late LibraryFilterValuesProvider _filterValuesProvider;
+
   late Future<Result<QueryResult<UserLibraryCategory>>> _getLibraryCategories;
 
-  void _selectCategory(UserLibraryCategory category) {
-    widget.filterValues.selectedCategory = category;
-    widget.onChange(widget.filterValues);
+  void _selectCategory(UserLibraryCategory? category) {
+    _filterValuesProvider.updateFilterValueProperties(
+        selectedCategory: category);
+    Navigator.of(context).pop();
   }
 
   void _deleteCategory(UserLibraryCategory category) async {
@@ -37,8 +33,7 @@ class _LibraryCategoriesWidgetState extends State<LibraryCategoriesWidget> {
         .then((value) {
       switch (value) {
         case Success<String>():
-          widget.filterValues.selectedCategory = null;
-          widget.onChange(widget.filterValues);
+          _selectCategory(null);
         case Failure<String>():
           Navigator.of(context).pop();
           showSnackbar(context: context, content: value.exception.toString());
@@ -50,6 +45,7 @@ class _LibraryCategoriesWidgetState extends State<LibraryCategoriesWidget> {
   void initState() {
     super.initState();
     _userLibraryCategoryProvider = context.read<UserLibraryCategoryProvider>();
+    _filterValuesProvider = context.read<LibraryFilterValuesProvider>();
     _getLibraryCategories = _userLibraryCategoryProvider.getLibraryCategories();
   }
 
@@ -104,7 +100,8 @@ class _LibraryCategoriesWidgetState extends State<LibraryCategoriesWidget> {
 
                     return Card(
                       child: ListTile(
-                        leading: widget.filterValues.selectedCategory?.id ==
+                        leading: _filterValuesProvider
+                                    .filterValues.selectedCategory?.id ==
                                 category.id
                             ? const Icon(Icons.check_circle)
                             : null,

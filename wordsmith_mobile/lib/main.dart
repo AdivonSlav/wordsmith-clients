@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:wordsmith_mobile/utils/filters/ebook_filter_values.dart';
+import 'package:wordsmith_mobile/utils/filters/library_filter_values.dart';
 import 'package:wordsmith_mobile/utils/indexers/ebook_index_provider.dart';
 import 'package:wordsmith_mobile/utils/indexers/base_index_provider.dart';
 import 'package:wordsmith_mobile/utils/indexers/user_index_provider.dart';
@@ -88,6 +89,7 @@ Future<void> main() async {
       ChangeNotifierProvider(create: (_) => TranslationProvider()),
       ChangeNotifierProvider(create: (_) => TranslationLanguageProvider()),
       ChangeNotifierProvider(create: (_) => NoteProvider()),
+      ChangeNotifierProvider(create: (_) => LibraryFilterValuesProvider()),
     ],
     child: const Application(),
   ));

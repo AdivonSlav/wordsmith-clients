@@ -7,27 +7,23 @@ import 'package:wordsmith_utils/models/result.dart';
 import 'package:wordsmith_utils/providers/maturity_ratings_provider.dart';
 
 class LibraryFiltersWidget extends StatefulWidget {
-  final LibraryFilterValues filterValues;
-  final void Function(LibraryFilterValues values) onSelect;
-
-  const LibraryFiltersWidget({
-    super.key,
-    required this.filterValues,
-    required this.onSelect,
-  });
+  const LibraryFiltersWidget({super.key});
 
   @override
   State<LibraryFiltersWidget> createState() => _LibraryFiltersWidgetState();
 }
 
 class _LibraryFiltersWidgetState extends State<LibraryFiltersWidget> {
+  late LibraryFilterValuesProvider _filterValuesProvider;
+
   late Future<Result<QueryResult<MaturityRating>>> _getMaturityRatings;
 
   @override
   void initState() {
-    super.initState();
+    _filterValuesProvider = context.read<LibraryFilterValuesProvider>();
     _getMaturityRatings =
         context.read<MaturityRatingsProvider>().getMaturityRatings();
+    super.initState();
   }
 
   @override
@@ -65,8 +61,8 @@ class _LibraryFiltersWidgetState extends State<LibraryFiltersWidget> {
                   ),
                   TextButton(
                     onPressed: () {
-                      widget.filterValues.clearFilters();
-                      widget.onSelect(widget.filterValues);
+                      _filterValuesProvider.clearFilterValues();
+                      Navigator.of(context).pop();
                     },
                     child: const Text("Clear all"),
                   ),
@@ -81,22 +77,30 @@ class _LibraryFiltersWidgetState extends State<LibraryFiltersWidget> {
                 children: <Widget>[
                   ChoiceChip(
                     label: const Text("Read"),
-                    selected: widget.filterValues.isRead == null
+                    selected: _filterValuesProvider.filterValues.isRead == null
                         ? false
-                        : widget.filterValues.isRead!,
+                        : _filterValuesProvider.filterValues.isRead!,
                     onSelected: (bool selected) {
-                      widget.filterValues.isRead = selected ? true : null;
-                      widget.onSelect(widget.filterValues);
+                      _filterValuesProvider.updateFilterValueProperties(
+                        isRead: selected ? true : null,
+                        selectedCategory:
+                            _filterValuesProvider.filterValues.selectedCategory,
+                      );
+                      Navigator.of(context).pop();
                     },
                   ),
                   ChoiceChip(
                     label: const Text("Unread"),
-                    selected: widget.filterValues.isRead == null
+                    selected: _filterValuesProvider.filterValues.isRead == null
                         ? false
-                        : !widget.filterValues.isRead!,
+                        : !_filterValuesProvider.filterValues.isRead!,
                     onSelected: (bool selected) {
-                      widget.filterValues.isRead = selected ? false : null;
-                      widget.onSelect(widget.filterValues);
+                      _filterValuesProvider.updateFilterValueProperties(
+                        isRead: selected ? false : null,
+                        selectedCategory:
+                            _filterValuesProvider.filterValues.selectedCategory,
+                      );
+                      Navigator.of(context).pop();
                     },
                   ),
                 ],
@@ -111,16 +115,18 @@ class _LibraryFiltersWidgetState extends State<LibraryFiltersWidget> {
 
                   return ChoiceChip(
                     label: Text(rating.name),
-                    selected: widget.filterValues.selectedMaturityRatingId ==
+                    selected: _filterValuesProvider
+                            .filterValues.selectedMaturityRatingId ==
                         rating.id,
                     onSelected: (bool selected) {
                       if (selected) {
-                        widget.filterValues.selectedMaturityRatingId =
-                            rating.id;
+                        _filterValuesProvider.updateFilterValueProperties(
+                            selectedMaturityRatingId: rating.id);
                       } else {
-                        widget.filterValues.selectedMaturityRatingId = null;
+                        _filterValuesProvider.updateFilterValueProperties(
+                            selectedMaturityRatingId: null);
                       }
-                      widget.onSelect(widget.filterValues);
+                      Navigator.of(context).pop();
                     },
                   );
                 }),
