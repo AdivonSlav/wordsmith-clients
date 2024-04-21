@@ -47,13 +47,13 @@ class _EbookScreenWidget extends State<EbookScreenWidget> {
             icon: const Icon(Icons.report),
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.only(right: 8.0),
-          child: IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.favorite_outline),
-          ),
-        ),
+        // Padding( // TODO: Potentially add favoriting
+        //   padding: const EdgeInsets.only(right: 8.0),
+        //   child: IconButton(
+        //     onPressed: () {},
+        //     icon: const Icon(Icons.favorite_outline),
+        //   ),
+        // ),
         Padding(
           padding: const EdgeInsets.only(right: 8.0),
           child: IconButton(
@@ -159,11 +159,11 @@ class _EbookScreenWidget extends State<EbookScreenWidget> {
             content:
                 const Text("Do you want to add this book to your library?"),
             actions: <Widget>[
-              FilledButton(
+              TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
                 child: const Text("Cancel"),
               ),
-              TextButton(
+              FilledButton(
                 onPressed: () => Navigator.of(context).pop(true),
                 child: const Text("Add"),
               ),
