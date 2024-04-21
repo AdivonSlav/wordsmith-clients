@@ -1,3 +1,4 @@
+import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:wordsmith_utils/image_helper.dart';
@@ -28,10 +29,42 @@ class _ProfileImageWidgetState extends State<ProfileImageWidget> {
   final _logger = LogManager.getLogger("ProfileImageWidget");
   final String _apiUrl = BaseProvider.apiUrl;
 
-  final _editableImageOpacity = 0.4;
-  final _defaultImageOpacity = 0.0;
-
   final _defaultAvatarRadius = SizeConfig.safeBlockHorizontal * 15.0;
+
+  Color _getImageContainerColor() {
+    var adaptiveTheme = AdaptiveTheme.of(context);
+
+    if (adaptiveTheme.brightness == Brightness.dark) {
+      double defaultImageOpacity = 0.0;
+      double editableImageOpacity = 0.4;
+      return Colors.black.withOpacity(widget.editCallback == null
+          ? defaultImageOpacity
+          : editableImageOpacity);
+    } else {
+      double defaultImageOpacity = 0.0;
+      double editableImageOpacity = 0.1;
+      return Colors.black.withOpacity(widget.editCallback == null
+          ? defaultImageOpacity
+          : editableImageOpacity);
+    }
+  }
+
+  Icon _getImageContainerIcon() {
+    var adaptiveTheme = AdaptiveTheme.of(context);
+
+    if (adaptiveTheme.brightness == Brightness.dark) {
+      return const Icon(
+        Icons.edit,
+        size: 32.0,
+      );
+    } else {
+      return const Icon(
+        Icons.edit,
+        size: 32.0,
+        color: Colors.white,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,9 +97,7 @@ class _ProfileImageWidgetState extends State<ProfileImageWidget> {
           Container(
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Colors.black.withOpacity(widget.editCallback == null
-                  ? _defaultImageOpacity
-                  : _editableImageOpacity),
+              color: _getImageContainerColor(),
             ),
             width: widget.radius != null
                 ? widget.radius! * 2.0
@@ -78,10 +109,7 @@ class _ProfileImageWidgetState extends State<ProfileImageWidget> {
           Positioned(
             child: Visibility(
               visible: widget.editCallback != null,
-              child: Icon(
-                Icons.edit,
-                size: SizeConfig.safeBlockHorizontal * 10.0,
-              ),
+              child: _getImageContainerIcon(),
             ),
           ),
         ],
