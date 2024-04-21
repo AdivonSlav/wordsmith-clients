@@ -104,16 +104,26 @@ class _LibraryInfoWidgetState extends State<LibraryInfoWidget> {
             ProfileScreenWidget(userId: widget.libraryEntry.eBook.author.id)));
   }
 
-  void _openReaderPage() {
-    var model = _indexModel;
+  void _openReaderPage() async {
+    if (_indexModel == null) {
+      await _syncToLibrary(showSuccessDialog: false).then((value) {
+        var model = _indexModel;
 
-    if (model == null) return;
+        if (model == null) return;
 
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => ReaderScreenWidget(indexModel: model),
-      ),
-    );
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => ReaderScreenWidget(indexModel: model),
+          ),
+        );
+      });
+    } else {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => ReaderScreenWidget(indexModel: _indexModel!),
+        ),
+      );
+    }
   }
 
   void _openBookPage() {
@@ -177,7 +187,7 @@ class _LibraryInfoWidgetState extends State<LibraryInfoWidget> {
     });
   }
 
-  Future<void> _syncToLibrary() async {
+  Future<void> _syncToLibrary({bool showSuccessDialog = true}) async {
     if (_indexModel != null) return;
 
     TransferFile? file = await _downloadBook();
@@ -191,13 +201,15 @@ class _LibraryInfoWidgetState extends State<LibraryInfoWidget> {
 
     await _index(file).then((result) async {
       if (result != null) {
-        await showInfoDialog(
-          context: context,
-          title: const Text("Success"),
-          content: const Text(
-            "Succesfully downloaded the ebook!",
-          ),
-        );
+        if (showSuccessDialog) {
+          await showInfoDialog(
+            context: context,
+            title: const Text("Success"),
+            content: const Text(
+              "Succesfully downloaded the ebook!",
+            ),
+          );
+        }
 
         setState(() {
           _indexModel = result;
