@@ -46,6 +46,8 @@ flutter:
   assets:
     - assets/images/profile_image_placeholder.jpeg
     - assets/images/no_image_placeholder.png
+    - assets/images/logo_white.png
+    - assets/images/logo_black.png
     - .env
 
   fonts:
