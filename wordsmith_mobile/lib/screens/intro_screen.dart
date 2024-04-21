@@ -2,7 +2,6 @@ import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:wordsmith_mobile/screens/login_screen.dart';
 import 'package:wordsmith_mobile/screens/registration_screen.dart';
-import 'package:wordsmith_utils/size_config.dart';
 
 class IntroScreenWidget extends StatefulWidget {
   const IntroScreenWidget({super.key});
@@ -50,6 +49,38 @@ class _IntroScreenWidgetState extends State<IntroScreenWidget> {
     );
   }
 
+  Widget _buildActionBody() {
+    var size = MediaQuery.of(context).size;
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 32.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          FilledButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const LoginScreenWidget(),
+                  ),
+                );
+              },
+              child: const Text("Login")),
+          Divider(indent: size.width / 5.0, endIndent: size.width / 5.0),
+          FilledButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const RegistrationScreenWidget(),
+                  ),
+                );
+              },
+              child: const Text("Create an account")),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -57,37 +88,7 @@ class _IntroScreenWidgetState extends State<IntroScreenWidget> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Builder(builder: (context) => _buildHeader()),
-          SizedBox(
-            height: SizeConfig.safeBlockVertical * 8.0,
-          ),
-          SizedBox(
-            width: SizeConfig.safeBlockHorizontal * 45.0,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const LoginScreenWidget(),
-                        ),
-                      );
-                    },
-                    child: const Text("Login")),
-                const Divider(),
-                ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              const RegistrationScreenWidget(),
-                        ),
-                      );
-                    },
-                    child: const Text("Create an account")),
-              ],
-            ),
-          )
+          Builder(builder: (context) => _buildActionBody()),
         ],
       ),
     );
