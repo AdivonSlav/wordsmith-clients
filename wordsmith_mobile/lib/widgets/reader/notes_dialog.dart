@@ -89,7 +89,7 @@ class _NotesDialogWidgetState extends State<NotesDialogWidget> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: <Widget>[
-                          // TextButton(
+                          // TextButton( // TODO: Potentially fix the problem with CFI not working
                           //   onPressed: () {
                           //     _dismiss();
                           //     widget.onGoto(note.cfi);
