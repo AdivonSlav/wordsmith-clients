@@ -1,5 +1,6 @@
 import 'package:wordsmith_utils/exceptions/base_exception.dart';
 import 'package:wordsmith_utils/logger.dart';
+import 'package:wordsmith_utils/models/entity_result.dart';
 import 'package:wordsmith_utils/models/query_result.dart';
 import 'package:wordsmith_utils/models/result.dart';
 import 'package:wordsmith_utils/models/user_library/user_library.dart';
@@ -54,6 +55,24 @@ class UserLibraryProvider extends BaseProvider<UserLibrary> {
       }
 
       return Success(result.result[0]);
+    } on BaseException catch (error) {
+      _logger.severe(error);
+      return Failure(error);
+    }
+  }
+
+  Future<Result<EntityResult<UserLibrary>>> deleteLibraryEntry(
+      int libraryId) async {
+    var accessToken = await SecureStore.getValue("access_token");
+
+    try {
+      var result = await delete(
+        id: libraryId,
+        bearerToken: accessToken ?? "",
+        retryForRefresh: true,
+      );
+
+      return Success(result);
     } on BaseException catch (error) {
       _logger.severe(error);
       return Failure(error);
