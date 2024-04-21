@@ -7,6 +7,7 @@ import 'package:wordsmith_mobile/screens/ebook_comments_screen.dart';
 import 'package:wordsmith_mobile/utils/indexers/models/ebook_index_model.dart';
 import 'package:wordsmith_mobile/widgets/reader/add_note_dialog.dart';
 import 'package:wordsmith_mobile/widgets/reader/dictionary_definition_view.dart';
+import 'package:wordsmith_mobile/widgets/reader/notes_dialog.dart';
 import 'package:wordsmith_mobile/widgets/reader/translation_view.dart';
 import 'package:wordsmith_utils/logger.dart';
 
@@ -21,6 +22,8 @@ class ReaderScreenWidget extends StatefulWidget {
 
 class _ReaderScreenWidgetState extends State<ReaderScreenWidget> {
   final _logger = LogManager.getLogger("ReaderScreenWidget");
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
+
   late EpubController _epubController;
 
   String _selectedText = "";
@@ -29,7 +32,9 @@ class _ReaderScreenWidgetState extends State<ReaderScreenWidget> {
 
   void _openEpub() async {
     var epubFile = File(widget.indexModel.path);
-    _epubController = EpubController(document: EpubDocument.openFile(epubFile));
+    _epubController = EpubController(
+      document: EpubDocument.openFile(epubFile),
+    );
   }
 
   void _openEbookComments() async {
@@ -78,6 +83,11 @@ class _ReaderScreenWidgetState extends State<ReaderScreenWidget> {
             title: const Text("Comments"),
             leading: const Icon(Icons.comment),
             onTap: () => _openEbookComments(),
+          ),
+          ListTile(
+            title: const Text("Notes"),
+            leading: const Icon(Icons.note),
+            onTap: () => _showNotesDialog(),
           ),
           ExpansionTile(
             title: const Text("Chapters"),
@@ -166,6 +176,20 @@ class _ReaderScreenWidgetState extends State<ReaderScreenWidget> {
     }
   }
 
+  void _showNotesDialog() {
+    if (_scaffoldKey.currentState!.isDrawerOpen) {
+      _scaffoldKey.currentState!.closeDrawer();
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => NotesDialogWidget(
+        ebookId: widget.indexModel.id,
+        onGoto: (cfi) => _gotoCfi(cfi),
+      ),
+    );
+  }
+
   void _handleContentSelection(SelectedContent? content) {
     var plainText = content?.plainText;
 
@@ -177,6 +201,10 @@ class _ReaderScreenWidgetState extends State<ReaderScreenWidget> {
   bool _isValidSelection() {
     return _selectedText.trim().isNotEmpty &&
         _selectedText.length <= _selectionMaxLength;
+  }
+
+  void _gotoCfi(String cfi) {
+    _epubController.gotoEpubCfi(cfi);
   }
 
   @override
@@ -194,6 +222,7 @@ class _ReaderScreenWidgetState extends State<ReaderScreenWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: _buildAppBar(),
       drawer: _buildDrawer(),
       body: EpubView(
