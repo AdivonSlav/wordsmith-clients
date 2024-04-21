@@ -40,48 +40,46 @@ class _LibraryInfoWidgetState extends State<LibraryInfoWidget> {
   EbookIndexModel? _indexModel;
 
   Widget _buildEbookInfo() {
+    var size = MediaQuery.of(context).size;
     return Flexible(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text(
-            widget.libraryEntry.eBook.title,
-            style: const TextStyle(
-              fontSize: 18.0,
-              fontWeight: FontWeight.bold,
+      child: SizedBox(
+        height: size.height * 0.25,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              widget.libraryEntry.eBook.title,
+              style: const TextStyle(
+                fontSize: 18.0,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-          RichText(
-            text: TextSpan(text: "by ", children: <TextSpan>[
-              TextSpan(
-                text: widget.libraryEntry.eBook.author.username,
-                recognizer: TapGestureRecognizer()
-                  ..onTap = () => _showAuthorProfileScreen(),
-                style: const TextStyle(
-                  color: Colors.blue,
-                ),
-              )
-            ]),
-          ),
-          const SizedBox(height: 24.0),
-          Text(
-            "Added to library: ${formatDateTime(date: widget.libraryEntry.syncDate, format: "yMMMMd")}",
-            style: const TextStyle(
-              fontSize: 12.0,
+            RichText(
+              text: TextSpan(text: "by ", children: <TextSpan>[
+                TextSpan(
+                  text: widget.libraryEntry.eBook.author.username,
+                  recognizer: TapGestureRecognizer()
+                    ..onTap = () => _showAuthorProfileScreen(),
+                  style: const TextStyle(
+                    color: Colors.blue,
+                  ),
+                )
+              ]),
             ),
-          ),
-          Text(
-            "Read progress: ${widget.libraryEntry.readProgress}",
-            style: const TextStyle(
-              fontSize: 12.0,
+            const Spacer(),
+            Text(
+              "Added to library: ${formatDateTime(date: widget.libraryEntry.syncDate, format: "yMMMMd")}",
+              style: const TextStyle(
+                fontSize: 12.0,
+              ),
             ),
-          ),
-          const SizedBox(height: 14.0),
-          IconButton.outlined(
-            onPressed: _openBookPage,
-            icon: const Icon(Icons.open_in_new),
-          )
-        ],
+            const Spacer(),
+            IconButton.outlined(
+              onPressed: _openBookPage,
+              icon: const Icon(Icons.open_in_new),
+            )
+          ],
+        ),
       ),
     );
   }

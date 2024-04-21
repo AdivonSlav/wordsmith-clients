@@ -58,12 +58,6 @@ class _LibraryOfflineInfoWidgetState extends State<LibraryOfflineInfoWidget> {
                       fontSize: 12.0,
                     ),
                   ),
-                  Text(
-                    "Read progress: ${widget.indexModel.readProgress}",
-                    style: const TextStyle(
-                      fontSize: 12.0,
-                    ),
-                  ),
                 ],
               ),
             ),
