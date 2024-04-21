@@ -235,11 +235,15 @@ class _LibraryInfoWidgetState extends State<LibraryInfoWidget> {
 
   @override
   void initState() {
-    super.initState();
     _eBookDownloadProvider = context.read<EbookDownloadProvider>();
     _eBookParseProvider = context.read<EbookParseProvider>();
     _ebookIndexProvider = context.read<EbookIndexProvider>();
-    _fetchIndexEntry();
+
+    Future.microtask(() {
+      _fetchIndexEntry();
+    });
+
+    super.initState();
   }
 
   @override
@@ -280,7 +284,7 @@ class _LibraryInfoWidgetState extends State<LibraryInfoWidget> {
                 label: const Text("Read"),
               ),
               FilledButton.icon(
-                onPressed: _syncToLibrary,
+                onPressed: _indexModel == null ? _syncToLibrary : null,
                 icon: Icon(
                     _indexModel == null ? Icons.download : Icons.download_done),
                 label: Text(_indexModel == null ? "Download" : "Downloaded"),
