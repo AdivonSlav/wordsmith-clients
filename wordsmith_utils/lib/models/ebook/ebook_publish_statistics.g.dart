@@ -10,6 +10,6 @@ EbookPublishStatistics _$EbookPublishStatisticsFromJson(
         Map<String, dynamic> json) =>
     EbookPublishStatistics(
       json['year'] as int,
-      json['month'] as String,
+      json['month'] as int,
       json['publishCount'] as int,
     );

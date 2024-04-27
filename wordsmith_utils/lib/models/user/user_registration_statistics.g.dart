@@ -10,6 +10,6 @@ UserRegistrationStatistics _$UserRegistrationStatisticsFromJson(
         Map<String, dynamic> json) =>
     UserRegistrationStatistics(
       json['year'] as int,
-      json['month'] as String,
+      json['month'] as int,
       json['registrationCount'] as int,
     );
