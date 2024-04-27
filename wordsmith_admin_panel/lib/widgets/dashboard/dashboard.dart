@@ -3,6 +3,7 @@ import "package:provider/provider.dart";
 import "package:wordsmith_admin_panel/screens/login_screen.dart";
 import "package:wordsmith_admin_panel/screens/profile_screen.dart";
 import "package:wordsmith_admin_panel/screens/reports_screen.dart";
+import "package:wordsmith_admin_panel/screens/statistics_screen.dart";
 import "package:wordsmith_admin_panel/widgets/dashboard/dashboard_error.dart";
 import "package:wordsmith_admin_panel/widgets/dashboard/dashboard_loading.dart";
 import "package:wordsmith_admin_panel/widgets/dashboard/dashboard_trailing.dart";
@@ -38,7 +39,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
       case 1:
         return "Reports";
       case 2:
-        return "Ebooks";
+        return "Statistics";
       default:
         return "Wordsmith";
     }
@@ -51,7 +52,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
       const NavigationRailDestination(
           icon: Icon(Icons.report), label: Text("Reports")),
       const NavigationRailDestination(
-          icon: Icon(Icons.book_online), label: Text("Ebooks"))
+          icon: Icon(Icons.auto_graph), label: Text("Statistics"))
     ];
   }
 
@@ -144,7 +145,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                     _page = const ReportsScreenWidget();
                     break;
                   case 2:
-                    _page = const Placeholder();
+                    _page = const StatisticsScreenWidget();
                     break;
                   default:
                     throw UnimplementedError("No widget for $_selectedIndex");

@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 import "package:wordsmith_utils/size_config.dart";
 
 class InputField extends StatelessWidget {
@@ -13,6 +14,7 @@ class InputField extends StatelessWidget {
   final bool? enabled;
   final int maxLines;
   final int? maxLength;
+  final List<TextInputFormatter>? inputFormatters;
 
   const InputField({
     super.key,
@@ -27,6 +29,7 @@ class InputField extends StatelessWidget {
     this.enabled,
     this.maxLines = 1,
     this.maxLength,
+    this.inputFormatters,
   });
 
   @override
@@ -60,6 +63,7 @@ class InputField extends StatelessWidget {
         enabled: enabled,
         maxLines: maxLines,
         maxLength: maxLength,
+        inputFormatters: inputFormatters,
       ),
     );
   }

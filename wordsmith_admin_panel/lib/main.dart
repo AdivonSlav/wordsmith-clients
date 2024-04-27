@@ -5,6 +5,7 @@ import "package:flutter_dotenv/flutter_dotenv.dart";
 import "package:provider/provider.dart";
 import "package:window_manager/window_manager.dart";
 import "package:wordsmith_admin_panel/utils/reports_filter_values.dart";
+import "package:wordsmith_admin_panel/utils/statistics_filter_values.dart";
 import "package:wordsmith_admin_panel/utils/themes.dart";
 import "package:wordsmith_admin_panel/widgets/dashboard/dashboard.dart";
 import "package:wordsmith_utils/dialogs/progress_indicator_dialog.dart";
@@ -66,6 +67,7 @@ void main() async {
       ChangeNotifierProvider(
         create: (_) => UserRegistrationStatisticsProvider(),
       ),
+      ChangeNotifierProvider(create: (_) => StatisticsFilterValuesProvider()),
     ],
     child: const Application(),
   ));
