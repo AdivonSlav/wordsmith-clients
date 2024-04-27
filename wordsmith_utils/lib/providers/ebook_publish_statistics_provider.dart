@@ -15,12 +15,14 @@ class EbookPublishStatisticsProvider
   EbookPublishStatisticsProvider() : super("ebooks/statistics/publishings");
 
   Future<Result<QueryResult<EbookPublishStatistics>>> getPublishStatistics(
-    StatisticsRequest request,
-  ) async {
+    StatisticsRequest request, {
+    int? pageSize,
+  }) async {
     var accessToken = await SecureStore.getValue("access_token");
 
     try {
       var map = request.toJson();
+      map["pageSize"] = pageSize;
 
       var result = await get(
         filter: map,

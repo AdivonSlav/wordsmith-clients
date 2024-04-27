@@ -15,12 +15,14 @@ class UserPurchaseStatisticsProvider
   UserPurchaseStatisticsProvider() : super("users/statistics/purchases");
 
   Future<Result<QueryResult<UserPurchasesStatistics>>> getPurchaseStatistics(
-    StatisticsRequest request,
-  ) async {
+    StatisticsRequest request, {
+    int? pageSize,
+  }) async {
     var accessToken = await SecureStore.getValue("access_token");
 
     try {
       var map = request.toJson();
+      map["pageSize"] = pageSize;
 
       var result = await get(
         filter: map,
