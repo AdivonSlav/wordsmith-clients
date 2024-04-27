@@ -14,9 +14,13 @@ import "package:wordsmith_utils/providers/app_report_provider.dart";
 import "package:wordsmith_utils/providers/auth_provider.dart";
 import "package:wordsmith_utils/providers/base_provider.dart";
 import "package:wordsmith_utils/providers/ebook_provider.dart";
+import "package:wordsmith_utils/providers/ebook_publish_statistics_provider.dart";
 import "package:wordsmith_utils/providers/ebook_reports_provider.dart";
+import "package:wordsmith_utils/providers/ebook_traffic_statistics_provider.dart";
 import "package:wordsmith_utils/providers/user_login_provider.dart";
 import "package:wordsmith_utils/providers/user_provider.dart";
+import "package:wordsmith_utils/providers/user_purchase_statistics_provider.dart";
+import "package:wordsmith_utils/providers/user_registration_statistics_provider.dart";
 import "package:wordsmith_utils/providers/user_reports_provider.dart";
 import "package:wordsmith_utils/size_config.dart";
 
@@ -56,6 +60,12 @@ void main() async {
       ChangeNotifierProvider(create: (_) => ReportFilterValuesProvider()),
       ChangeNotifierProvider(create: (_) => EbookProvider()),
       ChangeNotifierProvider(create: (_) => AppReportProvider()),
+      ChangeNotifierProvider(create: (_) => UserPurchaseStatisticsProvider()),
+      ChangeNotifierProvider(create: (_) => EbookTrafficStatisticsProvider()),
+      ChangeNotifierProvider(create: (_) => EbookPublishStatisticsProvider()),
+      ChangeNotifierProvider(
+        create: (_) => UserRegistrationStatisticsProvider(),
+      ),
     ],
     child: const Application(),
   ));
