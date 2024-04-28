@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:wordsmith_mobile/screens/ebook_screen.dart';
+import 'package:wordsmith_mobile/screens/profile_screen.dart';
 import 'package:wordsmith_mobile/widgets/ebook/ebook_image.dart';
 import 'package:wordsmith_utils/formatters/datetime_formatter.dart';
 import 'package:wordsmith_utils/models/ebook/ebook.dart';
@@ -54,7 +55,8 @@ class _EbookListTileState extends State<EbookListTile> {
                     TextSpan(
                       text: ebook.author.username,
                       style: const TextStyle(color: Colors.blue),
-                      recognizer: TapGestureRecognizer()..onTap = () {},
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () => _openUserProfileScreen(),
                     ),
                   ],
                   style: const TextStyle(fontSize: 13.0)),
@@ -75,7 +77,7 @@ class _EbookListTileState extends State<EbookListTile> {
             ),
           ),
           Text(
-            "Published: ${formatDateTime(date: ebook.publishedDate, format: "yMMMd")} - Updated: ${timeAgoSinceDate(date: ebook.updatedDate)}",
+            "Published: ${formatDateTime(date: ebook.publishedDate, format: "yMMMd")}",
             style: const TextStyle(
               fontSize: 10.0,
               color: Colors.grey,
@@ -87,8 +89,20 @@ class _EbookListTileState extends State<EbookListTile> {
   }
 
   void _openEbookScreen() {
-    Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => EbookScreenWidget(ebookId: widget.ebook.id)));
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => EbookScreenWidget(ebookId: widget.ebook.id),
+      ),
+    );
+  }
+
+  void _openUserProfileScreen() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) =>
+            ProfileScreenWidget(userId: widget.ebook.author.id),
+      ),
+    );
   }
 
   @override
