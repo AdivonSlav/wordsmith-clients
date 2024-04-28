@@ -12,7 +12,7 @@ class EbookPublishStatisticsProvider
     extends BaseProvider<EbookPublishStatistics> {
   final _logger = LogManager.getLogger("UserRegistrationStatisticsProvider");
 
-  EbookPublishStatisticsProvider() : super("ebooks/statistics/publishings");
+  EbookPublishStatisticsProvider() : super("ebooks/statistics/publishing");
 
   Future<Result<QueryResult<EbookPublishStatistics>>> getPublishStatistics(
     StatisticsRequest request, {

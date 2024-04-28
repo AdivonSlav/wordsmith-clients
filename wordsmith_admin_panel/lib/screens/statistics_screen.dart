@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wordsmith_admin_panel/utils/statistics_filter_values.dart';
+import 'package:wordsmith_admin_panel/widgets/statistics/ebook_publish_statistics_view.dart';
 import 'package:wordsmith_admin_panel/widgets/statistics/ebook_traffic_statistics_view.dart';
 import 'package:wordsmith_admin_panel/widgets/statistics/user_purchase_statistics_view.dart';
 import 'package:wordsmith_admin_panel/widgets/statistics/user_registration_statistics_view.dart';
@@ -72,7 +73,7 @@ class _StatisticsScreenWidgetState extends State<StatisticsScreenWidget> {
       case StatisticsTypes.ebookTraffic:
         return const EbookTrafficStatisticsViewWidget();
       case StatisticsTypes.ebookPublishings:
-        return Placeholder();
+        return const EbookPublishStatisticsViewWidget();
     }
   }
 

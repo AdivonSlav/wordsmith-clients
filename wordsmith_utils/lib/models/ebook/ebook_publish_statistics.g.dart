@@ -9,7 +9,6 @@ part of 'ebook_publish_statistics.dart';
 EbookPublishStatistics _$EbookPublishStatisticsFromJson(
         Map<String, dynamic> json) =>
     EbookPublishStatistics(
-      json['year'] as int,
-      json['month'] as int,
+      DateTime.parse(json['date'] as String),
       json['publishCount'] as int,
     );

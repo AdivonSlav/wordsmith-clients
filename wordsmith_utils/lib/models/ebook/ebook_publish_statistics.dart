@@ -4,11 +4,10 @@ part "ebook_publish_statistics.g.dart";
 
 @JsonSerializable(createToJson: false)
 class EbookPublishStatistics {
-  final int year;
-  final int month;
+  final DateTime date;
   final int publishCount;
 
-  const EbookPublishStatistics(this.year, this.month, this.publishCount);
+  const EbookPublishStatistics(this.date, this.publishCount);
 
   factory EbookPublishStatistics.fromJson(Map<String, dynamic> json) =>
       _$EbookPublishStatisticsFromJson(json);
