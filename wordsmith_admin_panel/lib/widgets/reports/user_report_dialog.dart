@@ -95,14 +95,6 @@ class _UserReportDialogWidgetState extends State<UserReportDialogWidget> {
               ),
               const SizedBox(height: 4.0),
               Text(report.reportedUser.username),
-              const SizedBox(height: 8.0),
-              Align(
-                alignment: Alignment.center,
-                child: OutlinedButton(
-                  onPressed: () {}, // TODO
-                  child: const Text("Go to user"),
-                ),
-              ),
             ],
           ),
         ),

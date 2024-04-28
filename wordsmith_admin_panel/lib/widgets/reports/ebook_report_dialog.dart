@@ -142,25 +142,6 @@ class _EbookReportDialogWidgetState extends State<EbookReportDialogWidget> {
                   ],
                 ),
               ),
-              const SizedBox(height: 8.0),
-              const Spacer(),
-              Align(
-                alignment: Alignment.center,
-                child: Wrap(
-                  spacing: 12.0,
-                  runSpacing: 8.0,
-                  children: <Widget>[
-                    OutlinedButton(
-                      onPressed: () {}, // TODO
-                      child: const Text("Go to ebook"),
-                    ),
-                    OutlinedButton(
-                      onPressed: () {}, // TODO
-                      child: const Text("Go to author"),
-                    ),
-                  ],
-                ),
-              ),
             ],
           ),
         ),
