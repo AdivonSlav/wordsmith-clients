@@ -43,7 +43,6 @@ class _EbookTrafficStatisticsViewWidgetState
         primaryXAxis: const CategoryAxis(),
         primaryYAxis: NumericAxis(
           numberFormat: NumberFormat.compact(),
-          desiredIntervals: 1,
         ),
         tooltipBehavior: TooltipBehavior(
           enable: true,
@@ -52,11 +51,13 @@ class _EbookTrafficStatisticsViewWidgetState
         series: <CartesianSeries>[
           BarSeries<EbookTrafficStatistics, String>(
             enableTooltip: true,
-            name: "Ebook traffic",
+            name: "Syncs",
             borderRadius: BorderRadius.circular(6.0),
             dataSource: statistics,
             xValueMapper: (statistic, _) => statistic.title,
             yValueMapper: (statistic, _) => statistic.syncCount,
+            sortingOrder: SortingOrder.ascending,
+            sortFieldValueMapper: (statistic, _) => statistic.syncCount,
           )
         ],
       ),

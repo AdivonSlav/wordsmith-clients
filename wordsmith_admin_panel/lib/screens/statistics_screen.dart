@@ -33,7 +33,7 @@ class _StatisticsScreenWidgetState extends State<StatisticsScreenWidget> {
             value: _filterValuesProvider.filterValues.limit,
             items: const [
               DropdownMenuItem(
-                value: 5,
+                value: 3,
                 child: Text("Top 3"),
               ),
               DropdownMenuItem(
