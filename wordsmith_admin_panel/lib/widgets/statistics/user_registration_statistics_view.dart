@@ -40,7 +40,9 @@ class _UserRegistrationStatisticsViewWidgetState
     return Center(
       child: SfCartesianChart(
         title: _buildChartTitle(),
-        primaryXAxis: const DateTimeAxis(),
+        primaryXAxis: const DateTimeAxis(
+          intervalType: DateTimeIntervalType.auto,
+        ),
         primaryYAxis: NumericAxis(
           numberFormat: NumberFormat.compact(),
           decimalPlaces: 0,
