@@ -236,30 +236,30 @@ class _ProfileScreenWidgetState extends State<ProfileScreenWidget> {
                 ),
               ),
             ),
-            Expanded(
-              child: Card(
-                clipBehavior: Clip.antiAlias,
-                child: InkResponse(
-                  onTap: () {},
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          userStatistics.favoriteBooksCount.toString(),
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 24.0,
-                          ),
-                        ),
-                        const Text("Favorite books"),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
+            // Expanded( // TODO: Potentially add
+            //   child: Card(
+            //     clipBehavior: Clip.antiAlias,
+            //     child: InkResponse(
+            //       onTap: () {},
+            //       child: Padding(
+            //         padding: const EdgeInsets.all(8.0),
+            //         child: Column(
+            //           mainAxisAlignment: MainAxisAlignment.center,
+            //           children: [
+            //             Text(
+            //               userStatistics.favoriteBooksCount.toString(),
+            //               style: const TextStyle(
+            //                 fontWeight: FontWeight.bold,
+            //                 fontSize: 24.0,
+            //               ),
+            //             ),
+            //             const Text("Favorite books"),
+            //           ],
+            //         ),
+            //       ),
+            //     ),
+            //   ),
+            // ),
           ],
         );
       },
