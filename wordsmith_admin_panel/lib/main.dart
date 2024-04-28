@@ -1,3 +1,5 @@
+import "dart:io";
+
 import "package:adaptive_theme/adaptive_theme.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
@@ -8,6 +10,7 @@ import "package:wordsmith_admin_panel/utils/reports_filter_values.dart";
 import "package:wordsmith_admin_panel/utils/statistics_filter_values.dart";
 import "package:wordsmith_admin_panel/utils/themes.dart";
 import "package:wordsmith_admin_panel/widgets/dashboard/dashboard.dart";
+import "package:wordsmith_admin_panel/x509_override.dart";
 import "package:wordsmith_utils/dialogs/progress_indicator_dialog.dart";
 import "package:wordsmith_utils/formatters/datetime_formatter.dart";
 import "package:wordsmith_utils/logger.dart";
@@ -48,6 +51,9 @@ void main() async {
   await dotenv.load();
   BaseProvider.apiUrl =
       dotenv.get("API_URL", fallback: "https://localhost:6443/");
+
+  // Disables X509 certificate verification in order for self-signed backend certificates to work
+  HttpOverrides.global = X509Override();
 
   initializeDateFormattingForLocale();
 
