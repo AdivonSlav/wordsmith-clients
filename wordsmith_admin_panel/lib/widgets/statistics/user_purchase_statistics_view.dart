@@ -7,24 +7,24 @@ import 'package:wordsmith_utils/formatters/datetime_formatter.dart';
 import 'package:wordsmith_utils/models/query_result.dart';
 import 'package:wordsmith_utils/models/result.dart';
 import 'package:wordsmith_utils/models/statistics/statistics_request.dart';
-import 'package:wordsmith_utils/models/user/user_registration_statistics.dart';
-import 'package:wordsmith_utils/providers/user_registration_statistics_provider.dart';
+import 'package:wordsmith_utils/models/user/user_purchases_statistics.dart';
+import 'package:wordsmith_utils/providers/user_purchase_statistics_provider.dart';
 
-class UserRegistrationStatisticsViewWidget extends StatefulWidget {
-  const UserRegistrationStatisticsViewWidget({super.key});
+class UserPurchaseStatisticsViewWidget extends StatefulWidget {
+  const UserPurchaseStatisticsViewWidget({super.key});
 
   @override
-  State<UserRegistrationStatisticsViewWidget> createState() =>
-      _UserRegistrationStatisticsViewWidgetState();
+  State<UserPurchaseStatisticsViewWidget> createState() =>
+      _UserPurchaseStatisticsViewWidgetState();
 }
 
-class _UserRegistrationStatisticsViewWidgetState
-    extends State<UserRegistrationStatisticsViewWidget> {
-  late UserRegistrationStatisticsProvider _registrationStatisticsProvider;
+class _UserPurchaseStatisticsViewWidgetState
+    extends State<UserPurchaseStatisticsViewWidget> {
+  late UserPurchaseStatisticsProvider _purchaseStatisticsProvider;
   late StatisticsFilterValuesProvider _filterValuesProvider;
 
-  late Future<Result<QueryResult<UserRegistrationStatistics>>>
-      _registrationStatisticsFuture;
+  late Future<Result<QueryResult<UserPurchasesStatistics>>>
+      _purchaseStatisticsFuture;
 
   ChartTitle _buildChartTitle() {
     final start = _filterValuesProvider.filterValues.startDate;
@@ -32,76 +32,75 @@ class _UserRegistrationStatisticsViewWidgetState
 
     return ChartTitle(
       text:
-          "Registrations between ${formatDateTime(date: start, format: "yMMMd")} and ${formatDateTime(date: end, format: "yMMMd")}",
+          "User purchases between ${formatDateTime(date: start, format: "yMMMd")} and ${formatDateTime(date: end, format: "yMMMd")}",
     );
   }
 
-  Widget _buildChart(List<UserRegistrationStatistics> statistics) {
+  Widget _buildChart(List<UserPurchasesStatistics> statistics) {
     return Center(
       child: SfCartesianChart(
         title: _buildChartTitle(),
-        primaryXAxis: const DateTimeAxis(),
+        primaryXAxis: const CategoryAxis(),
         primaryYAxis: NumericAxis(
-          numberFormat: NumberFormat.compact(),
-          decimalPlaces: 0,
+          numberFormat: NumberFormat.currency(),
         ),
-        legend: const Legend(isVisible: true),
         tooltipBehavior: TooltipBehavior(
           enable: true,
           duration: 2000,
         ),
         series: <CartesianSeries>[
-          LineSeries<UserRegistrationStatistics, DateTime>(
+          ColumnSeries<UserPurchasesStatistics, String>(
             enableTooltip: true,
-            name: "Number of registrations",
+            name: "User purchases",
             dataSource: statistics,
-            xValueMapper: (statistic, _) => statistic.date.toLocal(),
-            yValueMapper: (statistic, _) => statistic.registrationCount,
-          )
+            xValueMapper: (statistic, _) => statistic.username,
+            yValueMapper: (statistic, _) => statistic.totalSpent,
+          ),
         ],
       ),
     );
   }
 
-  void _getRegistrationStatistics() {
+  void _getPurchaseStatistics() {
     var request = StatisticsRequest(
       startDate: _filterValuesProvider.filterValues.startDate,
       endDate: _filterValuesProvider.filterValues.endDate,
     );
 
     setState(() {
-      _registrationStatisticsFuture =
-          _registrationStatisticsProvider.getRegistrationStatistics(request,
-              pageSize: _filterValuesProvider.filterValues.limit);
+      _purchaseStatisticsFuture =
+          _purchaseStatisticsProvider.getPurchaseStatistics(
+        request,
+        pageSize: _filterValuesProvider.filterValues.limit,
+      );
     });
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _filterValuesProvider.addListener(_getRegistrationStatistics);
+    _filterValuesProvider.addListener(_getPurchaseStatistics);
   }
 
   @override
   void dispose() {
-    _filterValuesProvider.removeListener(_getRegistrationStatistics);
+    _filterValuesProvider.removeListener(_getPurchaseStatistics);
     super.dispose();
   }
 
   @override
-  void didUpdateWidget(
-      covariant UserRegistrationStatisticsViewWidget oldWidget) {
-    _getRegistrationStatistics();
+  void didUpdateWidget(covariant UserPurchaseStatisticsViewWidget oldWidget) {
+    _getPurchaseStatistics();
     super.didUpdateWidget(oldWidget);
   }
 
   @override
   void initState() {
-    _registrationStatisticsProvider =
-        context.read<UserRegistrationStatisticsProvider>();
+    _purchaseStatisticsProvider =
+        context.read<UserPurchaseStatisticsProvider>();
     _filterValuesProvider = context.read<StatisticsFilterValuesProvider>();
 
-    _getRegistrationStatistics();
+    _getPurchaseStatistics();
 
     super.initState();
   }
@@ -109,7 +108,7 @@ class _UserRegistrationStatisticsViewWidgetState
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: _registrationStatisticsFuture,
+      future: _purchaseStatisticsFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
           return const Center(child: CircularProgressIndicator());
@@ -119,7 +118,7 @@ class _UserRegistrationStatisticsViewWidgetState
           return Center(child: Text(snapshot.error?.toString() ?? "Error"));
         }
 
-        late List<UserRegistrationStatistics> statistics;
+        late List<UserPurchasesStatistics> statistics;
 
         switch (snapshot.data!) {
           case Success(data: final d):

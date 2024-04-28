@@ -29,7 +29,7 @@ class StatisticsFilterValues {
   int limit;
 
   StatisticsFilterValues({
-    this.type = StatisticsTypes.userRegistrations,
+    required this.type,
     required this.startDate,
     required this.endDate,
     this.limit = 10,
@@ -52,6 +52,7 @@ class StatisticsFilterValues {
 
 class StatisticsFilterValuesProvider extends ChangeNotifier {
   StatisticsFilterValues _filterValues = StatisticsFilterValues(
+    type: StatisticsTypes.userRegistrations,
     startDate: DateTime.now().subtract(const Duration(days: 365)),
     endDate: DateTime.now(),
   );
@@ -89,6 +90,7 @@ class StatisticsFilterValuesProvider extends ChangeNotifier {
 
   void resetFilters({bool shouldNotify = true}) {
     _filterValues = StatisticsFilterValues(
+      type: StatisticsTypes.userRegistrations,
       startDate: DateTime.now().subtract(const Duration(days: 365)),
       endDate: DateTime.now(),
     );
