@@ -9,7 +9,6 @@ part of 'user_registration_statistics.dart';
 UserRegistrationStatistics _$UserRegistrationStatisticsFromJson(
         Map<String, dynamic> json) =>
     UserRegistrationStatistics(
-      json['year'] as int,
-      json['month'] as int,
+      DateTime.parse(json['date'] as String),
       json['registrationCount'] as int,
     );

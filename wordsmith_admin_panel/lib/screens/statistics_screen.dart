@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:wordsmith_admin_panel/utils/statistics_filter_values.dart';
+import 'package:wordsmith_admin_panel/widgets/statistics/user_registration_statistics_view.dart';
 
 class StatisticsScreenWidget extends StatefulWidget {
   const StatisticsScreenWidget({super.key});
@@ -61,6 +61,19 @@ class _StatisticsScreenWidgetState extends State<StatisticsScreenWidget> {
     );
   }
 
+  Widget _buildGraphView() {
+    switch (_filterValuesProvider.filterValues.type) {
+      case StatisticsTypes.userRegistrations:
+        return const UserRegistrationStatisticsViewWidget();
+      case StatisticsTypes.userPurchases:
+        return Placeholder();
+      case StatisticsTypes.ebookTraffic:
+        return Placeholder();
+      case StatisticsTypes.ebookPublishings:
+        return Placeholder();
+    }
+  }
+
   bool _shouldShowLimitSelector() {
     final type = _filterValuesProvider.filterValues.type;
     return type == StatisticsTypes.userPurchases ||
@@ -102,6 +115,15 @@ class _StatisticsScreenWidgetState extends State<StatisticsScreenWidget> {
           );
         });
 
+    if (picked?.start == null || picked?.end == null) {
+      return;
+    }
+
+    if (picked?.start == _filterValuesProvider.filterValues.startDate &&
+        picked?.end == _filterValuesProvider.filterValues.endDate) {
+      return;
+    }
+
     setState(() {
       _filterValuesProvider.updateFilterValueProperties(
         startDate: picked?.start,
@@ -126,6 +148,9 @@ class _StatisticsScreenWidgetState extends State<StatisticsScreenWidget> {
         children: <Widget>[
           Builder(builder: (context) => _buildControls()),
           const Divider(),
+          Expanded(
+            child: Builder(builder: (context) => _buildGraphView()),
+          ),
         ],
       ),
     );

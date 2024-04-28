@@ -4,13 +4,13 @@ part "user_registration_statistics.g.dart";
 
 @JsonSerializable(createToJson: false)
 class UserRegistrationStatistics {
-  final int year;
-  final int month;
+  // final int year;
+  // final int month;
+  final DateTime date;
   final int registrationCount;
 
   const UserRegistrationStatistics(
-    this.year,
-    this.month,
+    this.date,
     this.registrationCount,
   );
 

@@ -24,15 +24,15 @@ extension StatisticsTypesExtension on StatisticsTypes {
 
 class StatisticsFilterValues {
   StatisticsTypes type;
-  DateTime startDate;
-  DateTime endDate;
+  late DateTime startDate;
+  late DateTime endDate;
   int limit;
 
   StatisticsFilterValues({
-    required this.type,
+    this.type = StatisticsTypes.userRegistrations,
     required this.startDate,
     required this.endDate,
-    required this.limit,
+    this.limit = 10,
   });
 
   StatisticsFilterValues copyWith({
@@ -51,15 +51,12 @@ class StatisticsFilterValues {
 }
 
 class StatisticsFilterValuesProvider extends ChangeNotifier {
-  StatisticsFilterValues _filterValues;
+  StatisticsFilterValues _filterValues = StatisticsFilterValues(
+    startDate: DateTime.now().subtract(const Duration(days: 365)),
+    endDate: DateTime.now(),
+  );
 
-  StatisticsFilterValuesProvider()
-      : _filterValues = StatisticsFilterValues(
-          type: StatisticsTypes.userRegistrations,
-          startDate: DateTime.now().subtract(const Duration(days: 365)),
-          endDate: DateTime.now(),
-          limit: 10,
-        );
+  StatisticsFilterValuesProvider();
 
   StatisticsFilterValues get filterValues => _filterValues;
 
@@ -79,8 +76,25 @@ class StatisticsFilterValuesProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void updateFilterValues(StatisticsFilterValues newFilterValues) {
+  void updateFilterValues(
+    StatisticsFilterValues newFilterValues, {
+    bool shouldNotify = true,
+  }) {
     _filterValues = newFilterValues;
-    notifyListeners();
+
+    if (shouldNotify) {
+      notifyListeners();
+    }
+  }
+
+  void resetFilters({bool shouldNotify = true}) {
+    _filterValues = StatisticsFilterValues(
+      startDate: DateTime.now().subtract(const Duration(days: 365)),
+      endDate: DateTime.now(),
+    );
+
+    if (shouldNotify) {
+      notifyListeners();
+    }
   }
 }
